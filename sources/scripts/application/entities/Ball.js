@@ -37,12 +37,12 @@ var Ball = Entity.extend({
 
 
 		console.log(this.spriteBall.width);
-		
+
 		this.sprite = new PIXI.Sprite();
         this.sprite.addChild(this.spriteBall);
 
 		this.sprite.anchor.x = 0.5;
-		this.sprite.anchor.y = 0.5;
+		this.sprite.anchor.y = 0;
 		
 		// console.log(this.range);
 		this.updateable = true;
@@ -143,11 +143,24 @@ var Ball = Entity.extend({
 		this._super();
 		if(this.velocity.x !== 0 && this.velocity.x + this.getPosition().x < this.collideArea.x ||
 			this.velocity.x + this.getPosition().x > this.collideArea.x + this.collideArea.width){
+			if(this.velocity.x > 0){
+				this.getPosition().x = this.collideArea.x + this.collideArea.width;
+			}else{
+				this.getPosition().x = this.collideArea.x;
+			}
+
 			this.velocity.x = 0;
+
 			this.screen.collideWall();
 		}
 		if(this.velocity.y !== 0 && this.velocity.y + this.getPosition().y < this.collideArea.y ||
 			this.velocity.y + this.getPosition().y > this.collideArea.y + this.collideArea.height){
+			
+			if(this.velocity.y > 0){
+				this.getPosition().y = this.collideArea.y + this.collideArea.height;
+			}else{
+				this.getPosition().y = this.collideArea.y;
+			}
 			this.velocity.y = 0;
 			this.screen.collideWall();
 		}

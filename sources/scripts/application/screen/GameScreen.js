@@ -176,6 +176,9 @@ var GameScreen = AbstractScreen.extend({
 	},
 
 	collideWall:function(){
+		if(this.trails.length <= 0){
+			return;
+		}
 		var timeline = new TimelineLite();
 		var tempTrail = null;
 		for (var i = 0; i < this.trails.length; i++) {
@@ -185,6 +188,14 @@ var GameScreen = AbstractScreen.extend({
 			}else{
 				timeline.append(TweenLite.to(tempTrail,  Math.abs(tempTrail.height) / 1000, {height:0, y:tempTrail.position.y + tempTrail.height, ease:'easeNone'}));
 			}
+		}
+		this.player.getContent().scale = {x:1,y:1};
+		if(this.trails[this.trails.length - 1].type === 'HORIZONTAL'){
+			timeline.append(TweenLite.from(this.player.getContent().scale,  1, {x:0.5, ease:'easeOutElastic'}));
+		}else{
+			// this.player.getContent().position.y -= this.player.spriteBall.height / 2;
+			// console.log(this.player.getContent().anchor);
+			timeline.append(TweenLite.from(this.player.getContent().scale,  1, {y:0.5, ease:'easeOutElastic'}));
 		}
 		this.trails = [];
 
@@ -228,18 +239,25 @@ var GameScreen = AbstractScreen.extend({
 			trailObj.side = this.player.velocity.y < 0?'UP':'DOWN';
 		}
 		// trail.alpha = 0.5;
-		this.addChild(trail);
 
 		var joint = new PIXI.Graphics();
 		joint.beginFill(this.player.color);
 		joint.drawCircle(0,- this.player.spriteBall.height / 2,this.player.spriteBall.width/2);
 		this.addChild(joint);
+		this.addChild(trail);
 		joint.position.x = this.player.getPosition().x;
 		joint.position.y = this.player.getPosition().y;
 
 		this.trails.push({trail:joint, type:'JOINT', side:trailObj.side});
 		this.trails.push(trailObj);
 
+		if(this.onBack){
+			var self = this;
+			this.blockCollide = true;
+			setTimeout(function(){
+				self.blockCollide = false;
+			}, 300);
+		}
 		this.onBack = false;
 	},
 	update:function(){
@@ -249,6 +267,27 @@ var GameScreen = AbstractScreen.extend({
 		this._super();
 
 		// console.log('this.trails');
+
+		
+
+
+		if(this.player.velocity.y + this.player.velocity.x === 0){
+			return;
+		}
+
+
+		if(this.trails.length > 1){
+			// console.log(this.trails);
+			var tempTrail = this.trails[this.trails.length - 1].trail;
+			// console.log(tempTrail);
+			if(this.player.velocity.y === 0){
+				tempTrail.width = this.player.getPosition().x - tempTrail.position.x;
+			}else{
+				tempTrail.height = (this.player.getPosition().y - this.player.spriteBall.height / 2) - tempTrail.position.y;
+			}
+			var acc = 0;
+			
+		}
 
 		if(this.onBack){
 			var lastJoint = null;
@@ -286,11 +325,9 @@ var GameScreen = AbstractScreen.extend({
 
 				if(remove){
 					this.player.velocity = {x:0, y:0};
-					console.log(this.trails.length)
 					var spl = this.trails.splice(this.trails.length - 2, 2);
 					var j = 0;
 					var sizeSpl = spl.length;
-					console.log(this.trails.length)
 					for (j = spl.length - 1; j >= 0; j--) {
 
 						if(spl[j].trail.parent){
@@ -316,92 +353,77 @@ var GameScreen = AbstractScreen.extend({
 					// this.onBack = false;
 				}
 			}
-		}
+		}else{
+			console.log('onBack', this.onBack, this.blockCollide);
 
+			for (var i = 0; i < this.trails.length - 6; i++) {
+				if(this.blockCollide){
+					break;
+				}
+				if(this.trails[i].type !== 'JOINT'){
+					var rectTrail;
 
-		if(this.player.velocity.y + this.player.velocity.x === 0){
-			return;
-		}
+					var rectPlayer  = new PIXI.Rectangle(this.player.getPosition().x - this.player.spriteBall.width/2,
+						this.player.getPosition().y - this.player.spriteBall.height,
+						this.player.spriteBall.width,
+						this.player.spriteBall.height);
 
-
-		if(this.trails.length > 0){
-			// console.log(this.trails);
-			var tempTrail = this.trails[this.trails.length - 1].trail;
-			// console.log(tempTrail);
-			if(this.player.velocity.y === 0){
-				tempTrail.width = this.player.getPosition().x - tempTrail.position.x;
-			}else{
-				tempTrail.height = (this.player.getPosition().y - this.player.spriteBall.height / 2) - tempTrail.position.y;
-			}
-			var acc = 0;
-			
-		}
-
-
-		for (var i = 0; i < this.trails.length - 4; i++) {
-			if(this.trails[i].type !== 'JOINT'){
-				var rectTrail;
-
-				var rectPlayer  = new PIXI.Rectangle(this.player.getPosition().x - this.player.spriteBall.width/2,
-					this.player.getPosition().y - this.player.spriteBall.height,
-					this.player.spriteBall.width,
-					this.player.spriteBall.height);
-
-				if(this.trails[i].type === 'VERTICAL'){
-					if(this.trails[i].side === 'UP'){
-						rectTrail  =  new PIXI.Rectangle(this.trails[i].trail.position.x - Math.abs(this.trails[i].trail.width) / 2,// - this.trails[i].trail.width/2,
-						this.trails[i].trail.position.y - Math.abs(this.trails[i].trail.height),
-						Math.abs(this.trails[i].trail.width),
-						Math.abs(this.trails[i].trail.height));
-					}else{
-						rectTrail  =  new PIXI.Rectangle(this.trails[i].trail.position.x - this.trails[i].trail.width/2,
-						this.trails[i].trail.position.y,
-						Math.abs(this.trails[i].trail.width),
-						Math.abs(this.trails[i].trail.height));
-					}
-				}else{
-					if(this.trails[i].side === 'RIGHT'){
-						rectTrail  =  new PIXI.Rectangle(this.trails[i].trail.position.x,
-							this.trails[i].trail.position.y - Math.abs(this.trails[i].trail.height),// - this.trails[i].trail.height,
+					if(this.trails[i].type === 'VERTICAL'){
+						if(this.trails[i].side === 'UP'){
+							rectTrail  =  new PIXI.Rectangle(this.trails[i].trail.position.x - Math.abs(this.trails[i].trail.width) / 2,// - this.trails[i].trail.width/2,
+							this.trails[i].trail.position.y - Math.abs(this.trails[i].trail.height),
 							Math.abs(this.trails[i].trail.width),
 							Math.abs(this.trails[i].trail.height));
-					}else{
-						rectTrail  =  new PIXI.Rectangle(this.trails[i].trail.position.x - Math.abs(this.trails[i].trail.width),
-							this.trails[i].trail.position.y - Math.abs(this.trails[i].trail.height),// - this.trails[i].trail.height,
+						}else{
+							rectTrail  =  new PIXI.Rectangle(this.trails[i].trail.position.x - this.trails[i].trail.width/2,
+							this.trails[i].trail.position.y,
 							Math.abs(this.trails[i].trail.width),
 							Math.abs(this.trails[i].trail.height));
+						}
+					}else{
+						if(this.trails[i].side === 'RIGHT'){
+							rectTrail  =  new PIXI.Rectangle(this.trails[i].trail.position.x,
+								this.trails[i].trail.position.y - Math.abs(this.trails[i].trail.height),// - this.trails[i].trail.height,
+								Math.abs(this.trails[i].trail.width),
+								Math.abs(this.trails[i].trail.height));
+						}else{
+							rectTrail  =  new PIXI.Rectangle(this.trails[i].trail.position.x - Math.abs(this.trails[i].trail.width),
+								this.trails[i].trail.position.y - Math.abs(this.trails[i].trail.height),// - this.trails[i].trail.height,
+								Math.abs(this.trails[i].trail.width),
+								Math.abs(this.trails[i].trail.height));
+						}
 					}
+
+					// if(this.player.velocity.x < 0 && this.trails[i].side === 'RIGHT' ||
+					// 	this.player.velocity.x > 0 && this.trails[i].side === 'LEFT' ||
+					// 	this.player.velocity.y > 0 && this.trails[i].side === 'UP' ||
+					// 	this.player.velocity.y < 0 && this.trails[i].side === 'DOWN')
+					// {
+					if (rectPlayer.x + this.player.velocity.x < rectTrail.x + rectTrail.width &&
+						rectPlayer.x + rectPlayer.width + this.player.velocity.x> rectTrail.x &&
+						rectPlayer.y + this.player.velocity.y< rectTrail.y + rectTrail.height &&
+						rectPlayer.height + rectPlayer.y + this.player.velocity.y> rectTrail.y) {
+						this.player.velocity = {x:0,y:0};
+						// this.trails[i].trail.alpha = 0.8;
+
+						this.debugBall.clear();
+						this.debugBall.lineStyle(1,0xFF0000);
+						this.debugBall.drawRect(rectTrail.x,rectTrail.y,rectTrail.width, rectTrail.height);
+						if(this.debugBall.parent){
+							this.removeChild(this.debugBall);
+						}
+						this.addChild(this.debugBall);
+
+						console.log(rectPlayer,rectTrail);
+					}
+					// }
+				
 				}
 
-				if (rectPlayer.x + this.player.velocity.x < rectTrail.x + rectTrail.width &&
-					rectPlayer.x + rectPlayer.width + this.player.velocity.x> rectTrail.x &&
-					rectPlayer.y + this.player.velocity.y< rectTrail.y + rectTrail.height &&
-					rectPlayer.height + rectPlayer.y + this.player.velocity.y> rectTrail.y) {
-					this.player.velocity = {x:0,y:0};
-					// this.trails[i].trail.alpha = 0.8;
-
-					this.debugBall.clear();
-					this.debugBall.lineStyle(1,0xFF0000);
-					this.debugBall.drawRect(rectTrail.x,rectTrail.y,rectTrail.width, rectTrail.height);
-					if(this.debugBall.parent){
-						this.removeChild(this.debugBall);
-					}
-					this.addChild(this.debugBall);
-
-					console.log(rectPlayer,rectTrail);
-				}
-
-				// this.debugBall.clear();
-				// this.debugBall.lineStyle(1,0xFF0000);
-				// this.debugBall.drawRect(rectPlayer.x,rectPlayer.y,rectPlayer.width, rectPlayer.height);
-				// if(this.debugBall.parent){
-				// 	this.removeChild(this.debugBall);
-				// }
-				// this.addChild(this.debugBall);
-			
 			}
-
 		}
+
+		console.log(this.trails.length);
 
 		
 	},
