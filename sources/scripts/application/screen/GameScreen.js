@@ -23,6 +23,9 @@ var GameScreen = AbstractScreen.extend({
 
   //       APP.backColor = APP.vecColors[APP.currentColorID];
 
+		APP.mute = true;
+		Howler.mute();
+
 	},
 	destroy: function () {
 		this._super();
@@ -38,7 +41,7 @@ var GameScreen = AbstractScreen.extend({
 			this.onAssetsLoaded();
 		}
 		this.pinVel = {x:0, y:0};
-		console.log('buid');
+		// console.log('buid');
 		this.addSoundButton();
 	},
 	onProgress:function(){
@@ -48,6 +51,343 @@ var GameScreen = AbstractScreen.extend({
 	{
 		this.initApplication();
 	},
+	
+	initApplication:function(){
+		
+		var self = this;
+		
+
+		if(!this.background){
+			this.background = new PIXI.Graphics();
+			this.background.beginFill(APP.backColor);
+			this.background.drawRect(0,0,windowWidth, windowHeight);
+			this.addChild(this.background);
+		}else{
+			this.addChild(this.background);
+
+		}
+		
+		if(!this.interactiveBackground){
+			this.interactiveBackground = new InteractiveBackground(this);
+			this.interactiveBackground.build();
+			this.addChild(this.interactiveBackground);
+		}else{
+			this.addChild(this.interactiveBackground);
+
+		}
+		// this.changeColor();
+		// this.background.alpha = 0;
+
+
+		this.hitTouch = new PIXI.Graphics();
+		this.hitTouch.interactive = true;
+		this.hitTouch.beginFill(0);
+		this.hitTouch.drawRect(0,0,windowWidth, windowHeight);
+		
+		this.hitTouch.alpha = 0;
+		this.hitTouch.hitArea = new PIXI.Rectangle(0, 40, windowWidth, windowHeight);
+
+		this.tapDown = false;
+
+		// this.hitTouch.touchend = this.hitTouch.mouseup = function(touchData){
+			
+		// };
+
+		this.hitTouch.touchstart = this.hitTouch.mousedown = function(touchData){
+			var angle = Math.atan2(touchData.global.y - self.player.getPosition().y, (touchData.global.x) - self.player.getPosition().x) * 180 / Math.PI;
+			//console.log(angle);
+			if(angle > -135 && angle < -45){
+				self.player.stretch('UP');
+			}else if(angle > -45 && angle < 45){
+				self.player.stretch('RIGHT');
+			}else if(angle > 45 && angle < 135){
+				self.player.stretch('DOWN');
+			}else{
+				self.player.stretch('LEFT');
+			}
+		};
+		this.updateable = true;
+
+
+		document.body.addEventListener('keyup', function(e){
+			console.log(e.keyCode);
+			if(e.keyCode === 32 || e.keyCode === 40){
+				self.tapDown = false;
+				self.shoot((APP.force / 30) * windowHeight * 0.1);
+			}
+		});
+		document.body.addEventListener('keydown', function(e){
+			if(e.keyCode === 32 || e.keyCode === 40){
+				self.tapDown = true;
+			}
+		});
+
+
+		if(APP.withAPI){
+			GameAPI.GameBreak.request(function(){
+				self.pauseModal.show();
+			}, function(){
+				self.pauseModal.hide();
+			});
+		}
+
+		this.layerManager = new LayerManager();
+		this.layerManager.build('Main');
+
+		this.addChild(this.layerManager);
+
+		//adiciona uma camada
+		this.layer = new Layer();
+		this.layer.build('EntityLayer');
+		this.layerManager.addLayer(this.layer);
+
+
+
+
+		this.coinsLabel = new PIXI.Text('0', {align:'center',font:'72px Vagron', fill:'#FFFFFF', wordWrap:true, wordWrapWidth:500});
+		// scaleConverter(this.coinsLabel.height, windowHeight, 0.2, this.coinsLabel);
+		this.coinsLabel.resolution = retina;
+		this.coinsLabel.alpha = 0;
+		this.addChild(this.coinsLabel);
+
+		this.crazyContent = new PIXI.DisplayObjectContainer();
+		this.addChild(this.crazyContent);
+		
+
+		this.loaderBar = new LifeBarHUD(windowWidth, 30, 0, 0xFFFFFF, 0xFFFFFF);
+		this.addChild(this.loaderBar.getContent());
+		this.loaderBar.getContent().position.x = 0;//windowWidth / 2 - this.loaderBar.getContent().width / 2;
+		this.loaderBar.getContent().position.y = 0;//windowHeight / 1.1;
+		this.loaderBar.updateBar(0, 100);
+		this.loaderBar.getContent().alpha = 0;
+
+		this.initLevel();
+		// this.endGame = true;
+		// if(!this.fistTime){
+		// 	this.changeColor(true, true);
+		// 	this.openEndMenu();
+
+		// 	this.fistTime = true;
+		// }else{
+		// 	this.initLevel();
+		// }
+		this.startLevel = false;
+		this.debugBall = new PIXI.Graphics();
+	},
+
+	collideWall:function(){
+		var timeline = new TimelineLite();
+		var tempTrail = null;
+		for (var i = 0; i < this.trails.length; i++) {
+			tempTrail = this.trails[i].trail;
+			if(this.trails[i].type === 'HORIZONTAL'){
+				timeline.append(TweenLite.to(tempTrail, Math.abs(tempTrail.width) / 1000, {width:0, x:tempTrail.position.x + tempTrail.width, ease:'easeNone'}));
+			}else{
+				timeline.append(TweenLite.to(tempTrail,  Math.abs(tempTrail.height) / 1000, {height:0, y:tempTrail.position.y + tempTrail.height, ease:'easeNone'}));
+			}
+		}
+		this.trails = [];
+
+
+	},
+	addTrail:function(){
+
+		var trail = new PIXI.Graphics();
+		trail.beginFill(0);
+		var trailObj = {trail:trail};
+
+		
+
+		if(this.player.velocity.y === 0){
+			if(this.trails.length > 1){
+				if(this.trails[this.trails.length - 1].type === 'HORIZONTAL'){
+					return;
+				}
+			}
+			trail.drawRect(0, -this.player.spriteBall.height, 1, this.player.spriteBall.height);
+			trail.position.x = this.player.getPosition().x;
+			trail.position.y = this.player.getPosition().y;
+			trailObj.type = 'HORIZONTAL';
+			trailObj.side = this.player.velocity.x < 0?'LEFT':'RIGHT';
+		}else{
+			if(this.trails.length > 1){
+				if(this.trails[this.trails.length - 1].type === 'VERTICAL'){
+					return;
+				}
+			}
+			trail.beginFill(0);
+			trail.drawRect(-this.player.spriteBall.width / 2, 0, this.player.spriteBall.width, 1);
+			trail.position.x = this.player.getPosition().x;
+
+			// trail.position.y = this.player.getPosition().y + (this.player.velocity.y > 0 ?-this.player.spriteBall.height / 2 : this.player.spriteBall.height / 2);
+			trail.position.y = this.player.getPosition().y - this.player.spriteBall.height / 2;
+			trailObj.type = 'VERTICAL';
+			trailObj.side = this.player.velocity.y < 0?'UP':'DOWN';
+		}
+		trail.alpha = 0.5;
+		this.addChild(trail);
+
+		var joint = new PIXI.Graphics();
+		joint.beginFill(0x000000);
+		joint.drawCircle(0,- this.player.spriteBall.height / 2,this.player.spriteBall.width/2);
+		this.addChild(joint);
+		joint.position.x = this.player.getPosition().x;
+		joint.position.y = this.player.getPosition().y;
+
+		this.trails.push({trail:joint, type:'JOINT'});
+		this.trails.push(trailObj);
+	},
+	update:function(){
+		if(!this.updateable){
+			return;
+		}
+		this._super();
+
+		// console.log('this.trails');
+		if(this.player.velocity.y + this.player.velocity.x === 0){
+			return;
+		}
+
+
+		if(this.trails.length > 0){
+			// console.log(this.trails);
+			var tempTrail = this.trails[this.trails.length - 1].trail;
+			// console.log(tempTrail);
+			if(this.player.velocity.y === 0){
+				tempTrail.width = this.player.getPosition().x - tempTrail.position.x;
+			}else{
+				tempTrail.height = (this.player.getPosition().y - this.player.spriteBall.height / 2) - tempTrail.position.y;
+			}
+			var acc = 0;
+			
+		}
+
+		
+		for (var i = 0; i < this.trails.length - 4; i++) {
+			if(this.trails[i].type !== 'JOINT'){
+				var rectTrail;
+
+				var rectPlayer  = new PIXI.Rectangle(this.player.getPosition().x - this.player.spriteBall.width/2,
+					this.player.getPosition().y - this.player.spriteBall.height,
+					this.player.spriteBall.width,
+					this.player.spriteBall.height);
+
+				if(this.trails[i].type === 'VERTICAL'){
+					if(this.trails[i].side === 'UP'){
+						rectTrail  =  new PIXI.Rectangle(this.trails[i].trail.position.x - Math.abs(this.trails[i].trail.width) / 2,// - this.trails[i].trail.width/2,
+						this.trails[i].trail.position.y - Math.abs(this.trails[i].trail.height),
+						Math.abs(this.trails[i].trail.width),
+						Math.abs(this.trails[i].trail.height));
+					}else{
+						rectTrail  =  new PIXI.Rectangle(this.trails[i].trail.position.x - this.trails[i].trail.width/2,
+						this.trails[i].trail.position.y,
+						Math.abs(this.trails[i].trail.width),
+						Math.abs(this.trails[i].trail.height));
+					}
+				}else{
+					if(this.trails[i].side === 'RIGHT'){
+						rectTrail  =  new PIXI.Rectangle(this.trails[i].trail.position.x,
+							this.trails[i].trail.position.y - Math.abs(this.trails[i].trail.height),// - this.trails[i].trail.height,
+							Math.abs(this.trails[i].trail.width),
+							Math.abs(this.trails[i].trail.height));
+					}else{
+						rectTrail  =  new PIXI.Rectangle(this.trails[i].trail.position.x - Math.abs(this.trails[i].trail.width),
+							this.trails[i].trail.position.y - Math.abs(this.trails[i].trail.height),// - this.trails[i].trail.height,
+							Math.abs(this.trails[i].trail.width),
+							Math.abs(this.trails[i].trail.height));
+					}
+				}
+
+				if (rectPlayer.x + this.player.velocity.x < rectTrail.x + rectTrail.width &&
+					rectPlayer.x + rectPlayer.width + this.player.velocity.x> rectTrail.x &&
+					rectPlayer.y + this.player.velocity.y< rectTrail.y + rectTrail.height &&
+					rectPlayer.height + rectPlayer.y + this.player.velocity.y> rectTrail.y) {
+					this.player.velocity = {x:0,y:0};
+					// this.trails[i].trail.alpha = 0.8;
+
+					this.debugBall.clear();
+					this.debugBall.lineStyle(1,0xFF0000);
+					this.debugBall.drawRect(rectTrail.x,rectTrail.y,rectTrail.width, rectTrail.height);
+					if(this.debugBall.parent){
+						this.removeChild(this.debugBall);
+					}
+					this.addChild(this.debugBall);
+
+					console.log(rectPlayer,rectTrail);
+				}
+
+				// this.debugBall.clear();
+				// this.debugBall.lineStyle(1,0xFF0000);
+				// this.debugBall.drawRect(rectPlayer.x,rectPlayer.y,rectPlayer.width, rectPlayer.height);
+				// if(this.debugBall.parent){
+				// 	this.removeChild(this.debugBall);
+				// }
+				// this.addChild(this.debugBall);
+			
+			}
+
+		}
+
+		
+	},
+	initLevel:function(whereInit){
+		this.trails = [];
+		APP.points = 0;
+		this.player = new Ball({x:0,y:0}, this);
+		this.player.build();
+		this.layer.addChild(this.player);
+		this.player.getContent().position.x = windowWidth / 2;
+		this.player.getContent().position.y = windowHeight / 1.2;
+		var baseFloor = windowHeight / 1.2;
+		this.player.setFloor(baseFloor);
+
+		// this.player.stretch('UP');
+		
+
+		this.base = new PIXI.Graphics();
+		this.base.beginFill(0xFFFFFF);
+		this.base.drawCircle(0,0,windowHeight - baseFloor);
+		this.addChild(this.base);
+		this.base.alpha = 0.3;
+		this.base.position.x = windowWidth / 2;
+		this.base.position.y = windowHeight + this.player.spriteBall.height / 2;
+		// this.brilhoBase.getContent().position.y = base +  this.player.spriteBall.height / 2;
+
+		
+		
+		
+		
+		
+
+		this.updateCoins();
+
+		var self = this;
+		this.addChild(self.hitTouch);
+		this.force = 0;
+		this.levelCounter = 800;
+		this.levelCounterMax = 800;
+
+
+		// this.updateCoins();
+		this.changeColor(true, true);
+
+		this.endGame = false;
+
+		// if(this.crazyLogo){
+		// 	this.crazyLogo.updateable = false;
+		// }
+
+	},
+
+
+
+
+
+
+
+
+
+
 	addSoundButton:function(){
 		this.soundButtonContainer = new PIXI.DisplayObjectContainer();
 		this.soundOn = new PIXI.Graphics();
@@ -107,141 +447,7 @@ var GameScreen = AbstractScreen.extend({
 			}
 		};
 	},
-	initApplication:function(){
-		
-		var self = this;
-		
 
-		if(!this.background){
-			this.background = new PIXI.Graphics();
-			this.background.beginFill(APP.backColor);
-			this.background.drawRect(0,0,windowWidth, windowHeight);
-			this.addChild(this.background);
-		}else{
-			this.addChild(this.background);
-
-		}
-		
-		if(!this.interactiveBackground){
-			this.interactiveBackground = new InteractiveBackground(this);
-			this.interactiveBackground.build();
-			this.addChild(this.interactiveBackground);
-		}else{
-			this.addChild(this.interactiveBackground);
-
-		}
-		// this.changeColor();
-		// this.background.alpha = 0;
-
-
-		this.hitTouch = new PIXI.Graphics();
-		this.hitTouch.interactive = true;
-		this.hitTouch.beginFill(0);
-		this.hitTouch.drawRect(0,0,windowWidth, windowHeight);
-		
-		this.hitTouch.alpha = 0;
-		this.hitTouch.hitArea = new PIXI.Rectangle(0, 40, windowWidth, windowHeight);
-
-		this.tapDown = false;
-
-		this.hitTouch.touchend = this.hitTouch.mouseup = function(touchData){
-			var angle = Math.atan2(touchData.global.y - self.player.getPosition().y, (touchData.global.x) - self.player.getPosition().x) * 180 / Math.PI;
-			console.log(angle);
-			if(angle > -135 && angle < -45){
-				self.player.stretch('UP');
-			}else if(angle > -45 && angle < 45){
-				self.player.stretch('RIGHT');
-			}else if(angle > 45 && angle < 135){
-				self.player.stretch('DOWN');
-			}else{
-				self.player.stretch('LEFT');
-			}
-			// self.tapDown = false;
-			// self.shoot((self.force / 30) * windowHeight * 0.1);
-		};
-
-		this.hitTouch.touchstart = this.hitTouch.mousedown = function(touchData){
-			// self.tapDown = true;
-		};
-		this.updateable = true;
-
-
-		document.body.addEventListener('keyup', function(e){
-			console.log(e.keyCode);
-			if(e.keyCode === 32 || e.keyCode === 40){
-				self.tapDown = false;
-				self.shoot((APP.force / 30) * windowHeight * 0.1);
-			}
-		});
-		document.body.addEventListener('keydown', function(e){
-			if(e.keyCode === 32 || e.keyCode === 40){
-				self.tapDown = true;
-			}
-		});
-
-
-		if(APP.withAPI){
-			GameAPI.GameBreak.request(function(){
-				self.pauseModal.show();
-			}, function(){
-				self.pauseModal.hide();
-			});
-		}
-
-
-
-		// this.brilhoBase = new SimpleSprite('baseDegrade.png');
-		// // this.container.addChild(this.brilhoBase.getContent());
-		// this.brilhoBase.getContent().alpha = 0.5;
-		// scaleConverter(this.brilhoBase.getContent().width, windowWidth, 1, this.brilhoBase);
-		// this.brilhoBase.getContent().position.x = windowWidth / 2 - this.brilhoBase.getContent().width / 2;
-		// this.brilhoBase.getContent().position.y = windowHeight;
-		
-
-
-		this.layerManager = new LayerManager();
-		this.layerManager.build('Main');
-
-		this.addChild(this.layerManager);
-
-		//adiciona uma camada
-		this.layer = new Layer();
-		this.layer.build('EntityLayer');
-		this.layerManager.addLayer(this.layer);
-
-
-
-
-		this.coinsLabel = new PIXI.Text('0', {align:'center',font:'72px Vagron', fill:'#FFFFFF', wordWrap:true, wordWrapWidth:500});
-		// scaleConverter(this.coinsLabel.height, windowHeight, 0.2, this.coinsLabel);
-		this.coinsLabel.resolution = retina;
-		this.coinsLabel.alpha = 0;
-		this.addChild(this.coinsLabel);
-
-		this.crazyContent = new PIXI.DisplayObjectContainer();
-		this.addChild(this.crazyContent);
-		
-
-		this.loaderBar = new LifeBarHUD(windowWidth, 30, 0, 0xFFFFFF, 0xFFFFFF);
-		this.addChild(this.loaderBar.getContent());
-		this.loaderBar.getContent().position.x = 0;//windowWidth / 2 - this.loaderBar.getContent().width / 2;
-		this.loaderBar.getContent().position.y = 0;//windowHeight / 1.1;
-		this.loaderBar.updateBar(0, 100);
-		this.loaderBar.getContent().alpha = 0;
-
-		this.initLevel();
-		// this.endGame = true;
-		// if(!this.fistTime){
-		// 	this.changeColor(true, true);
-		// 	this.openEndMenu();
-
-		// 	this.fistTime = true;
-		// }else{
-		// 	this.initLevel();
-		// }
-		this.startLevel = false;
-		
-	},
 	addCrazyMessage:function(message) {
 		if(this.crazyLabel && this.crazyLabel.parent){
 			if(this.crazyLabel.text === message){
@@ -351,59 +557,7 @@ var GameScreen = AbstractScreen.extend({
 		this.destroy();
 		this.build();
 	},
-	update:function(){
-		if(!this.updateable){
-			return;
-		}
-		this._super();
-	},
-	initLevel:function(whereInit){
-		APP.points = 0;
-		this.player = new Ball({x:0,y:0}, this);
-		this.player.build();
-		this.layer.addChild(this.player);
-		this.player.getContent().position.x = windowWidth / 2;
-		this.player.getContent().position.y = windowHeight / 1.2;
-		var baseFloor = windowHeight / 1.2;
-		this.player.setFloor(baseFloor);
-
-		this.player.stretch('UP');
-		
-
-		this.base = new PIXI.Graphics();
-		this.base.beginFill(0xFFFFFF);
-		this.base.drawCircle(0,0,windowHeight - baseFloor);
-		this.addChild(this.base);
-		this.base.alpha = 0.3;
-		this.base.position.x = windowWidth / 2;
-		this.base.position.y = windowHeight + this.player.spriteBall.height / 2;
-		// this.brilhoBase.getContent().position.y = base +  this.player.spriteBall.height / 2;
-
-		
-		
-		
-		
-		
-
-		this.updateCoins();
-
-		var self = this;
-		this.addChild(self.hitTouch);
-		this.force = 0;
-		this.levelCounter = 800;
-		this.levelCounterMax = 800;
-
-
-		// this.updateCoins();
-		this.changeColor(true, true);
-
-		this.endGame = false;
-
-		if(this.crazyLogo){
-			this.crazyLogo.updateable = false;
-		}
-
-	},
+	
 	
 
 

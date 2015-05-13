@@ -32,8 +32,8 @@ var Ball = Entity.extend({
 		this.color = 0xFFFFFF;
 		this.spriteBall = new PIXI.Graphics();
 		this.spriteBall.beginFill(this.color);
-		this.maxSize = windowHeight * 0.03;
-		this.spriteBall.drawCircle(0,-this.maxSize,this.maxSize);
+		this.maxSize = windowHeight * 0.02;
+		this.spriteBall.drawCircle(0,0,this.maxSize);
 
 		this.sprite = new PIXI.Sprite();
         this.sprite.addChild(this.spriteBall);
@@ -112,7 +112,8 @@ var Ball = Entity.extend({
 			this.velocity.x = this.standardVelocity;
 			this.velocity.y = 0;
 		}
-		// var ballPos = {x:this.spriteBall.x, y:this.spriteBall.y};
+
+		this.screen.addTrail();
 		// if(side === 'UP'){
 		// 	this.currentSide = side;
 		// 	this.velocity.x = 0;
@@ -133,26 +134,19 @@ var Ball = Entity.extend({
 		// 	this.tail.drawRect(0, -this.spriteBall.height, this.spriteBall.width / 2, this.spriteBall.height);
 		// 	this.sprite.addChild(this.tail);
 		// }
-		// this.tail.position.x = ballPos.x;
-		// this.tail.position.y = ballPos.y;
+		
 	},
 	update: function(){
 		this._super();
-		// this.spriteBall.position.x += this.velocity.x;
-		// this.spriteBall.position.y += this.velocity.y;
-
-		// if(this.currentSide === 'UP'){
-		// 	this.tail.height = this.tail.position.y + this.spriteBall.position.y;
-		// }else{
-		// 	this.tail.width = this.tail.position.x + this.spriteBall.position.x;
-		// }
-		if(this.velocity.x + this.getPosition().x < this.collideArea.x ||
+		if(this.velocity.x !== 0 && this.velocity.x + this.getPosition().x < this.collideArea.x ||
 			this.velocity.x + this.getPosition().x > this.collideArea.x + this.collideArea.width){
 			this.velocity.x = 0;
+			this.screen.collideWall();
 		}
-		if(this.velocity.y + this.getPosition().y < this.collideArea.y ||
+		if(this.velocity.y !== 0 && this.velocity.y + this.getPosition().y < this.collideArea.y ||
 			this.velocity.y + this.getPosition().y > this.collideArea.y + this.collideArea.height){
 			this.velocity.y = 0;
+			this.screen.collideWall();
 		}
 	},
 	updateableParticles:function(){

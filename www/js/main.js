@@ -1,4 +1,4 @@
-/*! jefframos 12-05-2015 */
+/*! jefframos 13-05-2015 */
 function rgbToHsl(r, g, b) {
     r /= 255, g /= 255, b /= 255;
     var h, s, max = Math.max(r, g, b), min = Math.min(r, g, b), l = (max + min) / 2;
@@ -434,7 +434,7 @@ var Application = AbstractApplication.extend({
     },
     build: function() {
         this.color = 16777215, this.spriteBall = new PIXI.Graphics(), this.spriteBall.beginFill(this.color), 
-        this.maxSize = .03 * windowHeight, this.spriteBall.drawCircle(0, -this.maxSize, this.maxSize), 
+        this.maxSize = .02 * windowHeight, this.spriteBall.drawCircle(0, 0, this.maxSize), 
         this.sprite = new PIXI.Sprite(), this.sprite.addChild(this.spriteBall), this.sprite.anchor.x = .5, 
         this.sprite.anchor.y = .5, this.updateable = !0, this.collidable = !0, this.getContent().alpha = .1, 
         TweenLite.to(this.getContent(), .3, {
@@ -466,11 +466,13 @@ var Application = AbstractApplication.extend({
         this.currentSide = side, this.standardVelocity = 2, "UP" === this.currentSide ? (this.velocity.x = 0, 
         this.velocity.y = -this.standardVelocity) : "DOWN" === this.currentSide ? (this.velocity.x = 0, 
         this.velocity.y = this.standardVelocity) : "LEFT" === this.currentSide ? (this.velocity.x = -this.standardVelocity, 
-        this.velocity.y = 0) : (this.velocity.x = this.standardVelocity, this.velocity.y = 0);
+        this.velocity.y = 0) : (this.velocity.x = this.standardVelocity, this.velocity.y = 0), 
+        this.screen.addTrail();
     },
     update: function() {
-        this._super(), (this.velocity.x + this.getPosition().x < this.collideArea.x || this.velocity.x + this.getPosition().x > this.collideArea.x + this.collideArea.width) && (this.velocity.x = 0), 
-        (this.velocity.y + this.getPosition().y < this.collideArea.y || this.velocity.y + this.getPosition().y > this.collideArea.y + this.collideArea.height) && (this.velocity.y = 0);
+        this._super(), (0 !== this.velocity.x && this.velocity.x + this.getPosition().x < this.collideArea.x || this.velocity.x + this.getPosition().x > this.collideArea.x + this.collideArea.width) && (this.velocity.x = 0, 
+        this.screen.collideWall()), (0 !== this.velocity.y && this.velocity.y + this.getPosition().y < this.collideArea.y || this.velocity.y + this.getPosition().y > this.collideArea.y + this.collideArea.height) && (this.velocity.y = 0, 
+        this.screen.collideWall());
     },
     updateableParticles: function() {
         if (this.particlesCounter--, this.particlesCounter <= 0) {
@@ -1066,7 +1068,8 @@ var Application = AbstractApplication.extend({
 }), GameScreen = AbstractScreen.extend({
     init: function(label) {
         this._super(label), this.isLoaded = !1, this.fistTime = !1, APP.points = 0, APP.cookieManager.getSafeCookie("highscore") ? APP.highscore = APP.cookieManager.getSafeCookie("highscore") : (APP.cookieManager.setSafeCookie("highscore", 0), 
-        APP.highscore = 0), APP.audioController.playAmbientSound("loop");
+        APP.highscore = 0), APP.audioController.playAmbientSound("loop"), APP.mute = !0, 
+        Howler.mute();
     },
     destroy: function() {
         this._super();
@@ -1078,29 +1081,13 @@ var Application = AbstractApplication.extend({
         this.pinVel = {
             x: 0,
             y: 0
-        }, console.log("buid"), this.addSoundButton();
+        }, this.addSoundButton();
     },
     onProgress: function() {
         this._super();
     },
     onAssetsLoaded: function() {
         this.initApplication();
-    },
-    addSoundButton: function() {
-        this.soundButtonContainer = new PIXI.DisplayObjectContainer(), this.soundOn = new PIXI.Graphics(), 
-        this.soundOn.beginFill(16777215), this.soundOn.moveTo(10, 0), this.soundOn.lineTo(0, 0), 
-        this.soundOn.lineTo(0, 20), this.soundOn.lineTo(10, 20), this.soundOn.moveTo(15, 20), 
-        this.soundOn.lineTo(25, 20), this.soundOn.lineTo(25, 0), this.soundOn.lineTo(15, 0), 
-        this.soundOff = new PIXI.Graphics(), this.soundOff.beginFill(16777215), this.soundOff.moveTo(20, 10), 
-        this.soundOff.lineTo(5, 0), this.soundOff.lineTo(5, 20), this.soundButtonContainer.addChild(APP.mute ? this.soundOff : this.soundOn), 
-        this.addChild(this.soundButtonContainer), this.soundButtonContainer.position.x = windowWidth - 1.5 * this.soundButtonContainer.width, 
-        this.soundButtonContainer.position.y = this.soundButtonContainer.width, this.soundButtonContainer.hitArea = new PIXI.Rectangle(-5, -5, 35, 35), 
-        this.soundButtonContainer.interactive = !0, this.soundButtonContainer.buttonMode = !0;
-        var self = this;
-        this.soundButtonContainer.touchstart = this.soundButtonContainer.mousedown = function(mouseData) {
-            APP.mute ? (APP.mute = !1, Howler.unmute()) : (APP.mute = !0, Howler.mute()), self.soundOff.parent && self.soundOff.parent.removeChild(self.soundOff), 
-            self.soundOn.parent && self.soundOn.parent.removeChild(self.soundOn), self.soundButtonContainer.addChild(APP.mute ? self.soundOff : self.soundOn);
-        };
     },
     initApplication: function() {
         var self = this;
@@ -1111,11 +1098,10 @@ var Application = AbstractApplication.extend({
         this.hitTouch = new PIXI.Graphics(), this.hitTouch.interactive = !0, this.hitTouch.beginFill(0), 
         this.hitTouch.drawRect(0, 0, windowWidth, windowHeight), this.hitTouch.alpha = 0, 
         this.hitTouch.hitArea = new PIXI.Rectangle(0, 40, windowWidth, windowHeight), this.tapDown = !1, 
-        this.hitTouch.touchend = this.hitTouch.mouseup = function(touchData) {
+        this.hitTouch.touchstart = this.hitTouch.mousedown = function(touchData) {
             var angle = 180 * Math.atan2(touchData.global.y - self.player.getPosition().y, touchData.global.x - self.player.getPosition().x) / Math.PI;
-            console.log(angle), self.player.stretch(angle > -135 && -45 > angle ? "UP" : angle > -45 && 45 > angle ? "RIGHT" : angle > 45 && 135 > angle ? "DOWN" : "LEFT");
-        }, this.hitTouch.touchstart = this.hitTouch.mousedown = function(touchData) {}, 
-        this.updateable = !0, document.body.addEventListener("keyup", function(e) {
+            self.player.stretch(angle > -135 && -45 > angle ? "UP" : angle > -45 && 45 > angle ? "RIGHT" : angle > 45 && 135 > angle ? "DOWN" : "LEFT");
+        }, this.updateable = !0, document.body.addEventListener("keyup", function(e) {
             console.log(e.keyCode), (32 === e.keyCode || 40 === e.keyCode) && (self.tapDown = !1, 
             self.shoot(APP.force / 30 * windowHeight * .1));
         }), document.body.addEventListener("keydown", function(e) {
@@ -1137,7 +1123,95 @@ var Application = AbstractApplication.extend({
         this.loaderBar = new LifeBarHUD(windowWidth, 30, 0, 16777215, 16777215), this.addChild(this.loaderBar.getContent()), 
         this.loaderBar.getContent().position.x = 0, this.loaderBar.getContent().position.y = 0, 
         this.loaderBar.updateBar(0, 100), this.loaderBar.getContent().alpha = 0, this.initLevel(), 
-        this.startLevel = !1;
+        this.startLevel = !1, this.debugBall = new PIXI.Graphics();
+    },
+    collideWall: function() {
+        for (var timeline = new TimelineLite(), tempTrail = null, i = 0; i < this.trails.length; i++) tempTrail = this.trails[i].trail, 
+        timeline.append("HORIZONTAL" === this.trails[i].type ? TweenLite.to(tempTrail, Math.abs(tempTrail.width) / 1e3, {
+            width: 0,
+            x: tempTrail.position.x + tempTrail.width,
+            ease: "easeNone"
+        }) : TweenLite.to(tempTrail, Math.abs(tempTrail.height) / 1e3, {
+            height: 0,
+            y: tempTrail.position.y + tempTrail.height,
+            ease: "easeNone"
+        }));
+        this.trails = [];
+    },
+    addTrail: function() {
+        var trail = new PIXI.Graphics();
+        trail.beginFill(0);
+        var trailObj = {
+            trail: trail
+        };
+        if (0 === this.player.velocity.y) {
+            if (this.trails.length > 1 && "HORIZONTAL" === this.trails[this.trails.length - 1].type) return;
+            trail.drawRect(0, -this.player.spriteBall.height, 1, this.player.spriteBall.height), 
+            trail.position.x = this.player.getPosition().x, trail.position.y = this.player.getPosition().y, 
+            trailObj.type = "HORIZONTAL", trailObj.side = this.player.velocity.x < 0 ? "LEFT" : "RIGHT";
+        } else {
+            if (this.trails.length > 1 && "VERTICAL" === this.trails[this.trails.length - 1].type) return;
+            trail.beginFill(0), trail.drawRect(-this.player.spriteBall.width / 2, 0, this.player.spriteBall.width, 1), 
+            trail.position.x = this.player.getPosition().x, trail.position.y = this.player.getPosition().y - this.player.spriteBall.height / 2, 
+            trailObj.type = "VERTICAL", trailObj.side = this.player.velocity.y < 0 ? "UP" : "DOWN";
+        }
+        trail.alpha = .5, this.addChild(trail);
+        var joint = new PIXI.Graphics();
+        joint.beginFill(0), joint.drawCircle(0, -this.player.spriteBall.height / 2, this.player.spriteBall.width / 2), 
+        this.addChild(joint), joint.position.x = this.player.getPosition().x, joint.position.y = this.player.getPosition().y, 
+        this.trails.push({
+            trail: joint,
+            type: "JOINT"
+        }), this.trails.push(trailObj);
+    },
+    update: function() {
+        if (this.updateable && (this._super(), this.player.velocity.y + this.player.velocity.x !== 0)) {
+            if (this.trails.length > 0) {
+                var tempTrail = this.trails[this.trails.length - 1].trail;
+                0 === this.player.velocity.y ? tempTrail.width = this.player.getPosition().x - tempTrail.position.x : tempTrail.height = this.player.getPosition().y - this.player.spriteBall.height / 2 - tempTrail.position.y;
+            }
+            for (var i = 0; i < this.trails.length - 4; i++) if ("JOINT" !== this.trails[i].type) {
+                var rectTrail, rectPlayer = new PIXI.Rectangle(this.player.getPosition().x - this.player.spriteBall.width / 2, this.player.getPosition().y - this.player.spriteBall.height, this.player.spriteBall.width, this.player.spriteBall.height);
+                rectTrail = "VERTICAL" === this.trails[i].type ? "UP" === this.trails[i].side ? new PIXI.Rectangle(this.trails[i].trail.position.x - Math.abs(this.trails[i].trail.width) / 2, this.trails[i].trail.position.y - Math.abs(this.trails[i].trail.height), Math.abs(this.trails[i].trail.width), Math.abs(this.trails[i].trail.height)) : new PIXI.Rectangle(this.trails[i].trail.position.x - this.trails[i].trail.width / 2, this.trails[i].trail.position.y, Math.abs(this.trails[i].trail.width), Math.abs(this.trails[i].trail.height)) : "RIGHT" === this.trails[i].side ? new PIXI.Rectangle(this.trails[i].trail.position.x, this.trails[i].trail.position.y - Math.abs(this.trails[i].trail.height), Math.abs(this.trails[i].trail.width), Math.abs(this.trails[i].trail.height)) : new PIXI.Rectangle(this.trails[i].trail.position.x - Math.abs(this.trails[i].trail.width), this.trails[i].trail.position.y - Math.abs(this.trails[i].trail.height), Math.abs(this.trails[i].trail.width), Math.abs(this.trails[i].trail.height)), 
+                rectPlayer.x + this.player.velocity.x < rectTrail.x + rectTrail.width && rectPlayer.x + rectPlayer.width + this.player.velocity.x > rectTrail.x && rectPlayer.y + this.player.velocity.y < rectTrail.y + rectTrail.height && rectPlayer.height + rectPlayer.y + this.player.velocity.y > rectTrail.y && (this.player.velocity = {
+                    x: 0,
+                    y: 0
+                }, this.debugBall.clear(), this.debugBall.lineStyle(1, 16711680), this.debugBall.drawRect(rectTrail.x, rectTrail.y, rectTrail.width, rectTrail.height), 
+                this.debugBall.parent && this.removeChild(this.debugBall), this.addChild(this.debugBall), 
+                console.log(rectPlayer, rectTrail));
+            }
+        }
+    },
+    initLevel: function(whereInit) {
+        this.trails = [], APP.points = 0, this.player = new Ball({
+            x: 0,
+            y: 0
+        }, this), this.player.build(), this.layer.addChild(this.player), this.player.getContent().position.x = windowWidth / 2, 
+        this.player.getContent().position.y = windowHeight / 1.2;
+        var baseFloor = windowHeight / 1.2;
+        this.player.setFloor(baseFloor), this.base = new PIXI.Graphics(), this.base.beginFill(16777215), 
+        this.base.drawCircle(0, 0, windowHeight - baseFloor), this.addChild(this.base), 
+        this.base.alpha = .3, this.base.position.x = windowWidth / 2, this.base.position.y = windowHeight + this.player.spriteBall.height / 2, 
+        this.updateCoins();
+        var self = this;
+        this.addChild(self.hitTouch), this.force = 0, this.levelCounter = 800, this.levelCounterMax = 800, 
+        this.changeColor(!0, !0), this.endGame = !1;
+    },
+    addSoundButton: function() {
+        this.soundButtonContainer = new PIXI.DisplayObjectContainer(), this.soundOn = new PIXI.Graphics(), 
+        this.soundOn.beginFill(16777215), this.soundOn.moveTo(10, 0), this.soundOn.lineTo(0, 0), 
+        this.soundOn.lineTo(0, 20), this.soundOn.lineTo(10, 20), this.soundOn.moveTo(15, 20), 
+        this.soundOn.lineTo(25, 20), this.soundOn.lineTo(25, 0), this.soundOn.lineTo(15, 0), 
+        this.soundOff = new PIXI.Graphics(), this.soundOff.beginFill(16777215), this.soundOff.moveTo(20, 10), 
+        this.soundOff.lineTo(5, 0), this.soundOff.lineTo(5, 20), this.soundButtonContainer.addChild(APP.mute ? this.soundOff : this.soundOn), 
+        this.addChild(this.soundButtonContainer), this.soundButtonContainer.position.x = windowWidth - 1.5 * this.soundButtonContainer.width, 
+        this.soundButtonContainer.position.y = this.soundButtonContainer.width, this.soundButtonContainer.hitArea = new PIXI.Rectangle(-5, -5, 35, 35), 
+        this.soundButtonContainer.interactive = !0, this.soundButtonContainer.buttonMode = !0;
+        var self = this;
+        this.soundButtonContainer.touchstart = this.soundButtonContainer.mousedown = function(mouseData) {
+            APP.mute ? (APP.mute = !1, Howler.unmute()) : (APP.mute = !0, Howler.mute()), self.soundOff.parent && self.soundOff.parent.removeChild(self.soundOff), 
+            self.soundOn.parent && self.soundOn.parent.removeChild(self.soundOn), self.soundButtonContainer.addChild(APP.mute ? self.soundOff : self.soundOn);
+        };
     },
     addCrazyMessage: function(message) {
         if (this.crazyLabel && this.crazyLabel.parent) {
@@ -1220,24 +1294,6 @@ var Application = AbstractApplication.extend({
     },
     reset: function() {
         this.destroy(), this.build();
-    },
-    update: function() {
-        this.updateable && this._super();
-    },
-    initLevel: function(whereInit) {
-        APP.points = 0, this.player = new Ball({
-            x: 0,
-            y: 0
-        }, this), this.player.build(), this.layer.addChild(this.player), this.player.getContent().position.x = windowWidth / 2, 
-        this.player.getContent().position.y = windowHeight / 1.2;
-        var baseFloor = windowHeight / 1.2;
-        this.player.setFloor(baseFloor), this.player.stretch("UP"), this.base = new PIXI.Graphics(), 
-        this.base.beginFill(16777215), this.base.drawCircle(0, 0, windowHeight - baseFloor), 
-        this.addChild(this.base), this.base.alpha = .3, this.base.position.x = windowWidth / 2, 
-        this.base.position.y = windowHeight + this.player.spriteBall.height / 2, this.updateCoins();
-        var self = this;
-        this.addChild(self.hitTouch), this.force = 0, this.levelCounter = 800, this.levelCounterMax = 800, 
-        this.changeColor(!0, !0), this.endGame = !1, this.crazyLogo && (this.crazyLogo.updateable = !1);
     },
     gameOver: function() {
         if (this.endGame) return this.crazyContent.alpha = 0, this.coinsLabel.alpha = 0, 
