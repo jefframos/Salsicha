@@ -193,7 +193,7 @@ var GameScreen = AbstractScreen.extend({
 	addTrail:function(){
 
 		var trail = new PIXI.Graphics();
-		trail.beginFill(0);
+		trail.beginFill(this.player.color);
 		var trailObj = {trail:trail};
 
 		
@@ -201,10 +201,13 @@ var GameScreen = AbstractScreen.extend({
 		if(this.player.velocity.y === 0){
 			if(this.trails.length > 1){
 				if(this.trails[this.trails.length - 1].type === 'HORIZONTAL'){
+					this.onBack = true;
 					return;
 				}
 			}
 			trail.drawRect(0, -this.player.spriteBall.height, 1, this.player.spriteBall.height);
+
+
 			trail.position.x = this.player.getPosition().x;
 			trail.position.y = this.player.getPosition().y;
 			trailObj.type = 'HORIZONTAL';
@@ -212,10 +215,10 @@ var GameScreen = AbstractScreen.extend({
 		}else{
 			if(this.trails.length > 1){
 				if(this.trails[this.trails.length - 1].type === 'VERTICAL'){
+					this.onBack = true;
 					return;
 				}
 			}
-			trail.beginFill(0);
 			trail.drawRect(-this.player.spriteBall.width / 2, 0, this.player.spriteBall.width, 1);
 			trail.position.x = this.player.getPosition().x;
 
@@ -224,18 +227,20 @@ var GameScreen = AbstractScreen.extend({
 			trailObj.type = 'VERTICAL';
 			trailObj.side = this.player.velocity.y < 0?'UP':'DOWN';
 		}
-		trail.alpha = 0.5;
+		// trail.alpha = 0.5;
 		this.addChild(trail);
 
 		var joint = new PIXI.Graphics();
-		joint.beginFill(0x000000);
+		joint.beginFill(this.player.color);
 		joint.drawCircle(0,- this.player.spriteBall.height / 2,this.player.spriteBall.width/2);
 		this.addChild(joint);
 		joint.position.x = this.player.getPosition().x;
 		joint.position.y = this.player.getPosition().y;
 
-		this.trails.push({trail:joint, type:'JOINT'});
+		this.trails.push({trail:joint, type:'JOINT', side:trailObj.side});
 		this.trails.push(trailObj);
+
+		this.onBack = false;
 	},
 	update:function(){
 		if(!this.updateable){
@@ -244,6 +249,76 @@ var GameScreen = AbstractScreen.extend({
 		this._super();
 
 		// console.log('this.trails');
+
+		if(this.onBack){
+			var lastJoint = null;
+			for (var k = this.trails.length - 1; k >= 0; k--) {
+				if(this.trails[k].type === 'JOINT'){
+					lastJoint = this.trails[k];
+					break;
+				}
+			}
+
+			if(lastJoint){
+				console.log(lastJoint.side, lastJoint.trail.position.y);
+				var remove = false;
+				if(lastJoint.side === 'UP'){
+					if(this.player.getPosition().y > lastJoint.trail.position.y){
+						this.player.getPosition().y = lastJoint.trail.position.y;
+						remove = true;
+					}
+				}else if(lastJoint.side === 'DOWN'){
+					if(this.player.getPosition().y < lastJoint.trail.position.y){
+						this.player.getPosition().y = lastJoint.trail.position.y;
+						remove = true;
+					}
+				}else if(lastJoint.side === 'LEFT'){
+					if(this.player.getPosition().x > lastJoint.trail.position.x){
+						this.player.getPosition().x = lastJoint.trail.position.x;
+						remove = true;
+					}
+				}else{
+					if(this.player.getPosition().x < lastJoint.trail.position.x){
+						this.player.getPosition().x = lastJoint.trail.position.x;
+						remove = true;
+					}
+				}
+
+				if(remove){
+					this.player.velocity = {x:0, y:0};
+					console.log(this.trails.length)
+					var spl = this.trails.splice(this.trails.length - 2, 2);
+					var j = 0;
+					var sizeSpl = spl.length;
+					console.log(this.trails.length)
+					for (j = spl.length - 1; j >= 0; j--) {
+
+						if(spl[j].trail.parent){
+							spl[j].trail.parent.removeChild(spl[j].trail);
+						}
+					}
+
+					for (j = this.trails.length - 1; j >= 0; j--) {
+						if(this.trails[j].type === 'JOINT'){
+							if(this.trails[j].side === 'UP'){
+								this.player.velocity.y = 2;
+							}else if(this.trails[j].side === 'DOWN'){
+								this.player.velocity.y = -2;
+							}else if(this.trails[j].side === 'LEFT'){
+								this.player.velocity.x = 2;
+							}else if(this.trails[j].side === 'RIGHT'){
+								this.player.velocity.x = -2;
+							}
+							console.log(this.player.velocity, this.trails[j].side);
+							break;
+						}
+					}
+					// this.onBack = false;
+				}
+			}
+		}
+
+
 		if(this.player.velocity.y + this.player.velocity.x === 0){
 			return;
 		}
@@ -262,7 +337,7 @@ var GameScreen = AbstractScreen.extend({
 			
 		}
 
-		
+
 		for (var i = 0; i < this.trails.length - 4; i++) {
 			if(this.trails[i].type !== 'JOINT'){
 				var rectTrail;
@@ -347,7 +422,7 @@ var GameScreen = AbstractScreen.extend({
 		this.base = new PIXI.Graphics();
 		this.base.beginFill(0xFFFFFF);
 		this.base.drawCircle(0,0,windowHeight - baseFloor);
-		this.addChild(this.base);
+		// this.addChild(this.base);
 		this.base.alpha = 0.3;
 		this.base.position.x = windowWidth / 2;
 		this.base.position.y = windowHeight + this.player.spriteBall.height / 2;

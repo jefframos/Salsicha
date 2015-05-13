@@ -35,6 +35,9 @@ var Ball = Entity.extend({
 		this.maxSize = windowHeight * 0.02;
 		this.spriteBall.drawCircle(0,0,this.maxSize);
 
+
+		console.log(this.spriteBall.width);
+		
 		this.sprite = new PIXI.Sprite();
         this.sprite.addChild(this.spriteBall);
 

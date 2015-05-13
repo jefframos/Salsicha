@@ -435,9 +435,9 @@ var Application = AbstractApplication.extend({
     build: function() {
         this.color = 16777215, this.spriteBall = new PIXI.Graphics(), this.spriteBall.beginFill(this.color), 
         this.maxSize = .02 * windowHeight, this.spriteBall.drawCircle(0, 0, this.maxSize), 
-        this.sprite = new PIXI.Sprite(), this.sprite.addChild(this.spriteBall), this.sprite.anchor.x = .5, 
-        this.sprite.anchor.y = .5, this.updateable = !0, this.collidable = !0, this.getContent().alpha = .1, 
-        TweenLite.to(this.getContent(), .3, {
+        console.log(this.spriteBall.width), this.sprite = new PIXI.Sprite(), this.sprite.addChild(this.spriteBall), 
+        this.sprite.anchor.x = .5, this.sprite.anchor.y = .5, this.updateable = !0, this.collidable = !0, 
+        this.getContent().alpha = .1, TweenLite.to(this.getContent(), .3, {
             alpha: 1
         }), this.collideArea = new PIXI.Rectangle(50, 50, windowWidth - 100, windowHeight - 100), 
         this.particlesCounterMax = 2, this.particlesCounter = 1, this.floorPos = windowHeight, 
@@ -1140,45 +1140,76 @@ var Application = AbstractApplication.extend({
     },
     addTrail: function() {
         var trail = new PIXI.Graphics();
-        trail.beginFill(0);
+        trail.beginFill(this.player.color);
         var trailObj = {
             trail: trail
         };
         if (0 === this.player.velocity.y) {
-            if (this.trails.length > 1 && "HORIZONTAL" === this.trails[this.trails.length - 1].type) return;
+            if (this.trails.length > 1 && "HORIZONTAL" === this.trails[this.trails.length - 1].type) return void (this.onBack = !0);
             trail.drawRect(0, -this.player.spriteBall.height, 1, this.player.spriteBall.height), 
             trail.position.x = this.player.getPosition().x, trail.position.y = this.player.getPosition().y, 
             trailObj.type = "HORIZONTAL", trailObj.side = this.player.velocity.x < 0 ? "LEFT" : "RIGHT";
         } else {
-            if (this.trails.length > 1 && "VERTICAL" === this.trails[this.trails.length - 1].type) return;
-            trail.beginFill(0), trail.drawRect(-this.player.spriteBall.width / 2, 0, this.player.spriteBall.width, 1), 
+            if (this.trails.length > 1 && "VERTICAL" === this.trails[this.trails.length - 1].type) return void (this.onBack = !0);
+            trail.drawRect(-this.player.spriteBall.width / 2, 0, this.player.spriteBall.width, 1), 
             trail.position.x = this.player.getPosition().x, trail.position.y = this.player.getPosition().y - this.player.spriteBall.height / 2, 
             trailObj.type = "VERTICAL", trailObj.side = this.player.velocity.y < 0 ? "UP" : "DOWN";
         }
-        trail.alpha = .5, this.addChild(trail);
+        this.addChild(trail);
         var joint = new PIXI.Graphics();
-        joint.beginFill(0), joint.drawCircle(0, -this.player.spriteBall.height / 2, this.player.spriteBall.width / 2), 
+        joint.beginFill(this.player.color), joint.drawCircle(0, -this.player.spriteBall.height / 2, this.player.spriteBall.width / 2), 
         this.addChild(joint), joint.position.x = this.player.getPosition().x, joint.position.y = this.player.getPosition().y, 
         this.trails.push({
             trail: joint,
-            type: "JOINT"
-        }), this.trails.push(trailObj);
+            type: "JOINT",
+            side: trailObj.side
+        }), this.trails.push(trailObj), this.onBack = !1;
     },
     update: function() {
-        if (this.updateable && (this._super(), this.player.velocity.y + this.player.velocity.x !== 0)) {
-            if (this.trails.length > 0) {
-                var tempTrail = this.trails[this.trails.length - 1].trail;
-                0 === this.player.velocity.y ? tempTrail.width = this.player.getPosition().x - tempTrail.position.x : tempTrail.height = this.player.getPosition().y - this.player.spriteBall.height / 2 - tempTrail.position.y;
+        if (this.updateable) {
+            if (this._super(), this.onBack) {
+                for (var lastJoint = null, k = this.trails.length - 1; k >= 0; k--) if ("JOINT" === this.trails[k].type) {
+                    lastJoint = this.trails[k];
+                    break;
+                }
+                if (lastJoint) {
+                    console.log(lastJoint.side, lastJoint.trail.position.y);
+                    var remove = !1;
+                    if ("UP" === lastJoint.side ? this.player.getPosition().y > lastJoint.trail.position.y && (this.player.getPosition().y = lastJoint.trail.position.y, 
+                    remove = !0) : "DOWN" === lastJoint.side ? this.player.getPosition().y < lastJoint.trail.position.y && (this.player.getPosition().y = lastJoint.trail.position.y, 
+                    remove = !0) : "LEFT" === lastJoint.side ? this.player.getPosition().x > lastJoint.trail.position.x && (this.player.getPosition().x = lastJoint.trail.position.x, 
+                    remove = !0) : this.player.getPosition().x < lastJoint.trail.position.x && (this.player.getPosition().x = lastJoint.trail.position.x, 
+                    remove = !0), remove) {
+                        this.player.velocity = {
+                            x: 0,
+                            y: 0
+                        };
+                        var spl = this.trails.splice(this.trails.length - 2, 2), j = 0;
+                        spl.length;
+                        for (j = spl.length - 1; j >= 0; j--) spl[j].trail.parent && spl[j].trail.parent.removeChild(spl[j].trail);
+                        for (j = this.trails.length - 1; j >= 0; j--) if ("JOINT" === this.trails[j].type) {
+                            "UP" === this.trails[j].side ? this.player.velocity.y = 2 : "DOWN" === this.trails[j].side ? this.player.velocity.y = -2 : "LEFT" === this.trails[j].side ? this.player.velocity.x = 2 : "RIGHT" === this.trails[j].side && (this.player.velocity.x = -2), 
+                            console.log(this.player.velocity, this.trails[j].side);
+                            break;
+                        }
+                    }
+                }
             }
-            for (var i = 0; i < this.trails.length - 4; i++) if ("JOINT" !== this.trails[i].type) {
-                var rectTrail, rectPlayer = new PIXI.Rectangle(this.player.getPosition().x - this.player.spriteBall.width / 2, this.player.getPosition().y - this.player.spriteBall.height, this.player.spriteBall.width, this.player.spriteBall.height);
-                rectTrail = "VERTICAL" === this.trails[i].type ? "UP" === this.trails[i].side ? new PIXI.Rectangle(this.trails[i].trail.position.x - Math.abs(this.trails[i].trail.width) / 2, this.trails[i].trail.position.y - Math.abs(this.trails[i].trail.height), Math.abs(this.trails[i].trail.width), Math.abs(this.trails[i].trail.height)) : new PIXI.Rectangle(this.trails[i].trail.position.x - this.trails[i].trail.width / 2, this.trails[i].trail.position.y, Math.abs(this.trails[i].trail.width), Math.abs(this.trails[i].trail.height)) : "RIGHT" === this.trails[i].side ? new PIXI.Rectangle(this.trails[i].trail.position.x, this.trails[i].trail.position.y - Math.abs(this.trails[i].trail.height), Math.abs(this.trails[i].trail.width), Math.abs(this.trails[i].trail.height)) : new PIXI.Rectangle(this.trails[i].trail.position.x - Math.abs(this.trails[i].trail.width), this.trails[i].trail.position.y - Math.abs(this.trails[i].trail.height), Math.abs(this.trails[i].trail.width), Math.abs(this.trails[i].trail.height)), 
-                rectPlayer.x + this.player.velocity.x < rectTrail.x + rectTrail.width && rectPlayer.x + rectPlayer.width + this.player.velocity.x > rectTrail.x && rectPlayer.y + this.player.velocity.y < rectTrail.y + rectTrail.height && rectPlayer.height + rectPlayer.y + this.player.velocity.y > rectTrail.y && (this.player.velocity = {
-                    x: 0,
-                    y: 0
-                }, this.debugBall.clear(), this.debugBall.lineStyle(1, 16711680), this.debugBall.drawRect(rectTrail.x, rectTrail.y, rectTrail.width, rectTrail.height), 
-                this.debugBall.parent && this.removeChild(this.debugBall), this.addChild(this.debugBall), 
-                console.log(rectPlayer, rectTrail));
+            if (this.player.velocity.y + this.player.velocity.x !== 0) {
+                if (this.trails.length > 0) {
+                    var tempTrail = this.trails[this.trails.length - 1].trail;
+                    0 === this.player.velocity.y ? tempTrail.width = this.player.getPosition().x - tempTrail.position.x : tempTrail.height = this.player.getPosition().y - this.player.spriteBall.height / 2 - tempTrail.position.y;
+                }
+                for (var i = 0; i < this.trails.length - 4; i++) if ("JOINT" !== this.trails[i].type) {
+                    var rectTrail, rectPlayer = new PIXI.Rectangle(this.player.getPosition().x - this.player.spriteBall.width / 2, this.player.getPosition().y - this.player.spriteBall.height, this.player.spriteBall.width, this.player.spriteBall.height);
+                    rectTrail = "VERTICAL" === this.trails[i].type ? "UP" === this.trails[i].side ? new PIXI.Rectangle(this.trails[i].trail.position.x - Math.abs(this.trails[i].trail.width) / 2, this.trails[i].trail.position.y - Math.abs(this.trails[i].trail.height), Math.abs(this.trails[i].trail.width), Math.abs(this.trails[i].trail.height)) : new PIXI.Rectangle(this.trails[i].trail.position.x - this.trails[i].trail.width / 2, this.trails[i].trail.position.y, Math.abs(this.trails[i].trail.width), Math.abs(this.trails[i].trail.height)) : "RIGHT" === this.trails[i].side ? new PIXI.Rectangle(this.trails[i].trail.position.x, this.trails[i].trail.position.y - Math.abs(this.trails[i].trail.height), Math.abs(this.trails[i].trail.width), Math.abs(this.trails[i].trail.height)) : new PIXI.Rectangle(this.trails[i].trail.position.x - Math.abs(this.trails[i].trail.width), this.trails[i].trail.position.y - Math.abs(this.trails[i].trail.height), Math.abs(this.trails[i].trail.width), Math.abs(this.trails[i].trail.height)), 
+                    rectPlayer.x + this.player.velocity.x < rectTrail.x + rectTrail.width && rectPlayer.x + rectPlayer.width + this.player.velocity.x > rectTrail.x && rectPlayer.y + this.player.velocity.y < rectTrail.y + rectTrail.height && rectPlayer.height + rectPlayer.y + this.player.velocity.y > rectTrail.y && (this.player.velocity = {
+                        x: 0,
+                        y: 0
+                    }, this.debugBall.clear(), this.debugBall.lineStyle(1, 16711680), this.debugBall.drawRect(rectTrail.x, rectTrail.y, rectTrail.width, rectTrail.height), 
+                    this.debugBall.parent && this.removeChild(this.debugBall), this.addChild(this.debugBall), 
+                    console.log(rectPlayer, rectTrail));
+                }
             }
         }
     },
@@ -1190,9 +1221,8 @@ var Application = AbstractApplication.extend({
         this.player.getContent().position.y = windowHeight / 1.2;
         var baseFloor = windowHeight / 1.2;
         this.player.setFloor(baseFloor), this.base = new PIXI.Graphics(), this.base.beginFill(16777215), 
-        this.base.drawCircle(0, 0, windowHeight - baseFloor), this.addChild(this.base), 
-        this.base.alpha = .3, this.base.position.x = windowWidth / 2, this.base.position.y = windowHeight + this.player.spriteBall.height / 2, 
-        this.updateCoins();
+        this.base.drawCircle(0, 0, windowHeight - baseFloor), this.base.alpha = .3, this.base.position.x = windowWidth / 2, 
+        this.base.position.y = windowHeight + this.player.spriteBall.height / 2, this.updateCoins();
         var self = this;
         this.addChild(self.hitTouch), this.force = 0, this.levelCounter = 800, this.levelCounterMax = 800, 
         this.changeColor(!0, !0), this.endGame = !1;
