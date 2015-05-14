@@ -8,7 +8,7 @@ var Ball = Entity.extend({
 		this.range = 80;
 		this.width = 1;
 		this.height = 1;
-		this.type = 'bullet';
+		this.type = 'player';
 		this.target = 'enemy';
 		this.fireType = 'physical';
 		this.node = null;
@@ -42,6 +42,7 @@ var Ball = Entity.extend({
         this.sprite.addChild(this.spriteBall);
         this.spriteBall.position.y = this.spriteBall.height / 2;
 
+        this.range = this.spriteBall.height / 2;
 		this.sprite.anchor.x = 0.5;
 		this.sprite.anchor.y = 0.5;
 		
@@ -73,37 +74,8 @@ var Ball = Entity.extend({
 		this.friction = 0.1;
 
 	},
-	setFloor: function(pos){
-		this.floorPos = pos;
-		// this.velocity.y += this.gravityVal;
-	},
-	hideShadows: function(){
-		TweenLite.to(this.shadow, 0.1, {alpha:0});
-	},
-	updateShadow: function(angle){
-		TweenLite.to(this.shadow, 0.3, {delay:0.1, alpha:this.shadowAlpha});
-		// TweenLite.to(this.shadow, 0.1, {rotation:angle});
-		// this.shadow.rotation = angle;
-	},
-	// jump: function(force){
-	// 	if(this.breakJump){
-	// 		this.screen.miss();
-	// 		return;
-	// 	}
-	// 	this.gravity = 0;
-	// 	this.velocity.y = - force - ((this.gravityVal * this.gravityVal) / 1.5) * 10;
-	// 	this.firstJump = true;
-	// 	this.inJump = true;
-	// },
-	improveGravity: function(){
-		if(this.gravityVal >= 1.2){
-			return;
-		}
-		
-		this.gravityVal += 0.05;
-		// console.log(this.gravityVal);
-	},
 	moveBack: function(side){
+		this.currentSide = '';
 		if(side === 'UP'){
 			this.velocity.y = this.standardVelocity * 2;
 		}else if(side === 'DOWN'){
@@ -115,6 +87,9 @@ var Ball = Entity.extend({
 		}
 	},
 	stretch: function(side){
+		if(this.currentSide === side){
+			return;
+		}
 		this.currentSide = side;
 		if(this.currentSide === 'UP'){
 			this.velocity.x = 0;
@@ -133,8 +108,6 @@ var Ball = Entity.extend({
 	},
 	stop: function(){
 		this.velocity = {x:0, y:0};
-		console.log('ball.stop');
-		// this.screen.collideWall();
 	},
 	applyFriction:function(){
 		if(this.velocity.x > this.standardVelocity + this.friction){
@@ -152,32 +125,10 @@ var Ball = Entity.extend({
 
 	},
 	update: function(){
+		this.range = this.spriteBall.height / 2;
 		this._super();
 		this.applyFriction();
-
-		// if(this.velocity.x !== 0 && this.velocity.x + this.getPosition().x < this.collideArea.x ||
-		// 	this.velocity.x + this.getPosition().x > this.collideArea.x + this.collideArea.width){
-		// 	if(this.velocity.x > 0){
-		// 		this.getPosition().x = this.collideArea.x + this.collideArea.width;
-		// 	}else{
-		// 		this.getPosition().x = this.collideArea.x;
-		// 	}
-
-		// 	this.velocity.x = 0;
-
-		// 	this.screen.collideWall();
-		// }
-		// if(this.velocity.y !== 0 && this.velocity.y + this.getPosition().y < this.collideArea.y ||
-		// 	this.velocity.y + this.getPosition().y > this.collideArea.y + this.collideArea.height){
-			
-		// 	if(this.velocity.y > 0){
-		// 		this.getPosition().y = this.collideArea.y + this.collideArea.height;
-		// 	}else{
-		// 		this.getPosition().y = this.collideArea.y;
-		// 	}
-		// 	this.velocity.y = 0;
-		// 	this.screen.collideWall();
-		// }
+		this.layer.collideChilds(this);
 	},
 	updateableParticles:function(){
         this.particlesCounter --;
@@ -207,38 +158,19 @@ var Ball = Entity.extend({
         }
     },
 	collide:function(arrayCollide){
-		// console.log('fireCollide', arrayCollide[0].type);
-		if(this.velocity.y === 0){
-            return;
-        }
 		if(this.collidable){
 			for (var i = arrayCollide.length - 1; i >= 0; i--) {
 				if(arrayCollide[i].type === 'enemy'){
 					var enemy = arrayCollide[i];
-					this.velocity.y = 0;
-					this.getContent().position.y = enemy.getContent().position.y;
+					this.screen.gameOver();
 					// enemy.kill
 					enemy.preKill();
-					this.screen.getBall();
 					// arrayCollide[i].prekill();
 				}else if(arrayCollide[i].type === 'killer'){
 					this.screen.gameOver();
 					this.preKill();
 				}else if(arrayCollide[i].type === 'coin'){
-					this.velocity.y = 0;
-					var isPerfect = false;
-					if(this.perfectShoot <= 4){
-						this.screen.getPerfect();
-						isPerfect = true;
-						if(this.perfectShootAcum === 0){
-							this.perfectShootAcum = 4;
-						}else{
-							this.perfectShootAcum ++;
-						}
-					}else{
-						this.perfectShootAcum = 0;
-					}
-					this.perfectShoot = 0;
+					arrayCollide[i].preKill();
 					this.blockCollide = true;
 					var value = 1 + this.perfectShootAcum;
 					APP.points += value;
@@ -269,19 +201,7 @@ var Ball = Entity.extend({
 					labelCoin2.scaledecress = +0.05;
 					labelCoin2.setPosition(this.getPosition().x - tempLabel.width / 2+2, this.getPosition().y+2);
 					this.screen.layer.addChild(labelCoin2);
-
-
-					// var labelCoin = new Particles({x: 0, y:0}, 120, new PIXI.Text('+'+value, {font:'50px Vagron', fill:'#f5c30c'}));
-					// labelCoin.maxScale = this.getContent().scale.x;
-					// labelCoin.build();
-					// // labelCoin.getContent().tint = 0xf5c30c;
-					// labelCoin.gravity = -0.2;
-					// labelCoin.alphadecress = 0.04;
-					// labelCoin.scaledecress = +0.05;
-					// labelCoin.setPosition(this.getPosition().x, this.getPosition().y);
-					// this.screen.layer.addChild(labelCoin);
-
-					this.screen.getCoin(isPerfect);
+					this.screen.getCoin();
 				}
 			}
 		}
@@ -357,7 +277,7 @@ var Ball = Entity.extend({
 			tempParticle.drawCircle(0,0,this.spriteBall.width * 0.2);
 			// this.spriteBall.drawCircle(0,0,windowHeight * 0.02);
 
-			particle = new Particles({x: Math.random() * 10 - 5 - 10, y:Math.random() * 10 - 5 + 10}, 600, tempParticle, Math.random() * 0.05);
+			particle = new Particles({x: Math.random() * 10 - 5, y:Math.random() * 10 - 5}, 600, tempParticle, Math.random() * 0.05);
 			// particle.maxScale = this.getContent().scale.x / 2;
             // particle.maxInitScale = particle.maxScale;
 			particle.build();

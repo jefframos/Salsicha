@@ -1,5 +1,5 @@
 /*jshint undef:false */
-var Coin = Entity.extend({
+var Enemy1 = Entity.extend({
 	init:function(screen){
 		this._super( true );
 		this.updateable = false;
@@ -7,15 +7,16 @@ var Coin = Entity.extend({
 		this.range = 1;
 		this.width = 1;
 		this.height = 1;
-		this.type = 'coin';
+		this.type = 'enemy';
 		this.screen = screen;
+		this.rot = 0;
 	},
 	build: function(){
 
 		// this.sprite = new PIXI.Sprite.fromFrame(this.imgSource);
 		this.spriteBall = new PIXI.Graphics();
-		this.spriteBall.beginFill(0xFFFFFF);
-		var size = windowHeight * 0.03;
+		this.spriteBall.beginFill(0xFF8888);
+		var size = windowHeight * 0.02;
 		this.spriteBall.drawRect(-size/2,-size/2,size,size);
 		// this.spriteBall.drawCircle(0,0,windowHeight * 0.02);
 
@@ -41,6 +42,8 @@ var Coin = Entity.extend({
 	update: function(){
 		this.range = this.spriteBall.width / 2;
 		this._super();
+		this.rot += 0.1;
+		this.spriteBall.rotation = this.rot;
 	},
 	changeShape:function(){
 	},
@@ -52,7 +55,7 @@ var Coin = Entity.extend({
 		for (var i = 10; i >= 0; i--) {
 
 			tempParticle = new PIXI.Graphics();
-			tempParticle.beginFill(0xFFFFFF);
+			tempParticle.beginFill(0xFF8888);
 			tempParticle.drawRect(-this.size/2,-this.size/2,this.size,this.size);
 			// this.spriteBall.drawCircle(0,0,windowHeight * 0.02);
 
@@ -71,7 +74,7 @@ var Coin = Entity.extend({
 
 		tempParticle = new PIXI.Graphics();
 		this.size = windowHeight * 0.05;
-		tempParticle.beginFill(0xFFFFFF);
+		tempParticle.beginFill(0xFF8888);
 		tempParticle.drawRect(-this.size/2,-this.size/2,this.size,this.size);
 
 		particle = new Particles({x: 0, y:0}, 600, tempParticle, 0);

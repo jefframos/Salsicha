@@ -185,9 +185,9 @@ var Application = AbstractApplication.extend({
             self._super(windowWidth, windowHeight), self.stage.setBackgroundColor(self.backColor), 
             self.stage.removeChild(self.loadText), self.labelDebug = new PIXI.Text("", {
                 font: "15px Arial"
-            }), self.labelDebug.position.y = windowHeight - 20, self.labelDebug.position.x = 20, 
-            self.initialized = !0, self.audioController = new AudioController(), self.withAPI = !1, 
-            "#withoutAPI" === window.location.hash && (self.withAPI = !1);
+            }), self.stage.addChild(self.labelDebug), self.labelDebug.position.y = windowHeight - 20, 
+            self.labelDebug.position.x = 20, self.initialized = !0, self.audioController = new AudioController(), 
+            self.withAPI = !1, "#withoutAPI" === window.location.hash && (self.withAPI = !1);
         }
         var self = this;
         this.vecColors = [ 16743382, 16735338, 16746088, 16563797, 5563861, 2783487, 9586937, 14111213, 9682753 ], 
@@ -424,7 +424,7 @@ var Application = AbstractApplication.extend({
 }), Ball = Entity.extend({
     init: function(vel, screen) {
         this._super(!0), this.updateable = !1, this.deading = !1, this.screen = screen, 
-        this.range = 80, this.width = 1, this.height = 1, this.type = "bullet", this.target = "enemy", 
+        this.range = 80, this.width = 1, this.height = 1, this.type = "player", this.target = "enemy", 
         this.fireType = "physical", this.node = null, this.velocity.x = vel.x, this.velocity.y = vel.y, 
         this.power = 1, this.defaultVelocity = 1, this.imgSource = "bullet.png", this.particleSource = "bullet.png";
     },
@@ -439,9 +439,9 @@ var Application = AbstractApplication.extend({
         this.color = 16777215, this.spriteBall = new PIXI.Graphics(), this.spriteBall.beginFill(this.color), 
         this.maxSize = .02 * windowHeight, this.spriteBall.drawCircle(0, 0, this.maxSize), 
         console.log(this.spriteBall.width), this.sprite = new PIXI.Sprite(), this.sprite.addChild(this.spriteBall), 
-        this.spriteBall.position.y = this.spriteBall.height / 2, this.sprite.anchor.x = .5, 
-        this.sprite.anchor.y = .5, this.updateable = !0, this.collidable = !0, this.getContent().alpha = .1, 
-        TweenLite.to(this.getContent(), .3, {
+        this.spriteBall.position.y = this.spriteBall.height / 2, this.range = this.spriteBall.height / 2, 
+        this.sprite.anchor.x = .5, this.sprite.anchor.y = .5, this.updateable = !0, this.collidable = !0, 
+        this.getContent().alpha = .1, TweenLite.to(this.getContent(), .3, {
             alpha: 1
         }), this.collideArea = new PIXI.Rectangle(50, 50, windowWidth - 100, windowHeight - 100), 
         this.particlesCounterMax = 2, this.particlesCounter = 1, this.floorPos = windowHeight, 
@@ -449,37 +449,21 @@ var Application = AbstractApplication.extend({
         this.inError = !1, this.perfectShoot = 0, this.perfectShootAcum = 0, this.force = 0, 
         this.inJump = !1, this.standardVelocity = 3, this.friction = .1;
     },
-    setFloor: function(pos) {
-        this.floorPos = pos;
-    },
-    hideShadows: function() {
-        TweenLite.to(this.shadow, .1, {
-            alpha: 0
-        });
-    },
-    updateShadow: function(angle) {
-        TweenLite.to(this.shadow, .3, {
-            delay: .1,
-            alpha: this.shadowAlpha
-        });
-    },
-    improveGravity: function() {
-        this.gravityVal >= 1.2 || (this.gravityVal += .05);
-    },
     moveBack: function(side) {
-        "UP" === side ? this.velocity.y = 2 * this.standardVelocity : "DOWN" === side ? this.velocity.y = 2 * -this.standardVelocity : "LEFT" === side ? this.velocity.x = 2 * this.standardVelocity : "RIGHT" === side && (this.velocity.x = 2 * -this.standardVelocity);
+        this.currentSide = "", "UP" === side ? this.velocity.y = 2 * this.standardVelocity : "DOWN" === side ? this.velocity.y = 2 * -this.standardVelocity : "LEFT" === side ? this.velocity.x = 2 * this.standardVelocity : "RIGHT" === side && (this.velocity.x = 2 * -this.standardVelocity);
     },
     stretch: function(side) {
-        this.currentSide = side, "UP" === this.currentSide ? (this.velocity.x = 0, this.velocity.y = 2 * -this.standardVelocity) : "DOWN" === this.currentSide ? (this.velocity.x = 0, 
+        this.currentSide !== side && (this.currentSide = side, "UP" === this.currentSide ? (this.velocity.x = 0, 
+        this.velocity.y = 2 * -this.standardVelocity) : "DOWN" === this.currentSide ? (this.velocity.x = 0, 
         this.velocity.y = 2 * this.standardVelocity) : "LEFT" === this.currentSide ? (this.velocity.x = 2 * -this.standardVelocity, 
         this.velocity.y = 0) : (this.velocity.x = 2 * this.standardVelocity, this.velocity.y = 0), 
-        this.screen.addTrail();
+        this.screen.addTrail());
     },
     stop: function() {
         this.velocity = {
             x: 0,
             y: 0
-        }, console.log("ball.stop");
+        };
     },
     applyFriction: function() {
         this.velocity.x > this.standardVelocity + this.friction && (this.velocity.x -= this.friction), 
@@ -488,7 +472,7 @@ var Application = AbstractApplication.extend({
         this.velocity.y < -(this.standardVelocity + this.friction) && (this.velocity.y += this.friction);
     },
     update: function() {
-        this._super(), this.applyFriction();
+        this.range = this.spriteBall.height / 2, this._super(), this.applyFriction(), this.layer.collideChilds(this);
     },
     updateableParticles: function() {
         if (this.particlesCounter--, this.particlesCounter <= 0) {
@@ -505,15 +489,11 @@ var Application = AbstractApplication.extend({
         }
     },
     collide: function(arrayCollide) {
-        if (0 !== this.velocity.y && this.collidable) for (var i = arrayCollide.length - 1; i >= 0; i--) if ("enemy" === arrayCollide[i].type) {
+        if (this.collidable) for (var i = arrayCollide.length - 1; i >= 0; i--) if ("enemy" === arrayCollide[i].type) {
             var enemy = arrayCollide[i];
-            this.velocity.y = 0, this.getContent().position.y = enemy.getContent().position.y, 
-            enemy.preKill(), this.screen.getBall();
+            this.screen.gameOver(), enemy.preKill();
         } else if ("killer" === arrayCollide[i].type) this.screen.gameOver(), this.preKill(); else if ("coin" === arrayCollide[i].type) {
-            this.velocity.y = 0;
-            var isPerfect = !1;
-            this.perfectShoot <= 4 ? (this.screen.getPerfect(), isPerfect = !0, 0 === this.perfectShootAcum ? this.perfectShootAcum = 4 : this.perfectShootAcum++) : this.perfectShootAcum = 0, 
-            this.perfectShoot = 0, this.blockCollide = !0;
+            arrayCollide[i].preKill(), this.blockCollide = !0;
             var value = 1 + this.perfectShootAcum;
             APP.points += value, APP.audioController.playSound("explode1");
             var rot = .005 * Math.random(), tempLabel = new PIXI.Text("+" + value, {
@@ -535,7 +515,7 @@ var Application = AbstractApplication.extend({
             }), -rot);
             labelCoin2.maxScale = this.getContent().scale.x, labelCoin2.build(), labelCoin2.gravity = -.2, 
             labelCoin2.alphadecress = .01, labelCoin2.scaledecress = .05, labelCoin2.setPosition(this.getPosition().x - tempLabel.width / 2 + 2, this.getPosition().y + 2), 
-            this.screen.layer.addChild(labelCoin2), this.screen.getCoin(isPerfect);
+            this.screen.layer.addChild(labelCoin2), this.screen.getCoin();
         }
     },
     setColor: function(color) {
@@ -569,8 +549,8 @@ var Application = AbstractApplication.extend({
             APP.audioController.playSound("explode1"), this.collidable = !1, this.kill = !0;
             for (var i = 10; i >= 0; i--) tempParticle = new PIXI.Graphics(), tempParticle.beginFill(this.color), 
             tempParticle.drawCircle(0, 0, .2 * this.spriteBall.width), particle = new Particles({
-                x: 10 * Math.random() - 5 - 10,
-                y: 10 * Math.random() - 5 + 10
+                x: 10 * Math.random() - 5,
+                y: 10 * Math.random() - 5
             }, 600, tempParticle, .05 * Math.random()), particle.build(), particle.alphadecress = .008, 
             particle.setPosition(this.getPosition().x - (Math.random() + .4 * this.getContent().width) + .2 * this.getContent().width, this.getPosition().y - (Math.random() + .4 * this.getContent().width) + .2 * this.getContent().width), 
             this.layer.addChild(particle);
@@ -584,35 +564,13 @@ var Application = AbstractApplication.extend({
         }
     }
 }), Coin = Entity.extend({
-    init: function(vel, behaviour) {
-        this._super(!0), this.updateable = !1, this.deading = !1, this.range = 80, this.width = 1, 
-        this.height = 1, this.type = "coin", this.node = null, this.velocity.x = vel.x, 
-        this.velocity.y = vel.y, this.timeLive = 1e3, this.power = 1, this.defaultVelocity = 1, 
-        this.imgSource = "bullet.png", this.particleSource = "bullet.png", this.rot = 0, 
-        this.inMove = !1;
-    },
-    startScaleTween: function() {
-        TweenLite.from(this.getContent().scale, .3, {
-            x: 0,
-            y: 0,
-            ease: "easeOutBack"
-        });
-    },
-    randomPos: function(rangeMin, rangeMax) {
-        var yDest = rangeMin + Math.random() * rangeMax;
-        this.inMove = !0;
-        var self = this;
-        TweenLite.to(this.getContent(), .5, {
-            delay: .4,
-            y: yDest,
-            onComplete: function() {
-                self.inMove = !1;
-            }
-        });
+    init: function(screen) {
+        this._super(!0), this.updateable = !1, this.deading = !1, this.range = 1, this.width = 1, 
+        this.height = 1, this.type = "coin", this.screen = screen;
     },
     build: function() {
         this.spriteBall = new PIXI.Graphics(), this.spriteBall.beginFill(16777215);
-        var size = .05 * windowHeight;
+        var size = .03 * windowHeight;
         this.spriteBall.drawRect(-size / 2, -size / 2, size, size), this.sprite = new PIXI.Sprite(), 
         this.sprite.addChild(this.spriteBall), this.updateable = !0, this.collidable = !0, 
         this.getContent().alpha = .5, TweenLite.to(this.getContent(), .3, {
@@ -621,15 +579,14 @@ var Application = AbstractApplication.extend({
         this.particlesCounterMax = 8, this.particlesCounter = 1;
     },
     update: function() {
-        this.range = this.spriteBall.width, this._super(), this.inMove && this.updateableParticles();
+        this.range = this.spriteBall.width / 2, this._super();
     },
     changeShape: function() {},
     explode: function(velX, velY) {
         var particle = null, tempParticle = null;
         this.size = 8;
-        for (var i = 10; i >= 0; i--) console.log("part"), tempParticle = new PIXI.Graphics(), 
-        tempParticle.beginFill(16777215), tempParticle.drawRect(-this.size / 2, -this.size / 2, this.size, this.size), 
-        particle = new Particles({
+        for (var i = 10; i >= 0; i--) tempParticle = new PIXI.Graphics(), tempParticle.beginFill(16777215), 
+        tempParticle.drawRect(-this.size / 2, -this.size / 2, this.size, this.size), particle = new Particles({
             x: 10 * Math.random() - 5 + (velX ? velX : 0),
             y: 10 * Math.random() - 5 + (velY ? velY : 0)
         }, 600, tempParticle, .05 * Math.random()), particle.build(), particle.alphadecress = .008, 
@@ -642,20 +599,6 @@ var Application = AbstractApplication.extend({
         }, 600, tempParticle, 0), particle.maxScale = 5 * this.getContent().scale.x, particle.maxInitScale = 1, 
         particle.build(), particle.alphadecress = .05, particle.scaledecress = .1, particle.setPosition(this.getPosition().x, this.getPosition().y), 
         this.layer.addChild(particle);
-    },
-    updateableParticles: function() {
-        if (this.particlesCounter--, this.particlesCounter <= 0) {
-            this.particlesCounter = this.particlesCounterMax;
-            var tempPart = new PIXI.Graphics();
-            tempPart.beginFill(16777215), tempPart.drawRect(-this.size / 2, -this.size / 2, this.size, this.size);
-            var particle = new Particles({
-                x: 0,
-                y: 0
-            }, 120, tempPart, 0);
-            particle.build(), particle.gravity = 0, particle.alphadecress = .04, particle.scaledecress = -.01, 
-            particle.setPosition(this.getPosition().x, this.getPosition().y), this.layer.addChild(particle), 
-            particle.getContent().parent.setChildIndex(particle.getContent(), 0);
-        }
     },
     preKill: function() {
         this.invencible || (this.explode(-2, 2), this.collidable = !1, this.kill = !0);
@@ -703,6 +646,106 @@ var Application = AbstractApplication.extend({
                 strokeThickness: 5
             }));
         }
+    }
+}), Enemy1 = Entity.extend({
+    init: function(screen) {
+        this._super(!0), this.updateable = !1, this.deading = !1, this.range = 1, this.width = 1, 
+        this.height = 1, this.type = "enemy", this.screen = screen, this.rot = 0;
+    },
+    build: function() {
+        this.spriteBall = new PIXI.Graphics(), this.spriteBall.beginFill(16746632);
+        var size = .02 * windowHeight;
+        this.spriteBall.drawRect(-size / 2, -size / 2, size, size), this.sprite = new PIXI.Sprite(), 
+        this.sprite.addChild(this.spriteBall), this.updateable = !0, this.collidable = !0, 
+        this.getContent().alpha = .5, TweenLite.to(this.getContent(), .3, {
+            alpha: 1
+        }), this.collideArea = new PIXI.Rectangle(-50, -50, windowWidth + 100, windowHeight + 100), 
+        this.particlesCounterMax = 8, this.particlesCounter = 1;
+    },
+    update: function() {
+        this.range = this.spriteBall.width / 2, this._super(), this.rot += .1, this.spriteBall.rotation = this.rot;
+    },
+    changeShape: function() {},
+    explode: function(velX, velY) {
+        var particle = null, tempParticle = null;
+        this.size = 8;
+        for (var i = 10; i >= 0; i--) tempParticle = new PIXI.Graphics(), tempParticle.beginFill(16746632), 
+        tempParticle.drawRect(-this.size / 2, -this.size / 2, this.size, this.size), particle = new Particles({
+            x: 10 * Math.random() - 5 + (velX ? velX : 0),
+            y: 10 * Math.random() - 5 + (velY ? velY : 0)
+        }, 600, tempParticle, .05 * Math.random()), particle.build(), particle.alphadecress = .008, 
+        particle.setPosition(this.getPosition().x - (Math.random() + .4 * this.getContent().width) + .2 * this.getContent().width, this.getPosition().y - (Math.random() + .4 * this.getContent().width) + .2 * this.getContent().width), 
+        this.layer.addChild(particle);
+        tempParticle = new PIXI.Graphics(), this.size = .05 * windowHeight, tempParticle.beginFill(16746632), 
+        tempParticle.drawRect(-this.size / 2, -this.size / 2, this.size, this.size), particle = new Particles({
+            x: 0,
+            y: 0
+        }, 600, tempParticle, 0), particle.maxScale = 5 * this.getContent().scale.x, particle.maxInitScale = 1, 
+        particle.build(), particle.alphadecress = .05, particle.scaledecress = .1, particle.setPosition(this.getPosition().x, this.getPosition().y), 
+        this.layer.addChild(particle);
+    },
+    preKill: function() {
+        this.invencible || (this.explode(-2, 2), this.collidable = !1, this.kill = !0);
+    }
+}), Enemy2 = Entity.extend({
+    init: function(screen, id, loop) {
+        this._super(!0), this.updateable = !1, this.deading = !1, this.range = 1, this.width = 1, 
+        this.height = 1, this.id = id, this.type = "enemy", this.screen = screen, this.loop = loop, 
+        this.rot = 0, this.standardVelocity = 2;
+    },
+    setWaypoints: function(wayPoints) {
+        this.wayPoints = wayPoints, this.targetWay = 1, this.setPosition(this.wayPoints[0].x, this.wayPoints[0].y), 
+        this.testHorizontal(), this.testVertical();
+    },
+    build: function() {
+        this.spriteBall = new PIXI.Graphics(), this.spriteBall.beginFill(16746632);
+        var size = .02 * windowHeight;
+        this.spriteBall.drawRect(-size / 2, -size / 2, size, size), this.sprite = new PIXI.Sprite(), 
+        this.sprite.addChild(this.spriteBall), this.updateable = !0, this.collidable = !0, 
+        this.getContent().alpha = .5, TweenLite.to(this.getContent(), .3, {
+            alpha: 1
+        }), this.collideArea = new PIXI.Rectangle(-50, -50, windowWidth + 100, windowHeight + 100), 
+        this.particlesCounterMax = 8, this.particlesCounter = 1, this.indo = !0, this.collideAccum = 0;
+    },
+    testHorizontal: function() {
+        this.getPosition().x < this.wayPoints[this.targetWay].x ? (this.velocity.x = this.standardVelocity, 
+        this.velocity.y = 0, this.getPosition().y = this.wayPoints[this.targetWay].y) : this.getPosition().x > this.wayPoints[this.targetWay].x && (this.velocity.x = -this.standardVelocity, 
+        this.velocity.y = 0, this.getPosition().y = this.wayPoints[this.targetWay].y);
+    },
+    testVertical: function() {
+        this.getPosition().y < this.wayPoints[this.targetWay].y ? (this.velocity.y = this.standardVelocity, 
+        this.velocity.x = 0, this.getPosition().x = this.wayPoints[this.targetWay].x) : this.getPosition().y > this.wayPoints[this.targetWay].y && (this.velocity.y = -this.standardVelocity, 
+        this.velocity.x = 0, this.getPosition().x = this.wayPoints[this.targetWay].x);
+    },
+    update: function() {
+        this.collideAccum <= 0 ? (pointDistance(this.getPosition().x, this.getPosition().y, this.wayPoints[this.targetWay].x, this.wayPoints[this.targetWay].y) < 2 * this.standardVelocity && (this.collideAccum = 10, 
+        this.indo ? this.targetWay++ : this.targetWay--, this.loop ? this.targetWay >= this.wayPoints.length && (this.targetWay = 0) : this.targetWay >= this.wayPoints.length - 1 ? this.indo = !1 : this.targetWay < 1 && (this.indo = !0)), 
+        pointDistance(this.getPosition().x, 0, this.wayPoints[this.targetWay].x, 0) > 2 * this.standardVelocity && this.testHorizontal(), 
+        pointDistance(this.getPosition().y, 0, this.wayPoints[this.targetWay].y, 0) > 2 * this.standardVelocity && this.testVertical()) : this.collideAccum--, 
+        this.range = this.spriteBall.width / 2, this._super(), this.rot += this.standardVelocity / 10, 
+        this.spriteBall.rotation = this.rot;
+    },
+    changeShape: function() {},
+    explode: function(velX, velY) {
+        var particle = null, tempParticle = null;
+        this.size = 8;
+        for (var i = 10; i >= 0; i--) tempParticle = new PIXI.Graphics(), tempParticle.beginFill(16746632), 
+        tempParticle.drawRect(-this.size / 2, -this.size / 2, this.size, this.size), particle = new Particles({
+            x: 10 * Math.random() - 5 + (velX ? velX : 0),
+            y: 10 * Math.random() - 5 + (velY ? velY : 0)
+        }, 600, tempParticle, .05 * Math.random()), particle.build(), particle.alphadecress = .008, 
+        particle.setPosition(this.getPosition().x - (Math.random() + .4 * this.getContent().width) + .2 * this.getContent().width, this.getPosition().y - (Math.random() + .4 * this.getContent().width) + .2 * this.getContent().width), 
+        this.layer.addChild(particle);
+        tempParticle = new PIXI.Graphics(), this.size = .05 * windowHeight, tempParticle.beginFill(16746632), 
+        tempParticle.drawRect(-this.size / 2, -this.size / 2, this.size, this.size), particle = new Particles({
+            x: 0,
+            y: 0
+        }, 600, tempParticle, 0), particle.maxScale = 5 * this.getContent().scale.x, particle.maxInitScale = 1, 
+        particle.build(), particle.alphadecress = .05, particle.scaledecress = .1, particle.setPosition(this.getPosition().x, this.getPosition().y), 
+        this.layer.addChild(particle);
+    },
+    preKill: function() {
+        this.invencible || (this.explode(-2, 2), this.collidable = !1, this.kill = !0);
     }
 }), EnemyBall = Entity.extend({
     init: function(vel, behaviour) {
@@ -1088,7 +1131,7 @@ var Application = AbstractApplication.extend({
         Howler.mute();
     },
     destroy: function() {
-        this._super();
+        this._super(), this.environment = [], this.trails = [], this.vecTiles = null;
     },
     build: function() {
         this._super();
@@ -1115,7 +1158,6 @@ var Application = AbstractApplication.extend({
         this.hitTouch.drawRect(0, 0, windowWidth, windowHeight), this.hitTouch.alpha = 0, 
         APP.stage.addChild(this.hitTouch), this.tapDown = !1, this.hitTouch.touchstart = this.hitTouch.mousedown = function(touchData) {
             if (!self.recoil) {
-                console.log(touchData);
                 var angle = 180 * Math.atan2(touchData.global.y - windowHeight / 2, touchData.global.x - windowWidth / 2) / Math.PI;
                 self.player.stretch(angle > -135 && -45 > angle ? "UP" : angle > -45 && 45 > angle ? "RIGHT" : angle > 45 && 135 > angle ? "DOWN" : "LEFT");
             }
@@ -1152,11 +1194,11 @@ var Application = AbstractApplication.extend({
         }
         if (!(this.trails.length <= 0)) {
             var self = this;
-            self.recoil = !0;
-            for (var timeline = new TimelineLite({
+            self.recoil = !0, this.recoilTimeline = new TimelineLite({
                 onComplete: function() {}
-            }), frames = 1500, tempTrail = null, i = 0; i < this.trails.length; i++) tempTrail = this.trails[i].trail, 
-            timeline.append("HORIZONTAL" === this.trails[i].type ? TweenLite.to(tempTrail, Math.abs(tempTrail.width) / frames, {
+            });
+            for (var frames = 1500, tempTrail = null, i = 0; i < this.trails.length; i++) tempTrail = this.trails[i].trail, 
+            this.recoilTimeline.append("HORIZONTAL" === this.trails[i].type ? TweenLite.to(tempTrail, Math.abs(tempTrail.width) / frames, {
                 width: 0,
                 x: tempTrail.position.x + tempTrail.width,
                 ease: "easeNone",
@@ -1172,7 +1214,7 @@ var Application = AbstractApplication.extend({
             this.player.getContent().scale = {
                 x: 1,
                 y: 1
-            }, timeline.append("HORIZONTAL" === this.trails[this.trails.length - 1].type ? TweenLite.from(this.player.getContent().scale, 1, {
+            }, this.recoilTimeline.append("HORIZONTAL" === this.trails[this.trails.length - 1].type ? TweenLite.from(this.player.getContent().scale, 1, {
                 x: .5,
                 ease: "easeOutElastic",
                 onStart: onStart
@@ -1216,14 +1258,10 @@ var Application = AbstractApplication.extend({
         this.onBack = !1;
     },
     update: function() {
-        if (this.updateable && (this.layerManager && this.layerManager.update(), this.updateMapPosition(), 
-        this._super(), this.coinsLabel.parent.setChildIndex(this.coinsLabel, this.coinsLabel.parent.children.length - 1), 
-        this.player.velocity.y + this.player.velocity.x !== 0)) {
-            if (this.trails.length > 1) {
-                var tempTrail = this.trails[this.trails.length - 1].trail;
-                0 === this.player.velocity.y ? tempTrail.width = this.player.getPosition().x - tempTrail.position.x : tempTrail.height = this.player.getPosition().y - tempTrail.position.y;
-            }
-            if (this.onBack) {
+        if (this.updateable && (this.updateMapPosition(), this._super(), this.layerManager && this.layerManager.update(), 
+        !this.endGame)) {
+            if (this.coinsLabel.parent.setChildIndex(this.coinsLabel, this.coinsLabel.parent.children.length - 1), 
+            this.onBack) {
                 for (var lastJoint = null, k = this.trails.length - 1; k >= 0; k--) if ("JOINT" === this.trails[k].type) {
                     lastJoint = this.trails[k];
                     break;
@@ -1235,7 +1273,7 @@ var Application = AbstractApplication.extend({
                     remove = !0) : "LEFT" === lastJoint.side ? this.player.getPosition().x > lastJoint.trail.position.x && (this.player.getPosition().x = lastJoint.trail.position.x, 
                     remove = !0) : this.player.getPosition().x < lastJoint.trail.position.x && (this.player.getPosition().x = lastJoint.trail.position.x, 
                     remove = !0), remove) {
-                        console.log("aqui"), this.player.stop();
+                        this.player.stop();
                         var spl = this.trails.splice(this.trails.length - 2, 2), j = 0;
                         spl.length;
                         for (j = spl.length - 1; j >= 0; j--) spl[j].trail.parent && spl[j].trail.parent.removeChild(spl[j].trail);
@@ -1245,18 +1283,26 @@ var Application = AbstractApplication.extend({
                         }
                     }
                 }
-            } else for (var i = 0; i < this.trails.length - 6 && !this.blockCollide; i++) if ("JOINT" !== this.trails[i].type) {
-                var rectTrail, rectPlayer = new PIXI.Rectangle(this.player.getPosition().x - this.player.spriteBall.width / 2, this.player.getPosition().y - this.player.spriteBall.height / 2, this.player.spriteBall.width, this.player.spriteBall.height);
-                rectTrail = "VERTICAL" === this.trails[i].type ? "UP" === this.trails[i].side ? new PIXI.Rectangle(this.trails[i].trail.position.x - Math.abs(this.trails[i].trail.width) / 2, this.trails[i].trail.position.y - Math.abs(this.trails[i].trail.height), Math.abs(this.trails[i].trail.width), Math.abs(this.trails[i].trail.height)) : new PIXI.Rectangle(this.trails[i].trail.position.x - this.trails[i].trail.width / 2, this.trails[i].trail.position.y, Math.abs(this.trails[i].trail.width), Math.abs(this.trails[i].trail.height)) : "RIGHT" === this.trails[i].side ? new PIXI.Rectangle(this.trails[i].trail.position.x, this.trails[i].trail.position.y - Math.abs(this.trails[i].trail.height), Math.abs(this.trails[i].trail.width), Math.abs(this.trails[i].trail.height)) : new PIXI.Rectangle(this.trails[i].trail.position.x - Math.abs(this.trails[i].trail.width), this.trails[i].trail.position.y - Math.abs(this.trails[i].trail.height), Math.abs(this.trails[i].trail.width), Math.abs(this.trails[i].trail.height)), 
-                rectPlayer.x + this.player.velocity.x < rectTrail.x + rectTrail.width && rectPlayer.x + rectPlayer.width + this.player.velocity.x > rectTrail.x && rectPlayer.y + this.player.velocity.y < rectTrail.y + rectTrail.height && rectPlayer.height + rectPlayer.y + this.player.velocity.y > rectTrail.y && (this.player.stop(), 
-                this.debugBall.clear(), this.debugBall.lineStyle(1, 16711680), this.debugBall.drawRect(rectTrail.x, rectTrail.y, rectTrail.width, rectTrail.height), 
-                this.debugBall.parent && this.removeChild(this.debugBall), this.addChild(this.debugBall), 
-                console.log(rectPlayer, rectTrail));
+            } else this.trailCollide();
+            if (this.player.velocity.y + this.player.velocity.x !== 0) {
+                if (this.trails.length > 1) {
+                    var tempTrail = this.trails[this.trails.length - 1].trail;
+                    0 === this.player.velocity.y ? tempTrail.width = this.player.getPosition().x - tempTrail.position.x : tempTrail.height = this.player.getPosition().y - tempTrail.position.y;
+                }
+                var tempTiles = this.getTileByPos(this.player.getPosition().x, this.player.getPosition().y), typeTile = this.getTileType(tempTiles.i, tempTiles.j);
+                1 === typeTile ? (this.player.getContent().position.x -= this.player.velocity.x, 
+                this.player.getContent().position.y -= this.player.velocity.y, this.player.stop(), 
+                this.collideWall()) : 2 === typeTile ? (this.gameOver(), this.player.preKill()) : 3 === typeTile && this.player.stop();
             }
-            var tempTiles = this.getTileByPos(this.player.getPosition().x, this.player.getPosition().y);
-            this.getTileType(tempTiles.i, tempTiles.j) && (this.player.getContent().position.x -= this.player.velocity.x, 
-            this.player.getContent().position.y -= this.player.velocity.y, this.player.stop(), 
-            this.collideWall());
+        }
+    },
+    trailCollide: function() {
+        for (var i = 0; i < this.trails.length && !this.blockCollide; i++) if ("JOINT" !== this.trails[i].type) for (var rectTrail, tempEntity = null, tempTrail = this.trails[i], j = 0; j < this.layer.childs.length; j++) if (tempEntity = this.layer.childs[j], 
+        "enemy" === tempEntity.type || "player" === tempEntity.type && i < this.trails.length - 6) {
+            var rectPlayer = new PIXI.Rectangle(tempEntity.getPosition().x - tempEntity.spriteBall.width / 2, tempEntity.getPosition().y - tempEntity.spriteBall.height / 2, tempEntity.spriteBall.width, tempEntity.spriteBall.height);
+            rectTrail = "VERTICAL" === tempTrail.type ? "UP" === tempTrail.side ? new PIXI.Rectangle(tempTrail.trail.position.x - Math.abs(tempTrail.trail.width) / 2, tempTrail.trail.position.y - Math.abs(tempTrail.trail.height), Math.abs(tempTrail.trail.width), Math.abs(tempTrail.trail.height)) : new PIXI.Rectangle(tempTrail.trail.position.x - tempTrail.trail.width / 2, tempTrail.trail.position.y, Math.abs(tempTrail.trail.width), Math.abs(tempTrail.trail.height)) : "RIGHT" === tempTrail.side ? new PIXI.Rectangle(tempTrail.trail.position.x, tempTrail.trail.position.y - Math.abs(tempTrail.trail.height), Math.abs(tempTrail.trail.width), Math.abs(tempTrail.trail.height)) : new PIXI.Rectangle(tempTrail.trail.position.x - Math.abs(tempTrail.trail.width), tempTrail.trail.position.y - Math.abs(tempTrail.trail.height), Math.abs(tempTrail.trail.width), Math.abs(tempTrail.trail.height)), 
+            rectPlayer.x + tempEntity.velocity.x < rectTrail.x + rectTrail.width && rectPlayer.x + rectPlayer.width + tempEntity.velocity.x > rectTrail.x && rectPlayer.y + tempEntity.velocity.y < rectTrail.y + rectTrail.height && rectPlayer.height + rectPlayer.y + tempEntity.velocity.y > rectTrail.y && ("enemy" === tempEntity.type ? (tempEntity.preKill(), 
+            this.gameOver()) : this.player.stop());
         }
     },
     updateMapPosition: function() {
@@ -1274,50 +1320,82 @@ var Application = AbstractApplication.extend({
         });
     },
     initLevel: function(whereInit) {
-        this.trails = [], this.trailContainer = new PIXI.DisplayObjectContainer(), this.gameContainer.addChild(this.trailContainer), 
-        this.recoil = !1, APP.points = 0, this.player = new Ball({
+        console.log("initLevel"), this.trails = [], this.trailContainer = new PIXI.DisplayObjectContainer(), 
+        this.gameContainer.addChild(this.trailContainer), this.recoil = !1, APP.points = 0, 
+        this.player = new Ball({
             x: 0,
             y: 0
         }, this), this.player.build(), this.layer.addChild(this.player), this.player.getContent().position.x = windowWidth / 2, 
-        this.player.getContent().position.y = windowHeight / 1.2, this.player.standardVelocity = 5;
-        var baseFloor = windowHeight / 1.2;
-        this.player.setFloor(baseFloor), this.base = new PIXI.Graphics(), this.base.beginFill(16777215), 
-        this.base.drawCircle(0, 0, windowHeight - baseFloor), this.base.alpha = .3, this.base.position.x = windowWidth / 2, 
-        this.base.position.y = windowHeight + this.player.spriteBall.height / 2;
+        this.player.getContent().position.y = windowHeight / 1.2, this.player.standardVelocity = 3;
         this.force = 0, this.levelCounter = 800, this.levelCounterMax = 800, this.changeColor(!0, !0), 
         this.endGame = !1, this.initEnvironment(), this.updateMapPosition();
     },
     initEnvironment: function() {
         this.environment = [];
-        var temp = [ [ 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1 ], [ 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1 ], [ 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1 ], [ 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1 ], [ 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1 ], [ 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1 ], [ 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1 ], [ 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 1 ], [ 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1 ], [ 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1 ], [ 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ], [ 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ], [ 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1 ] ];
+        var temp = [ [ 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0 ], [ 1, 1, 0, 5, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0 ], [ 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, [ 14, 0, 2, 1 ], 0, 0, [ 14, 1, 2, 1 ], 0, 1, 0 ], [ 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0 ], [ 1, 1, 1, 0, 0, 1, 1, 1, 3, 0, 0, 0, 5, 0, 0, 1, 0 ], [ 1, 1, 0, 0, 0, 0, 1, 1, 2, 0, 0, 0, 0, 0, 0, 1, 0 ], [ 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, [ 12, 0, 3 ], 0, 0, 1, 1 ], [ 1, 1, 0, 0, 0, [ 13, 0, 2, 1 ], 5, 0, 0, [ 13, 3, 2, 1 ], 8, 0, 0, 0, 0, 1, 0 ], [ 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 5, 0, 1, 0 ], [ 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, [ 12, 1, 3 ], 0, [ 12, 2, 3 ], 1, 0 ], [ 1, 1, 0, 0, 0, [ 13, 1, 2, 1 ], 0, 0, 0, [ 13, 2, 2, 1 ], 0, 6, 0, 0, 0, 1, 0 ], [ 1, 1, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0 ], [ 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, [ 12, 3, 3 ], 1, 0 ] ];
         this.tileSize = {
-            w: .08 * windowWidth,
-            h: .08 * windowWidth
+            w: .1 * windowWidth,
+            h: .1 * windowWidth
         }, this.mapSize = {
             i: temp[0].length,
             j: temp.length
         }, this.environment = temp, this.drawMap(), this.drawPlayer();
     },
     drawMap: function() {
-        if (this.environment) if (this.vecTiles) for (var k = 0; k < this.vecTiles.length; k++) this.vecTiles[k].clear(), 
-        this.vecTiles[k].beginFill(this.player.color), this.vecTiles[k].drawRect(0, 0, this.tileSize.w, this.tileSize.h); else {
-            this.vecTiles = [];
+        if (this.environment) if (this.vecTiles && this.vecTiles.length > 0) for (var k = 0; k < this.vecTiles.length; k++) {
+            var tempTile = this.getTileByPos(this.vecTiles[k].x + 5, this.vecTiles[k].y + 5), tempColor = this.player.color, tileType = this.getTileType(tempTile.i, tempTile.j);
+            2 === tileType ? tempColor = addBright(this.player.color, .5) : 3 === tileType && (tempColor = addBright(this.player.color, .8)), 
+            this.vecTiles[k].clear(), this.vecTiles[k].beginFill(tempColor), this.vecTiles[k].drawRect(0, 0, this.tileSize.w, this.tileSize.h);
+        } else {
+            this.vecTiles = [], this.vecMovEnemiesTemp = [], this.vecMovEnemies = [];
             for (var i = 0; i < this.environment.length; i++) for (var j = 0; j < this.environment[i].length; j++) this.drawTile(this.environment[i][j], j, i);
             this.hitTouch.hitArea = new PIXI.Rectangle(-100, -100, this.getContent().width, this.getContent().height);
         }
     },
     drawTile: function(type, i, j) {
-        if (1 === type) {
+        if (type >= 1 && 3 >= type) {
+            var tempColor = this.player.color;
+            2 === type ? tempColor = addBright(this.player.color, .5) : 3 === type && (tempColor = addBright(this.player.color, .8));
             var tempGraphics = new PIXI.Graphics();
-            tempGraphics.beginFill(this.player.color), tempGraphics.drawRect(0, 0, this.tileSize.w, this.tileSize.h), 
+            tempGraphics.beginFill(tempColor), tempGraphics.drawRect(0, 0, this.tileSize.w, this.tileSize.h), 
             tempGraphics.position.x = i * this.tileSize.w, tempGraphics.position.y = j * this.tileSize.h, 
             this.gameContainer.addChild(tempGraphics), this.vecTiles.push(tempGraphics);
-        } else 3 === type && (this.player.getContent().position.x = i * this.tileSize.w + this.tileSize.w / 2, 
-        this.player.getContent().position.y = j * this.tileSize.h + this.tileSize.h / 2);
+        } else if (5 === type) {
+            var coin = new Coin(this);
+            coin.build(), this.layer.addChild(coin), coin.getContent().position.x = i * this.tileSize.w + this.tileSize.w / 2, 
+            coin.getContent().position.y = j * this.tileSize.h + this.tileSize.h / 2;
+        } else type > 5 || type instanceof Array;
+        if (type instanceof Array && type[0] > 10) {
+            this.vecMovEnemiesTemp.push({
+                index: type[1],
+                id: type[0],
+                x: i * this.tileSize.w + this.tileSize.w / 2,
+                y: j * this.tileSize.h + this.tileSize.h / 2
+            });
+            for (var count = 0, tempPositions = [], k = 0; k < this.vecMovEnemiesTemp.length; k++) this.vecMovEnemiesTemp[k].id === type[0] && (count++, 
+            tempPositions.push({
+                x: this.vecMovEnemiesTemp[k].x,
+                y: this.vecMovEnemiesTemp[k].y,
+                index: this.vecMovEnemiesTemp[k].index
+            }));
+            var enemyMov = null;
+            if (2 === count) {
+                var tempVel = type.length > 2 ? type[2] : 2;
+                enemyMov = new Enemy2(this, type[0], type.length >= 4 && type[3]), enemyMov.standardVelocity = tempVel, 
+                enemyMov.build(), this.layer.addChild(enemyMov), enemyMov.getContent().position.x = i * this.tileSize.w + this.tileSize.w / 2, 
+                enemyMov.getContent().position.y = j * this.tileSize.h + this.tileSize.h / 2, enemyMov.setWaypoints(tempPositions), 
+                this.vecMovEnemies.push(enemyMov);
+            } else if (count > 2) {
+                tempPositions.sort(function(a, b) {
+                    return a.index - b.index;
+                });
+                for (var l = 0; l < this.vecMovEnemies.length; l++) this.vecMovEnemies[l].id === type[0] && this.vecMovEnemies[l].setWaypoints(tempPositions);
+            }
+        }
     },
     drawPlayer: function() {
-        for (var i = 0; i < this.environment.length; i++) for (var j = 0; j < this.environment[i].length; j++) 3 === this.environment[i][j] && (this.player.getContent().position.x = i * this.tileSize.w + this.tileSize.w / 2, 
-        this.player.getContent().position.y = j * this.tileSize.h + this.tileSize.h / 2);
+        for (var i = 0; i < this.environment.length; i++) for (var j = 0; j < this.environment[i].length; j++) 8 === this.environment[i][j] && (this.player.getContent().position.x = j * this.tileSize.w + this.tileSize.w / 2, 
+        this.player.getContent().position.y = i * this.tileSize.h + this.tileSize.h / 2);
     },
     getTileByPos: function(x, y) {
         var tempX = Math.floor(x / this.tileSize.w), tempY = Math.floor(y / this.tileSize.h), ret = {
@@ -1329,7 +1407,7 @@ var Application = AbstractApplication.extend({
     getTileType: function(i, j) {
         if (!this.environment || !this.environment.length) return 0;
         try {
-            return console.log(i, j), this.environment[j][i];
+            return this.environment[j][i];
         } catch (err) {
             return 1;
         }
@@ -1430,20 +1508,20 @@ var Application = AbstractApplication.extend({
         }
     },
     reset: function() {
-        this.destroy(), this.build();
+        console.log("reset"), this.destroy(), this.build();
     },
     gameOver: function() {
-        if (this.endGame) return this.crazyContent.alpha = 0, this.coinsLabel.alpha = 0, 
-        void (this.loaderBar.getContent().alpha = 0);
-        this.hitTouch.parent.removeChild(this.hitTouch), setTimeout(function() {
-            self.player.preKill();
-        }, 100), this.base.parent.removeChild(this.base), this.earthquake(40), this.endGame = !0, 
-        this.crazyContent.alpha = 0, this.coinsLabel.alpha = 0, this.loaderBar.getContent().alpha = 0, 
-        this.interactiveBackground.accel = -5;
-        var self = this;
-        setTimeout(function() {
-            self.openEndMenu(), APP.audioController.playSound("wub");
-        }, 1e3);
+        if (!this.endGame) {
+            this.collideWall(), this.hitTouch && this.hitTouch.parent && this.hitTouch.parent.removeChild(this.hitTouch), 
+            setTimeout(function() {
+                self.player.preKill();
+            }, 50), this.earthquake(40), this.endGame = !0, this.crazyContent.alpha = 0, this.coinsLabel.alpha = 0;
+            var self = this;
+            setTimeout(function() {
+                self.endGame = !1, APP.audioController.playSound("wub"), self.recoilTimeline.kill(), 
+                self.reset();
+            }, 1e3);
+        }
     },
     addRegularLabel: function(label, font, initY) {
         var rot = .004 * Math.random(), tempLabel = new PIXI.Text(label, {
@@ -1473,22 +1551,25 @@ var Application = AbstractApplication.extend({
     },
     getCoin: function(isPerfect) {
         this.levelCounter += .015 * this.levelCounterMax, this.levelCounter > this.levelCounterMax && (this.levelCounter = this.levelCounterMax), 
-        this.updateCoins(), isPerfect || this.addRegularLabel(APP.vecGood[Math.floor(APP.vecGood.length * Math.random())], "30px Vagron"), 
-        this.earthquake(20), this.changeColor();
+        this.updateCoins(), this.earthquake(20), this.changeColor();
     },
     changeColor: function(force, first, forceColor) {
-        console.log("randomHEre");
         var tempColor = 0, self = this;
         first || (APP.currentColorID = forceColor ? APP.currentColorID : Math.floor(APP.vecColors.length * Math.random()));
         var temptempColor = APP.vecColors[APP.currentColorID];
-        force ? (self.background.clear(), self.background.beginFill(temptempColor), self.background.drawRect(-80, -80, windowWidth + 160, windowHeight + 160)) : (forceColor && (APP.backColor = APP.vecColors[Math.floor(APP.vecColors.length * Math.random())]), 
+        if (force ? (self.background.clear(), self.background.beginFill(temptempColor), 
+        self.background.drawRect(-80, -80, windowWidth + 160, windowHeight + 160)) : (forceColor && (APP.backColor = APP.vecColors[Math.floor(APP.vecColors.length * Math.random())]), 
         TweenLite.to(APP, .3, {
             backColor: temptempColor,
             onUpdate: function() {
                 self.background.clear(), self.background.beginFill(APP.backColor), self.background.drawRect(-80, -80, windowWidth + 160, windowHeight + 160);
             }
         })), document.body.style.backgroundColor = APP.vecColorsS[APP.currentColorID], this.player && (tempColor = addBright(temptempColor, .65), 
-        this.player.setColor(tempColor), this.loaderBar.setBackColor(tempColor), this.drawMap());
+        this.player.setColor(tempColor), this.loaderBar.setBackColor(tempColor), this.drawMap(), 
+        this.trails && this.trails.length)) for (var i = 0; i < this.trails.length; i++) {
+            var tempTrail = this.trails[i].trail, tempRect = new PIXI.Rectangle(tempTrail.getLocalBounds().x, tempTrail.getLocalBounds().y, tempTrail.getLocalBounds().width, tempTrail.getLocalBounds().height);
+            tempTrail.clear(), tempTrail.beginFill(tempColor), "JOINT" !== this.trails[i].type ? tempTrail.drawRect(tempRect.x, tempRect.y, tempRect.width, tempRect.height) : tempTrail.drawCircle(0, 0, tempRect.width / 2);
+        }
     },
     earthquake: function(force) {
         var earth = new TimelineLite();
@@ -1506,9 +1587,7 @@ var Application = AbstractApplication.extend({
     updateCoins: function() {
         if (this.coinsLabel.setText(APP.points), TweenLite.to(this.coinsLabel, .2, {
             alpha: .5
-        }), this.coinsLabel.position.x = windowWidth / 2 - this.coinsLabel.width / 2 / this.coinsLabel.resolution, 
-        this.coinsLabel.position.y = windowHeight / 2 - this.coinsLabel.height / 2 / this.coinsLabel.resolution, 
-        this.background.parent && this.background.parent.setChildIndex(this.background, 0), 
+        }), this.coinsLabel.position.x = 20, this.coinsLabel.position.y = 20, this.background.parent && this.background.parent.setChildIndex(this.background, 0), 
         this.coinsLabel.parent.setChildIndex(this.coinsLabel, 1), !(this.coinsLabel.alpha < .5)) {
             var tempCoins = new PIXI.Text(APP.points, {
                 align: "center",

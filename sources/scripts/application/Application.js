@@ -22,7 +22,7 @@ var Application = AbstractApplication.extend({
             self.stage.removeChild(self.loadText);
 
             self.labelDebug = new PIXI.Text('', {font:'15px Arial'});
-            // self.stage.addChild(self.labelDebug);
+            self.stage.addChild(self.labelDebug);
             self.labelDebug.position.y = windowHeight - 20;
             self.labelDebug.position.x = 20;
 
