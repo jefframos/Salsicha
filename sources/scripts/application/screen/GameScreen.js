@@ -534,7 +534,7 @@ var GameScreen = AbstractScreen.extend({
 		// }
 
 		// this.tileSize = {w:windowWidth / temp[0].length, h:windowHeight / temp.length};
-		this.tileSize = {w:windowWidth * 0.1, h:windowWidth * 0.1};
+		this.tileSize = {w:windowWidth * 0.08, h:windowWidth * 0.08};
 		this.mapSize = {i:temp[0].length, j:temp.length};
 		this.environment = temp;
 
