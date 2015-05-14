@@ -1279,7 +1279,7 @@ var Application = AbstractApplication.extend({
             x: 0,
             y: 0
         }, this), this.player.build(), this.layer.addChild(this.player), this.player.getContent().position.x = windowWidth / 2, 
-        this.player.getContent().position.y = windowHeight / 1.2;
+        this.player.getContent().position.y = windowHeight / 1.2, this.player.standardVelocity = 5;
         var baseFloor = windowHeight / 1.2;
         this.player.setFloor(baseFloor), this.base = new PIXI.Graphics(), this.base.beginFill(16777215), 
         this.base.drawCircle(0, 0, windowHeight - baseFloor), this.base.alpha = .3, this.base.position.x = windowWidth / 2, 

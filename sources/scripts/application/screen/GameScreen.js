@@ -473,6 +473,9 @@ var GameScreen = AbstractScreen.extend({
 		this.layer.addChild(this.player);
 		this.player.getContent().position.x = windowWidth / 2;
 		this.player.getContent().position.y = windowHeight / 1.2;
+
+		this.player.standardVelocity = 5;
+
 		var baseFloor = windowHeight / 1.2;
 		this.player.setFloor(baseFloor);
 
