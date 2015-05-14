@@ -211,7 +211,7 @@ var GameScreen = AbstractScreen.extend({
 
 
 			trail.position.x = this.player.getPosition().x;
-			trail.position.y = this.player.getPosition().y;
+			trail.position.y = this.player.getPosition().y + this.player.spriteBall.height / 2;
 			trailObj.type = 'HORIZONTAL';
 			trailObj.side = this.player.velocity.x < 0?'LEFT':'RIGHT';
 		}else{
@@ -225,7 +225,7 @@ var GameScreen = AbstractScreen.extend({
 			trail.position.x = this.player.getPosition().x;
 
 			// trail.position.y = this.player.getPosition().y + (this.player.velocity.y > 0 ?-this.player.spriteBall.height / 2 : this.player.spriteBall.height / 2);
-			trail.position.y = this.player.getPosition().y - this.player.spriteBall.height / 2;
+			trail.position.y = this.player.getPosition().y;// - this.player.spriteBall.height / 2;
 			trailObj.type = 'VERTICAL';
 			trailObj.side = this.player.velocity.y < 0?'UP':'DOWN';
 		}
@@ -233,7 +233,7 @@ var GameScreen = AbstractScreen.extend({
 
 		var joint = new PIXI.Graphics();
 		joint.beginFill(this.player.color);
-		joint.drawCircle(0,- this.player.spriteBall.height / 2,this.player.spriteBall.width/2);
+		joint.drawCircle(0,0,this.player.spriteBall.width/2);
 		this.addChild(joint);
 		this.addChild(trail);
 		joint.position.x = this.player.getPosition().x;
@@ -269,7 +269,7 @@ var GameScreen = AbstractScreen.extend({
 			if(this.player.velocity.y === 0){
 				tempTrail.width = this.player.getPosition().x - tempTrail.position.x;
 			}else{
-				tempTrail.height = (this.player.getPosition().y - this.player.spriteBall.height / 2) - tempTrail.position.y;
+				tempTrail.height = (this.player.getPosition().y) - tempTrail.position.y;
 			}
 			var acc = 0;
 			
@@ -323,8 +323,9 @@ var GameScreen = AbstractScreen.extend({
 
 					for (j = this.trails.length - 1; j >= 0; j--) {
 						if(this.trails[j].type === 'JOINT'){
+
 							this.player.moveBack(this.trails[j].side);
-							console.log(this.player.velocity, this.trails[j].side);
+							// console.log(this.player.velocity, this.trails[j].side);
 							break;
 						}
 					}
@@ -381,7 +382,9 @@ var GameScreen = AbstractScreen.extend({
 						rectPlayer.x + rectPlayer.width + this.player.velocity.x> rectTrail.x &&
 						rectPlayer.y + this.player.velocity.y< rectTrail.y + rectTrail.height &&
 						rectPlayer.height + rectPlayer.y + this.player.velocity.y> rectTrail.y) {
-						this.player.velocity = {x:0,y:0};
+						// this.player.velocity = {x:0,y:0};
+
+						this.player.stop();
 						// this.trails[i].trail.alpha = 0.8;
 
 						this.debugBall.clear();
@@ -406,7 +409,10 @@ var GameScreen = AbstractScreen.extend({
 
 		console.log('tempTiles',tempTiles);
 		if(this.getTileType(tempTiles.i, tempTiles.j)){
+			this.player.getContent().position.x -= this.player.velocity.x;
+			this.player.getContent().position.y -= this.player.velocity.y;
 			this.player.stop();
+			this.collideWall();
 		}
 	},
 	initLevel:function(whereInit){
@@ -491,7 +497,8 @@ var GameScreen = AbstractScreen.extend({
 		var color = type === 1?0:0xFF0000;
 		if(type !== 0){
 			var tempGraphics = new PIXI.Graphics();
-			tempGraphics.lineStyle(1,color);
+			// tempGraphics.lineStyle(1,color); APP.vecColors[APP.currentColorID]
+			tempGraphics.beginFill(this.player.color);
 			tempGraphics.drawRect(0,0,this.tileSize.w, this.tileSize.h);
 			tempGraphics.position.x = i * this.tileSize.w;
 			tempGraphics.position.y = j * this.tileSize.h;

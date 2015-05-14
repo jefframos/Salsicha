@@ -40,9 +40,10 @@ var Ball = Entity.extend({
 
 		this.sprite = new PIXI.Sprite();
         this.sprite.addChild(this.spriteBall);
+        this.spriteBall.position.y = this.spriteBall.height / 2;
 
 		this.sprite.anchor.x = 0.5;
-		this.sprite.anchor.y = 0;
+		this.sprite.anchor.y = 0.5;
 		
 		// console.log(this.range);
 		this.updateable = true;
@@ -132,7 +133,7 @@ var Ball = Entity.extend({
 	},
 	stop: function(){
 		this.velocity = {x:0, y:0};
-		this.screen.collideWall();
+		// this.screen.collideWall();
 	},
 	applyFriction:function(){
 		if(this.velocity.x > this.standardVelocity + this.friction){
