@@ -68,6 +68,9 @@ var Ball = Entity.extend({
         this.force = 0;
 		this.inJump = false;
 
+		this.standardVelocity = 3;
+		this.friction = 0.1;
+
 	},
 	setFloor: function(pos){
 		this.floorPos = pos;
@@ -99,71 +102,80 @@ var Ball = Entity.extend({
 		this.gravityVal += 0.05;
 		// console.log(this.gravityVal);
 	},
+	moveBack: function(side){
+		if(side === 'UP'){
+			this.velocity.y = this.standardVelocity * 2;
+		}else if(side === 'DOWN'){
+			this.velocity.y = -this.standardVelocity * 2;
+		}else if(side === 'LEFT'){
+			this.velocity.x = this.standardVelocity * 2;
+		}else if(side === 'RIGHT'){
+			this.velocity.x = -this.standardVelocity * 2;
+		}
+	},
 	stretch: function(side){
 		this.currentSide = side;
-		this.standardVelocity = 2;
 		if(this.currentSide === 'UP'){
 			this.velocity.x = 0;
-			this.velocity.y = -this.standardVelocity;
+			this.velocity.y = -this.standardVelocity * 2;
 		}else if(this.currentSide === 'DOWN'){
 			this.velocity.x = 0;
-			this.velocity.y = this.standardVelocity;
+			this.velocity.y = this.standardVelocity * 2;
 		}else if(this.currentSide === 'LEFT'){
-			this.velocity.x = -this.standardVelocity;
+			this.velocity.x = -this.standardVelocity * 2;
 			this.velocity.y = 0;
 		}else{
-			this.velocity.x = this.standardVelocity;
+			this.velocity.x = this.standardVelocity * 2;
 			this.velocity.y = 0;
 		}
-
 		this.screen.addTrail();
-		// if(side === 'UP'){
-		// 	this.currentSide = side;
-		// 	this.velocity.x = 0;
-		// 	this.velocity.y = -3;
+	},
+	stop: function(){
+		this.velocity = {x:0, y:0};
+		this.screen.collideWall();
+	},
+	applyFriction:function(){
+		if(this.velocity.x > this.standardVelocity + this.friction){
+			this.velocity.x -= this.friction;
+		}
+		if(this.velocity.x < -(this.standardVelocity + this.friction)){
+			this.velocity.x += this.friction;
+		}
+		if(this.velocity.y > this.standardVelocity + this.friction){
+			this.velocity.y -= this.friction;
+		}
+		if(this.velocity.y < -(this.standardVelocity + this.friction)){
+			this.velocity.y += this.friction;
+		}
 
-		// 	this.tail = new PIXI.Graphics();
-		// 	this.tail.beginFill(0);
-		// 	this.tail.drawRect(-this.spriteBall.width / 2, 0, this.spriteBall.width, this.spriteBall.height / 2);
-		// 	this.sprite.addChild(this.tail);
-
-		// }else{
-		// 	this.currentSide = side;
-		// 	this.velocity.x = 3;
-		// 	this.velocity.y = 0;
-
-		// 	this.tail = new PIXI.Graphics();
-		// 	this.tail.beginFill(0);
-		// 	this.tail.drawRect(0, -this.spriteBall.height, this.spriteBall.width / 2, this.spriteBall.height);
-		// 	this.sprite.addChild(this.tail);
-		// }
-		
 	},
 	update: function(){
 		this._super();
-		if(this.velocity.x !== 0 && this.velocity.x + this.getPosition().x < this.collideArea.x ||
-			this.velocity.x + this.getPosition().x > this.collideArea.x + this.collideArea.width){
-			if(this.velocity.x > 0){
-				this.getPosition().x = this.collideArea.x + this.collideArea.width;
-			}else{
-				this.getPosition().x = this.collideArea.x;
-			}
+		this.applyFriction();
 
-			this.velocity.x = 0;
+		// if(this.velocity.x !== 0 && this.velocity.x + this.getPosition().x < this.collideArea.x ||
+		// 	this.velocity.x + this.getPosition().x > this.collideArea.x + this.collideArea.width){
+		// 	if(this.velocity.x > 0){
+		// 		this.getPosition().x = this.collideArea.x + this.collideArea.width;
+		// 	}else{
+		// 		this.getPosition().x = this.collideArea.x;
+		// 	}
 
-			this.screen.collideWall();
-		}
-		if(this.velocity.y !== 0 && this.velocity.y + this.getPosition().y < this.collideArea.y ||
-			this.velocity.y + this.getPosition().y > this.collideArea.y + this.collideArea.height){
+		// 	this.velocity.x = 0;
+
+		// 	this.screen.collideWall();
+		// }
+		// if(this.velocity.y !== 0 && this.velocity.y + this.getPosition().y < this.collideArea.y ||
+		// 	this.velocity.y + this.getPosition().y > this.collideArea.y + this.collideArea.height){
 			
-			if(this.velocity.y > 0){
-				this.getPosition().y = this.collideArea.y + this.collideArea.height;
-			}else{
-				this.getPosition().y = this.collideArea.y;
-			}
-			this.velocity.y = 0;
-			this.screen.collideWall();
-		}
+		// 	if(this.velocity.y > 0){
+		// 		this.getPosition().y = this.collideArea.y + this.collideArea.height;
+		// 	}else{
+		// 		this.getPosition().y = this.collideArea.y;
+		// 	}
+		// 	this.velocity.y = 0;
+		// 	this.screen.collideWall();
+		// }
 	},
 	updateableParticles:function(){
         this.particlesCounter --;

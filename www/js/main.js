@@ -1,4 +1,4 @@
-/*! jefframos 13-05-2015 */
+/*! jefframos 14-05-2015 */
 function rgbToHsl(r, g, b) {
     r /= 255, g /= 255, b /= 255;
     var h, s, max = Math.max(r, g, b), min = Math.min(r, g, b), l = (max + min) / 2;
@@ -130,18 +130,21 @@ function updateResolution(orientation, scale) {
 }
 
 function update() {
-    requestAnimFrame(update), init || (windowWidth = res.x, windowHeight = res.y - 50, 
-    realWindowWidth = res.x, realWindowHeight = res.y, renderer = testMobile() ? PIXI.autoDetectRecommendedRenderer(realWindowWidth, realWindowHeight, {
-        antialias: !0,
-        resolution: retina,
-        view: gameView
-    }) : PIXI.autoDetectRenderer(realWindowWidth, realWindowHeight, {
-        antialias: !0,
-        resolution: retina,
-        view: gameView
-    }), retina = 2, renderer.view.style.width = windowWidthVar + "px", renderer.view.style.height = windowHeightVar + 26 + "px", 
-    APP = new Application(), APP.build(), APP.show(), init = !0), renderer && (APP.update(), 
-    renderer.render(APP.stage));
+    if (requestAnimFrame(update), !init) {
+        var gambs = 0;
+        windowWidth = res.x, windowHeight = res.y - gambs, realWindowWidth = res.x, realWindowHeight = res.y, 
+        renderer = testMobile() ? PIXI.autoDetectRecommendedRenderer(realWindowWidth, realWindowHeight, {
+            antialias: !0,
+            resolution: retina,
+            view: gameView
+        }) : PIXI.autoDetectRenderer(realWindowWidth, realWindowHeight, {
+            antialias: !0,
+            resolution: retina,
+            view: gameView
+        }), retina = 2, renderer.view.style.width = windowWidthVar + "px", renderer.view.style.height = windowHeightVar + gambs / 2 + "px", 
+        APP = new Application(), APP.build(), APP.show(), init = !0;
+    }
+    renderer && (APP.update(), renderer.render(APP.stage));
 }
 
 function fullscreen() {
@@ -443,7 +446,7 @@ var Application = AbstractApplication.extend({
         this.particlesCounterMax = 2, this.particlesCounter = 1, this.floorPos = windowHeight, 
         this.gravity = 0, this.gravityVal = .15, this.breakJump = !1, this.blockCollide = !1, 
         this.inError = !1, this.perfectShoot = 0, this.perfectShootAcum = 0, this.force = 0, 
-        this.inJump = !1;
+        this.inJump = !1, this.standardVelocity = 3, this.friction = .1;
     },
     setFloor: function(pos) {
         this.floorPos = pos;
@@ -462,17 +465,29 @@ var Application = AbstractApplication.extend({
     improveGravity: function() {
         this.gravityVal >= 1.2 || (this.gravityVal += .05);
     },
+    moveBack: function(side) {
+        "UP" === side ? this.velocity.y = 2 * this.standardVelocity : "DOWN" === side ? this.velocity.y = 2 * -this.standardVelocity : "LEFT" === side ? this.velocity.x = 2 * this.standardVelocity : "RIGHT" === side && (this.velocity.x = 2 * -this.standardVelocity);
+    },
     stretch: function(side) {
-        this.currentSide = side, this.standardVelocity = 2, "UP" === this.currentSide ? (this.velocity.x = 0, 
-        this.velocity.y = -this.standardVelocity) : "DOWN" === this.currentSide ? (this.velocity.x = 0, 
-        this.velocity.y = this.standardVelocity) : "LEFT" === this.currentSide ? (this.velocity.x = -this.standardVelocity, 
-        this.velocity.y = 0) : (this.velocity.x = this.standardVelocity, this.velocity.y = 0), 
+        this.currentSide = side, "UP" === this.currentSide ? (this.velocity.x = 0, this.velocity.y = 2 * -this.standardVelocity) : "DOWN" === this.currentSide ? (this.velocity.x = 0, 
+        this.velocity.y = 2 * this.standardVelocity) : "LEFT" === this.currentSide ? (this.velocity.x = 2 * -this.standardVelocity, 
+        this.velocity.y = 0) : (this.velocity.x = 2 * this.standardVelocity, this.velocity.y = 0), 
         this.screen.addTrail();
     },
+    stop: function() {
+        this.velocity = {
+            x: 0,
+            y: 0
+        }, this.screen.collideWall();
+    },
+    applyFriction: function() {
+        this.velocity.x > this.standardVelocity + this.friction && (this.velocity.x -= this.friction), 
+        this.velocity.x < -(this.standardVelocity + this.friction) && (this.velocity.x += this.friction), 
+        this.velocity.y > this.standardVelocity + this.friction && (this.velocity.y -= this.friction), 
+        this.velocity.y < -(this.standardVelocity + this.friction) && (this.velocity.y += this.friction);
+    },
     update: function() {
-        this._super(), (0 !== this.velocity.x && this.velocity.x + this.getPosition().x < this.collideArea.x || this.velocity.x + this.getPosition().x > this.collideArea.x + this.collideArea.width) && (this.velocity.x > 0 ? this.getPosition().x = this.collideArea.x + this.collideArea.width : this.getPosition().x = this.collideArea.x, 
-        this.velocity.x = 0, this.screen.collideWall()), (0 !== this.velocity.y && this.velocity.y + this.getPosition().y < this.collideArea.y || this.velocity.y + this.getPosition().y > this.collideArea.y + this.collideArea.height) && (this.velocity.y > 0 ? this.getPosition().y = this.collideArea.y + this.collideArea.height : this.getPosition().y = this.collideArea.y, 
-        this.velocity.y = 0, this.screen.collideWall());
+        this._super(), this.applyFriction();
     },
     updateableParticles: function() {
         if (this.particlesCounter--, this.particlesCounter <= 0) {
@@ -1102,8 +1117,7 @@ var Application = AbstractApplication.extend({
             var angle = 180 * Math.atan2(touchData.global.y - self.player.getPosition().y, touchData.global.x - self.player.getPosition().x) / Math.PI;
             self.player.stretch(angle > -135 && -45 > angle ? "UP" : angle > -45 && 45 > angle ? "RIGHT" : angle > 45 && 135 > angle ? "DOWN" : "LEFT");
         }, this.updateable = !0, document.body.addEventListener("keyup", function(e) {
-            console.log(e.keyCode), (32 === e.keyCode || 40 === e.keyCode) && (self.tapDown = !1, 
-            self.shoot(APP.force / 30 * windowHeight * .1));
+            (32 === e.keyCode || 40 === e.keyCode) && self.getTileByPos(self.player.getPosition().x, self.player.getPosition().y);
         }), document.body.addEventListener("keydown", function(e) {
             (32 === e.keyCode || 40 === e.keyCode) && (self.tapDown = !0);
         }), APP.withAPI && GameAPI.GameBreak.request(function() {
@@ -1200,16 +1214,12 @@ var Application = AbstractApplication.extend({
                     remove = !0) : "LEFT" === lastJoint.side ? this.player.getPosition().x > lastJoint.trail.position.x && (this.player.getPosition().x = lastJoint.trail.position.x, 
                     remove = !0) : this.player.getPosition().x < lastJoint.trail.position.x && (this.player.getPosition().x = lastJoint.trail.position.x, 
                     remove = !0), remove) {
-                        this.player.velocity = {
-                            x: 0,
-                            y: 0
-                        };
+                        this.player.stop();
                         var spl = this.trails.splice(this.trails.length - 2, 2), j = 0;
                         spl.length;
                         for (j = spl.length - 1; j >= 0; j--) spl[j].trail.parent && spl[j].trail.parent.removeChild(spl[j].trail);
                         for (j = this.trails.length - 1; j >= 0; j--) if ("JOINT" === this.trails[j].type) {
-                            "UP" === this.trails[j].side ? this.player.velocity.y = 2 : "DOWN" === this.trails[j].side ? this.player.velocity.y = -2 : "LEFT" === this.trails[j].side ? this.player.velocity.x = 2 : "RIGHT" === this.trails[j].side && (this.player.velocity.x = -2), 
-                            console.log(this.player.velocity, this.trails[j].side);
+                            this.player.moveBack(this.trails[j].side), console.log(this.player.velocity, this.trails[j].side);
                             break;
                         }
                     }
@@ -1228,6 +1238,8 @@ var Application = AbstractApplication.extend({
                 }
             }
             console.log(this.trails.length);
+            var tempTiles = this.getTileByPos(this.player.getPosition().x, this.player.getPosition().y);
+            console.log("tempTiles", tempTiles), this.getTileType(tempTiles.i, tempTiles.j) && this.player.stop();
         }
     },
     initLevel: function(whereInit) {
@@ -1242,7 +1254,41 @@ var Application = AbstractApplication.extend({
         this.base.position.y = windowHeight + this.player.spriteBall.height / 2, this.updateCoins();
         var self = this;
         this.addChild(self.hitTouch), this.force = 0, this.levelCounter = 800, this.levelCounterMax = 800, 
-        this.changeColor(!0, !0), this.endGame = !1;
+        this.changeColor(!0, !0), this.endGame = !1, this.initEnvironment();
+    },
+    initEnvironment: function() {
+        this.environment = [];
+        var temp = [ [ 1, 0, 0, 0, 0, 0, 0, 1 ], [ 1, 1, 0, 0, 0, 0, 1, 1 ], [ 1, 1, 1, 0, 0, 1, 1, 1 ], [ 1, 1, 1, 0, 0, 1, 1, 1 ], [ 1, 1, 1, 0, 0, 1, 1, 1 ], [ 1, 1, 0, 0, 0, 0, 1, 1 ], [ 1, 1, 0, 0, 0, 0, 1, 1 ], [ 1, 1, 0, 0, 0, 0, 1, 1 ] ];
+        this.tileSize = {
+            w: windowWidth / temp[0].length,
+            h: windowHeight / temp.length
+        }, this.mapSize = {
+            i: temp[0].length,
+            j: temp.length
+        }, console.log(this.tileSize), this.environment = temp, this.drawMap(), console.log(this.environment);
+    },
+    drawMap: function() {
+        for (var i = 0; i < this.environment.length; i++) for (var j = 0; j < this.environment[i].length; j++) this.drawTile(this.environment[i][j], j, i);
+    },
+    drawTile: function(type, i, j) {
+        var color = 1 === type ? 0 : 16711680;
+        if (0 !== type) {
+            var tempGraphics = new PIXI.Graphics();
+            tempGraphics.lineStyle(1, color), tempGraphics.drawRect(0, 0, this.tileSize.w, this.tileSize.h), 
+            tempGraphics.position.x = i * this.tileSize.w, tempGraphics.position.y = j * this.tileSize.h, 
+            this.addChild(tempGraphics);
+        }
+    },
+    getTileByPos: function(x, y) {
+        var tempX = Math.floor(x / this.tileSize.w), tempY = Math.floor(y / this.tileSize.h), ret = {
+            i: tempX,
+            j: tempY
+        };
+        return console.log("get", ret), ret;
+    },
+    getTileType: function(i, j) {
+        return this.environment && this.environment.length ? (console.log("tile", this.environment[j][i]), 
+        this.environment[j][i]) : 0;
     },
     addSoundButton: function() {
         this.soundButtonContainer = new PIXI.DisplayObjectContainer(), this.soundOn = new PIXI.Graphics(), 
@@ -1995,11 +2041,11 @@ var Application = AbstractApplication.extend({
         this.sprite.alpha = 0, this.updateable = !0, this.kill = !0;
     }
 }), res = {
-    x: window.outerWidth,
-    y: window.outerHeight
+    x: window.innerWidth,
+    y: window.innerHeight
 };
 
-testMobile() || (res = {
+testMobile() && (res = {
     x: window.innerWidth,
     y: window.innerHeight
 });

@@ -4,9 +4,9 @@ function testMobile() {
 	return Modernizr.touch;// || window.innerWidth < 600;//true;// Modernizr.touch || window.innerWidth < 600;
 }
 
-var res = {x:window.outerWidth, y: window.outerHeight};
-// var res = {x:window.innerWidth, y: window.innerHeight};
-if(!testMobile()){
+// var res = {x:window.outerWidth, y: window.outerHeight};
+var res = {x:window.innerWidth, y: window.innerHeight};
+if(testMobile()){
 	res = {x:window.innerWidth, y:window.innerHeight};
 }
 var resizeProportional = true;
@@ -113,9 +113,10 @@ function updateResolution(orientation, scale){
 function update() {
 	requestAnimFrame(update );
 	if(!init){
+		var gambs = 0;//50;
 
 		windowWidth = res.x;
-		windowHeight = res.y - 50;
+		windowHeight = res.y - gambs;
 
 		realWindowWidth = res.x;
 		realWindowHeight = res.y;
@@ -129,7 +130,7 @@ function update() {
 		retina = 2;
 		// alert('init');
 		renderer.view.style.width = windowWidthVar+'px';
-		renderer.view.style.height = (windowHeightVar + 26)+'px';
+		renderer.view.style.height = (windowHeightVar + gambs/2)+'px';
 		// alert('init1');
 		APP = new Application();
 		// alert('init2');

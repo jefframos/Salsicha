@@ -110,10 +110,10 @@ var GameScreen = AbstractScreen.extend({
 
 
 		document.body.addEventListener('keyup', function(e){
-			console.log(e.keyCode);
 			if(e.keyCode === 32 || e.keyCode === 40){
-				self.tapDown = false;
-				self.shoot((APP.force / 30) * windowHeight * 0.1);
+				self.getTileByPos(self.player.getPosition().x, self.player.getPosition().y);
+				// self.tapDown = false;
+				// self.shoot((APP.force / 30) * windowHeight * 0.1);
 			}
 		});
 		document.body.addEventListener('keydown', function(e){
@@ -141,9 +141,6 @@ var GameScreen = AbstractScreen.extend({
 		this.layer.build('EntityLayer');
 		this.layerManager.addLayer(this.layer);
 
-
-
-
 		this.coinsLabel = new PIXI.Text('0', {align:'center',font:'72px Vagron', fill:'#FFFFFF', wordWrap:true, wordWrapWidth:500});
 		// scaleConverter(this.coinsLabel.height, windowHeight, 0.2, this.coinsLabel);
 		this.coinsLabel.resolution = retina;
@@ -162,17 +159,11 @@ var GameScreen = AbstractScreen.extend({
 		this.loaderBar.getContent().alpha = 0;
 
 		this.initLevel();
-		// this.endGame = true;
-		// if(!this.fistTime){
-		// 	this.changeColor(true, true);
-		// 	this.openEndMenu();
-
-		// 	this.fistTime = true;
-		// }else{
-		// 	this.initLevel();
-		// }
 		this.startLevel = false;
 		this.debugBall = new PIXI.Graphics();
+
+
+		
 	},
 
 	collideWall:function(){
@@ -266,11 +257,6 @@ var GameScreen = AbstractScreen.extend({
 		}
 		this._super();
 
-		// console.log('this.trails');
-
-		
-
-
 		if(this.player.velocity.y + this.player.velocity.x === 0){
 			return;
 		}
@@ -324,7 +310,7 @@ var GameScreen = AbstractScreen.extend({
 				}
 
 				if(remove){
-					this.player.velocity = {x:0, y:0};
+					this.player.stop();
 					var spl = this.trails.splice(this.trails.length - 2, 2);
 					var j = 0;
 					var sizeSpl = spl.length;
@@ -337,15 +323,7 @@ var GameScreen = AbstractScreen.extend({
 
 					for (j = this.trails.length - 1; j >= 0; j--) {
 						if(this.trails[j].type === 'JOINT'){
-							if(this.trails[j].side === 'UP'){
-								this.player.velocity.y = 2;
-							}else if(this.trails[j].side === 'DOWN'){
-								this.player.velocity.y = -2;
-							}else if(this.trails[j].side === 'LEFT'){
-								this.player.velocity.x = 2;
-							}else if(this.trails[j].side === 'RIGHT'){
-								this.player.velocity.x = -2;
-							}
+							this.player.moveBack(this.trails[j].side);
 							console.log(this.player.velocity, this.trails[j].side);
 							break;
 						}
@@ -424,8 +402,12 @@ var GameScreen = AbstractScreen.extend({
 		}
 
 		console.log(this.trails.length);
+		var tempTiles = this.getTileByPos(this.player.getPosition().x, this.player.getPosition().y);
 
-		
+		console.log('tempTiles',tempTiles);
+		if(this.getTileType(tempTiles.i, tempTiles.j)){
+			this.player.stop();
+		}
 	},
 	initLevel:function(whereInit){
 		this.trails = [];
@@ -450,12 +432,6 @@ var GameScreen = AbstractScreen.extend({
 		this.base.position.y = windowHeight + this.player.spriteBall.height / 2;
 		// this.brilhoBase.getContent().position.y = base +  this.player.spriteBall.height / 2;
 
-		
-		
-		
-		
-		
-
 		this.updateCoins();
 
 		var self = this;
@@ -470,10 +446,77 @@ var GameScreen = AbstractScreen.extend({
 
 		this.endGame = false;
 
+
+		this.initEnvironment();
 		// if(this.crazyLogo){
 		// 	this.crazyLogo.updateable = false;
 		// }
 
+	},
+	initEnvironment: function(){
+		this.environment = [];
+		var temp = [
+			[1,0,0,0,0,0,0,1,],
+			[1,1,0,0,0,0,1,1,],
+			[1,1,1,0,0,1,1,1,],
+			[1,1,1,0,0,1,1,1,],
+			[1,1,1,0,0,1,1,1,],
+			[1,1,0,0,0,0,1,1,],
+			[1,1,0,0,0,0,1,1,],
+			[1,1,0,0,0,0,1,1,],
+		];
+		// for (var i = temp.length - 1; i >= 0; i--) {
+		// 	for (var j = temp[i].length - 1; j >= 0; j--) {
+		// 		temp[i][j]
+		// 	}
+		// }
+
+		this.tileSize = {w:windowWidth / temp[0].length, h:windowHeight / temp.length};
+		this.mapSize = {i:temp[0].length, j:temp.length};
+		console.log(this.tileSize);
+		this.environment = temp;
+
+		this.drawMap();
+
+		console.log(this.environment);
+	},
+	drawMap: function(){
+		for (var i = 0; i < this.environment.length; i++) {
+			for (var j = 0; j < this.environment[i].length; j++) {
+				this.drawTile(this.environment[i][j], j, i);
+			}
+		}
+	},
+	drawTile: function(type, i,j){
+		var color = type === 1?0:0xFF0000;
+		if(type !== 0){
+			var tempGraphics = new PIXI.Graphics();
+			tempGraphics.lineStyle(1,color);
+			tempGraphics.drawRect(0,0,this.tileSize.w, this.tileSize.h);
+			tempGraphics.position.x = i * this.tileSize.w;
+			tempGraphics.position.y = j * this.tileSize.h;
+			this.addChild(tempGraphics);
+		}
+	},
+
+	getTileByPos: function(x,y){
+		var tempX = Math.floor(x / this.tileSize.w);
+		var tempY = Math.floor(y / this.tileSize.h);
+		// this.drawTile(2, tempX,tempY);
+		var ret = {i:tempX, j:tempY};
+		console.log('get', ret);
+
+
+		return ret;
+	},
+
+	getTileType: function(i,j){
+		// console.log('environment',this.environment);
+		if(!this.environment || !this.environment.length){
+			return 0;
+		}
+		console.log('tile', this.environment[j][i]);
+		return this.environment[j][i];
 	},
 
 
@@ -481,10 +524,7 @@ var GameScreen = AbstractScreen.extend({
 
 
 
-
-
-
-
+ 
 	addSoundButton:function(){
 		this.soundButtonContainer = new PIXI.DisplayObjectContainer();
 		this.soundOn = new PIXI.Graphics();
