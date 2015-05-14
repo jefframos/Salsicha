@@ -133,6 +133,7 @@ var Ball = Entity.extend({
 	},
 	stop: function(){
 		this.velocity = {x:0, y:0};
+		console.log('ball.stop');
 		// this.screen.collideWall();
 	},
 	applyFriction:function(){

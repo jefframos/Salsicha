@@ -479,7 +479,7 @@ var Application = AbstractApplication.extend({
         this.velocity = {
             x: 0,
             y: 0
-        };
+        }, console.log("ball.stop");
     },
     applyFriction: function() {
         this.velocity.x > this.standardVelocity + this.friction && (this.velocity.x -= this.friction), 
@@ -1113,10 +1113,12 @@ var Application = AbstractApplication.extend({
         this.interactiveBackground.build(), this.addChild(this.interactiveBackground)), 
         this.hitTouch = new PIXI.Graphics(), this.hitTouch.interactive = !0, this.hitTouch.beginFill(0), 
         this.hitTouch.drawRect(0, 0, windowWidth, windowHeight), this.hitTouch.alpha = 0, 
-        this.hitTouch.hitArea = new PIXI.Rectangle(0, 40, windowWidth, windowHeight), this.tapDown = !1, 
-        this.hitTouch.touchstart = this.hitTouch.mousedown = function(touchData) {
-            var angle = 180 * Math.atan2(touchData.global.y - self.player.getPosition().y, touchData.global.x - self.player.getPosition().x) / Math.PI;
-            self.player.stretch(angle > -135 && -45 > angle ? "UP" : angle > -45 && 45 > angle ? "RIGHT" : angle > 45 && 135 > angle ? "DOWN" : "LEFT");
+        APP.stage.addChild(this.hitTouch), this.tapDown = !1, this.hitTouch.touchstart = this.hitTouch.mousedown = function(touchData) {
+            if (!self.recoil) {
+                console.log(touchData);
+                var angle = 180 * Math.atan2(touchData.global.y - windowHeight / 2, touchData.global.x - windowWidth / 2) / Math.PI;
+                self.player.stretch(angle > -135 && -45 > angle ? "UP" : angle > -45 && 45 > angle ? "RIGHT" : angle > 45 && 135 > angle ? "DOWN" : "LEFT");
+            }
         }, this.updateable = !0, document.body.addEventListener("keyup", function(e) {
             (32 === e.keyCode || 40 === e.keyCode) && self.getTileByPos(self.player.getPosition().x, self.player.getPosition().y);
         }), document.body.addEventListener("keydown", function(e) {
@@ -1125,7 +1127,8 @@ var Application = AbstractApplication.extend({
             self.pauseModal.show();
         }, function() {
             self.pauseModal.hide();
-        }), this.layerManager = new LayerManager(), this.layerManager.build("Main"), this.addChild(this.layerManager), 
+        }), this.gameContainer = new PIXI.DisplayObjectContainer(), this.addChild(this.gameContainer), 
+        this.layerManager = new LayerManager(), this.layerManager.build("Main"), this.gameContainer.addChild(this.layerManager.getContent()), 
         this.layer = new Layer(), this.layer.build("EntityLayer"), this.layerManager.addLayer(this.layer), 
         this.coinsLabel = new PIXI.Text("0", {
             align: "center",
@@ -1133,34 +1136,50 @@ var Application = AbstractApplication.extend({
             fill: "#FFFFFF",
             wordWrap: !0,
             wordWrapWidth: 500
-        }), this.coinsLabel.resolution = retina, this.coinsLabel.alpha = 0, this.addChild(this.coinsLabel), 
-        this.crazyContent = new PIXI.DisplayObjectContainer(), this.addChild(this.crazyContent), 
-        this.loaderBar = new LifeBarHUD(windowWidth, 30, 0, 16777215, 16777215), this.addChild(this.loaderBar.getContent()), 
-        this.loaderBar.getContent().position.x = 0, this.loaderBar.getContent().position.y = 0, 
-        this.loaderBar.updateBar(0, 100), this.loaderBar.getContent().alpha = 0, this.initLevel(), 
-        this.startLevel = !1, this.debugBall = new PIXI.Graphics();
+        }), this.coinsLabel.resolution = retina, this.coinsLabel.alpha = .5, this.coinsLabel.position.x = 20, 
+        this.coinsLabel.position.y = 0, this.addChild(this.coinsLabel), this.crazyContent = new PIXI.DisplayObjectContainer(), 
+        this.addChild(this.crazyContent), this.loaderBar = new LifeBarHUD(windowWidth, 30, 0, 16777215, 16777215), 
+        this.addChild(this.loaderBar.getContent()), this.loaderBar.getContent().position.x = 0, 
+        this.loaderBar.getContent().position.y = 0, this.loaderBar.updateBar(0, 100), this.loaderBar.getContent().alpha = 0, 
+        this.initLevel(), this.startLevel = !1, this.debugBall = new PIXI.Graphics();
     },
     collideWall: function() {
+        function removeSelf(target) {
+            target && target.parent && target.parent.removeChild(target);
+        }
+        function onStart() {
+            self.recoil = !1, self.changeColor();
+        }
         if (!(this.trails.length <= 0)) {
-            for (var timeline = new TimelineLite(), tempTrail = null, i = 0; i < this.trails.length; i++) tempTrail = this.trails[i].trail, 
-            timeline.append("HORIZONTAL" === this.trails[i].type ? TweenLite.to(tempTrail, Math.abs(tempTrail.width) / 1e3, {
+            var self = this;
+            self.recoil = !0;
+            for (var timeline = new TimelineLite({
+                onComplete: function() {}
+            }), frames = 1500, tempTrail = null, i = 0; i < this.trails.length; i++) tempTrail = this.trails[i].trail, 
+            timeline.append("HORIZONTAL" === this.trails[i].type ? TweenLite.to(tempTrail, Math.abs(tempTrail.width) / frames, {
                 width: 0,
                 x: tempTrail.position.x + tempTrail.width,
-                ease: "easeNone"
-            }) : TweenLite.to(tempTrail, Math.abs(tempTrail.height) / 1e3, {
+                ease: "easeNone",
+                onComplete: removeSelf,
+                onCompleteParams: [ tempTrail ]
+            }) : TweenLite.to(tempTrail, Math.abs(tempTrail.height) / frames, {
                 height: 0,
                 y: tempTrail.position.y + tempTrail.height,
-                ease: "easeNone"
+                ease: "easeNone",
+                onComplete: removeSelf,
+                onCompleteParams: [ tempTrail ]
             }));
             this.player.getContent().scale = {
                 x: 1,
                 y: 1
             }, timeline.append("HORIZONTAL" === this.trails[this.trails.length - 1].type ? TweenLite.from(this.player.getContent().scale, 1, {
                 x: .5,
-                ease: "easeOutElastic"
+                ease: "easeOutElastic",
+                onStart: onStart
             }) : TweenLite.from(this.player.getContent().scale, 1, {
                 y: .5,
-                ease: "easeOutElastic"
+                ease: "easeOutElastic",
+                onStart: onStart
             })), this.trails = [];
         }
     },
@@ -1183,7 +1202,7 @@ var Application = AbstractApplication.extend({
         }
         var joint = new PIXI.Graphics();
         if (joint.beginFill(this.player.color), joint.drawCircle(0, 0, this.player.spriteBall.width / 2), 
-        this.addChild(joint), this.addChild(trail), joint.position.x = this.player.getPosition().x, 
+        this.trailContainer.addChild(joint), this.trailContainer.addChild(trail), joint.position.x = this.player.getPosition().x, 
         joint.position.y = this.player.getPosition().y, this.trails.push({
             trail: joint,
             type: "JOINT",
@@ -1197,7 +1216,9 @@ var Application = AbstractApplication.extend({
         this.onBack = !1;
     },
     update: function() {
-        if (this.updateable && (this._super(), this.player.velocity.y + this.player.velocity.x !== 0)) {
+        if (this.updateable && (this.layerManager && this.layerManager.update(), this.updateMapPosition(), 
+        this._super(), this.coinsLabel.parent.setChildIndex(this.coinsLabel, this.coinsLabel.parent.children.length - 1), 
+        this.player.velocity.y + this.player.velocity.x !== 0)) {
             if (this.trails.length > 1) {
                 var tempTrail = this.trails[this.trails.length - 1].trail;
                 0 === this.player.velocity.y ? tempTrail.width = this.player.getPosition().x - tempTrail.position.x : tempTrail.height = this.player.getPosition().y - tempTrail.position.y;
@@ -1208,14 +1229,13 @@ var Application = AbstractApplication.extend({
                     break;
                 }
                 if (lastJoint) {
-                    console.log(lastJoint.side, lastJoint.trail.position.y);
                     var remove = !1;
                     if ("UP" === lastJoint.side ? this.player.getPosition().y > lastJoint.trail.position.y && (this.player.getPosition().y = lastJoint.trail.position.y, 
                     remove = !0) : "DOWN" === lastJoint.side ? this.player.getPosition().y < lastJoint.trail.position.y && (this.player.getPosition().y = lastJoint.trail.position.y, 
                     remove = !0) : "LEFT" === lastJoint.side ? this.player.getPosition().x > lastJoint.trail.position.x && (this.player.getPosition().x = lastJoint.trail.position.x, 
                     remove = !0) : this.player.getPosition().x < lastJoint.trail.position.x && (this.player.getPosition().x = lastJoint.trail.position.x, 
                     remove = !0), remove) {
-                        this.player.stop();
+                        console.log("aqui"), this.player.stop();
                         var spl = this.trails.splice(this.trails.length - 2, 2), j = 0;
                         spl.length;
                         for (j = spl.length - 1; j >= 0; j--) spl[j].trail.parent && spl[j].trail.parent.removeChild(spl[j].trail);
@@ -1225,26 +1245,37 @@ var Application = AbstractApplication.extend({
                         }
                     }
                 }
-            } else {
-                console.log("onBack", this.onBack, this.blockCollide);
-                for (var i = 0; i < this.trails.length - 6 && !this.blockCollide; i++) if ("JOINT" !== this.trails[i].type) {
-                    var rectTrail, rectPlayer = new PIXI.Rectangle(this.player.getPosition().x - this.player.spriteBall.width / 2, this.player.getPosition().y - this.player.spriteBall.height, this.player.spriteBall.width, this.player.spriteBall.height);
-                    rectTrail = "VERTICAL" === this.trails[i].type ? "UP" === this.trails[i].side ? new PIXI.Rectangle(this.trails[i].trail.position.x - Math.abs(this.trails[i].trail.width) / 2, this.trails[i].trail.position.y - Math.abs(this.trails[i].trail.height), Math.abs(this.trails[i].trail.width), Math.abs(this.trails[i].trail.height)) : new PIXI.Rectangle(this.trails[i].trail.position.x - this.trails[i].trail.width / 2, this.trails[i].trail.position.y, Math.abs(this.trails[i].trail.width), Math.abs(this.trails[i].trail.height)) : "RIGHT" === this.trails[i].side ? new PIXI.Rectangle(this.trails[i].trail.position.x, this.trails[i].trail.position.y - Math.abs(this.trails[i].trail.height), Math.abs(this.trails[i].trail.width), Math.abs(this.trails[i].trail.height)) : new PIXI.Rectangle(this.trails[i].trail.position.x - Math.abs(this.trails[i].trail.width), this.trails[i].trail.position.y - Math.abs(this.trails[i].trail.height), Math.abs(this.trails[i].trail.width), Math.abs(this.trails[i].trail.height)), 
-                    rectPlayer.x + this.player.velocity.x < rectTrail.x + rectTrail.width && rectPlayer.x + rectPlayer.width + this.player.velocity.x > rectTrail.x && rectPlayer.y + this.player.velocity.y < rectTrail.y + rectTrail.height && rectPlayer.height + rectPlayer.y + this.player.velocity.y > rectTrail.y && (this.player.stop(), 
-                    this.debugBall.clear(), this.debugBall.lineStyle(1, 16711680), this.debugBall.drawRect(rectTrail.x, rectTrail.y, rectTrail.width, rectTrail.height), 
-                    this.debugBall.parent && this.removeChild(this.debugBall), this.addChild(this.debugBall), 
-                    console.log(rectPlayer, rectTrail));
-                }
+            } else for (var i = 0; i < this.trails.length - 6 && !this.blockCollide; i++) if ("JOINT" !== this.trails[i].type) {
+                var rectTrail, rectPlayer = new PIXI.Rectangle(this.player.getPosition().x - this.player.spriteBall.width / 2, this.player.getPosition().y - this.player.spriteBall.height / 2, this.player.spriteBall.width, this.player.spriteBall.height);
+                rectTrail = "VERTICAL" === this.trails[i].type ? "UP" === this.trails[i].side ? new PIXI.Rectangle(this.trails[i].trail.position.x - Math.abs(this.trails[i].trail.width) / 2, this.trails[i].trail.position.y - Math.abs(this.trails[i].trail.height), Math.abs(this.trails[i].trail.width), Math.abs(this.trails[i].trail.height)) : new PIXI.Rectangle(this.trails[i].trail.position.x - this.trails[i].trail.width / 2, this.trails[i].trail.position.y, Math.abs(this.trails[i].trail.width), Math.abs(this.trails[i].trail.height)) : "RIGHT" === this.trails[i].side ? new PIXI.Rectangle(this.trails[i].trail.position.x, this.trails[i].trail.position.y - Math.abs(this.trails[i].trail.height), Math.abs(this.trails[i].trail.width), Math.abs(this.trails[i].trail.height)) : new PIXI.Rectangle(this.trails[i].trail.position.x - Math.abs(this.trails[i].trail.width), this.trails[i].trail.position.y - Math.abs(this.trails[i].trail.height), Math.abs(this.trails[i].trail.width), Math.abs(this.trails[i].trail.height)), 
+                rectPlayer.x + this.player.velocity.x < rectTrail.x + rectTrail.width && rectPlayer.x + rectPlayer.width + this.player.velocity.x > rectTrail.x && rectPlayer.y + this.player.velocity.y < rectTrail.y + rectTrail.height && rectPlayer.height + rectPlayer.y + this.player.velocity.y > rectTrail.y && (this.player.stop(), 
+                this.debugBall.clear(), this.debugBall.lineStyle(1, 16711680), this.debugBall.drawRect(rectTrail.x, rectTrail.y, rectTrail.width, rectTrail.height), 
+                this.debugBall.parent && this.removeChild(this.debugBall), this.addChild(this.debugBall), 
+                console.log(rectPlayer, rectTrail));
             }
-            console.log(this.trails.length);
             var tempTiles = this.getTileByPos(this.player.getPosition().x, this.player.getPosition().y);
-            console.log("tempTiles", tempTiles), this.getTileType(tempTiles.i, tempTiles.j) && (this.player.getContent().position.x -= this.player.velocity.x, 
+            this.getTileType(tempTiles.i, tempTiles.j) && (this.player.getContent().position.x -= this.player.velocity.x, 
             this.player.getContent().position.y -= this.player.velocity.y, this.player.stop(), 
             this.collideWall());
         }
     },
+    updateMapPosition: function() {
+        this.gameContainer.position.x = windowWidth / 2 - this.player.getPosition().x * this.gameContainer.scale.x, 
+        this.gameContainer.position.y = windowHeight / 2 - this.player.getPosition().y * this.gameContainer.scale.y;
+        var tempScale = 1;
+        if (this.trailContainer.width / this.gameContainer.scale.x > windowWidth / 2 && (tempScale = windowWidth / 2 / this.trailContainer.width), 
+        this.trailContainer.height / this.gameContainer.scale.y > windowHeight / 2) {
+            var tempH = windowHeight / 2 / this.trailContainer.height;
+            tempScale = tempH > tempScale ? tempScale : tempH;
+        }
+        TweenLite.to(this.gameContainer.scale, 1, {
+            x: tempScale,
+            y: tempScale
+        });
+    },
     initLevel: function(whereInit) {
-        this.trails = [], APP.points = 0, this.player = new Ball({
+        this.trails = [], this.trailContainer = new PIXI.DisplayObjectContainer(), this.gameContainer.addChild(this.trailContainer), 
+        this.recoil = !1, APP.points = 0, this.player = new Ball({
             x: 0,
             y: 0
         }, this), this.player.build(), this.layer.addChild(this.player), this.player.getContent().position.x = windowWidth / 2, 
@@ -1252,43 +1283,56 @@ var Application = AbstractApplication.extend({
         var baseFloor = windowHeight / 1.2;
         this.player.setFloor(baseFloor), this.base = new PIXI.Graphics(), this.base.beginFill(16777215), 
         this.base.drawCircle(0, 0, windowHeight - baseFloor), this.base.alpha = .3, this.base.position.x = windowWidth / 2, 
-        this.base.position.y = windowHeight + this.player.spriteBall.height / 2, this.updateCoins();
-        var self = this;
-        this.addChild(self.hitTouch), this.force = 0, this.levelCounter = 800, this.levelCounterMax = 800, 
-        this.changeColor(!0, !0), this.endGame = !1, this.initEnvironment();
+        this.base.position.y = windowHeight + this.player.spriteBall.height / 2;
+        this.force = 0, this.levelCounter = 800, this.levelCounterMax = 800, this.changeColor(!0, !0), 
+        this.endGame = !1, this.initEnvironment(), this.updateMapPosition();
     },
     initEnvironment: function() {
         this.environment = [];
-        var temp = [ [ 1, 0, 0, 0, 0, 0, 0, 1 ], [ 1, 1, 0, 0, 0, 0, 1, 1 ], [ 1, 1, 1, 0, 0, 1, 1, 1 ], [ 1, 1, 1, 0, 0, 1, 1, 1 ], [ 1, 1, 1, 0, 0, 1, 1, 1 ], [ 1, 1, 0, 0, 0, 0, 1, 1 ], [ 1, 1, 0, 0, 0, 0, 1, 1 ], [ 1, 1, 0, 0, 0, 0, 1, 1 ] ];
+        var temp = [ [ 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1 ], [ 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1 ], [ 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1 ], [ 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1 ], [ 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1 ], [ 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1 ], [ 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1 ], [ 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 1 ], [ 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1 ], [ 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1 ], [ 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ], [ 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ], [ 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1 ] ];
         this.tileSize = {
-            w: windowWidth / temp[0].length,
-            h: windowHeight / temp.length
+            w: .1 * windowWidth,
+            h: .1 * windowWidth
         }, this.mapSize = {
             i: temp[0].length,
             j: temp.length
-        }, console.log(this.tileSize), this.environment = temp, this.drawMap(), console.log(this.environment);
+        }, this.environment = temp, this.drawMap(), this.drawPlayer();
     },
     drawMap: function() {
-        for (var i = 0; i < this.environment.length; i++) for (var j = 0; j < this.environment[i].length; j++) this.drawTile(this.environment[i][j], j, i);
+        if (this.environment) if (this.vecTiles) for (var k = 0; k < this.vecTiles.length; k++) this.vecTiles[k].clear(), 
+        this.vecTiles[k].beginFill(this.player.color), this.vecTiles[k].drawRect(0, 0, this.tileSize.w, this.tileSize.h); else {
+            this.vecTiles = [];
+            for (var i = 0; i < this.environment.length; i++) for (var j = 0; j < this.environment[i].length; j++) this.drawTile(this.environment[i][j], j, i);
+            this.hitTouch.hitArea = new PIXI.Rectangle(-100, -100, this.getContent().width, this.getContent().height);
+        }
     },
     drawTile: function(type, i, j) {
-        if (0 !== type) {
+        if (1 === type) {
             var tempGraphics = new PIXI.Graphics();
             tempGraphics.beginFill(this.player.color), tempGraphics.drawRect(0, 0, this.tileSize.w, this.tileSize.h), 
             tempGraphics.position.x = i * this.tileSize.w, tempGraphics.position.y = j * this.tileSize.h, 
-            this.addChild(tempGraphics);
-        }
+            this.gameContainer.addChild(tempGraphics), this.vecTiles.push(tempGraphics);
+        } else 3 === type && (this.player.getContent().position.x = i * this.tileSize.w + this.tileSize.w / 2, 
+        this.player.getContent().position.y = j * this.tileSize.h + this.tileSize.h / 2);
+    },
+    drawPlayer: function() {
+        for (var i = 0; i < this.environment.length; i++) for (var j = 0; j < this.environment[i].length; j++) 3 === this.environment[i][j] && (this.player.getContent().position.x = i * this.tileSize.w + this.tileSize.w / 2, 
+        this.player.getContent().position.y = j * this.tileSize.h + this.tileSize.h / 2);
     },
     getTileByPos: function(x, y) {
         var tempX = Math.floor(x / this.tileSize.w), tempY = Math.floor(y / this.tileSize.h), ret = {
             i: tempX,
             j: tempY
         };
-        return console.log("get", ret), ret;
+        return ret;
     },
     getTileType: function(i, j) {
-        return this.environment && this.environment.length ? (console.log("tile", this.environment[j][i]), 
-        this.environment[j][i]) : 0;
+        if (!this.environment || !this.environment.length) return 0;
+        try {
+            return console.log(i, j), this.environment[j][i];
+        } catch (err) {
+            return 1;
+        }
     },
     addSoundButton: function() {
         this.soundButtonContainer = new PIXI.DisplayObjectContainer(), this.soundOn = new PIXI.Graphics(), 
@@ -1433,6 +1477,7 @@ var Application = AbstractApplication.extend({
         this.earthquake(20), this.changeColor();
     },
     changeColor: function(force, first, forceColor) {
+        console.log("randomHEre");
         var tempColor = 0, self = this;
         first || (APP.currentColorID = forceColor ? APP.currentColorID : Math.floor(APP.vecColors.length * Math.random()));
         var temptempColor = APP.vecColors[APP.currentColorID];
@@ -1443,7 +1488,7 @@ var Application = AbstractApplication.extend({
                 self.background.clear(), self.background.beginFill(APP.backColor), self.background.drawRect(-80, -80, windowWidth + 160, windowHeight + 160);
             }
         })), document.body.style.backgroundColor = APP.vecColorsS[APP.currentColorID], this.player && (tempColor = addBright(temptempColor, .65), 
-        this.player.setColor(tempColor), this.loaderBar.setBackColor(tempColor));
+        this.player.setColor(tempColor), this.loaderBar.setBackColor(tempColor), this.drawMap());
     },
     earthquake: function(force) {
         var earth = new TimelineLite();
