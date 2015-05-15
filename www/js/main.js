@@ -1298,6 +1298,7 @@ var Application = AbstractApplication.extend({
                         }
                     }
                 }
+                this.trailCollide(!0);
             } else this.trailCollide();
             if (this.player.velocity.y + this.player.velocity.x !== 0) {
                 if (this.trails.length > 1) {
@@ -1316,20 +1317,20 @@ var Application = AbstractApplication.extend({
                             height: tempTrail2.height
                         };
                         0 === this.player.velocity.y ? tempStretch.width = dest.x - tempTrail2.position.x : tempStretch.height = dest.y - tempTrail2.position.y, 
-                        TweenLite.to(tempTrail2, .5, tempStretch), console.log(tempTrail2);
+                        TweenLite.to(tempTrail2, .5, tempStretch);
                     }
                     this.player.stop();
                 }
             }
         }
     },
-    trailCollide: function() {
+    trailCollide: function(justEnemies) {
         for (var i = 0; i < this.trails.length && !this.blockCollide; i++) if ("JOINT" !== this.trails[i].type) for (var rectTrail, tempEntity = null, tempTrail = this.trails[i], j = 0; j < this.layer.childs.length; j++) if (tempEntity = this.layer.childs[j], 
-        "enemy" === tempEntity.type || "player" === tempEntity.type && i < this.trails.length - 6) {
+        "enemy" === tempEntity.type || !justEnemies && "player" === tempEntity.type && i < this.trails.length - 6) {
             var rectPlayer = new PIXI.Rectangle(tempEntity.getPosition().x - tempEntity.spriteBall.width / 2, tempEntity.getPosition().y - tempEntity.spriteBall.height / 2, tempEntity.spriteBall.width, tempEntity.spriteBall.height);
             rectTrail = "VERTICAL" === tempTrail.type ? "UP" === tempTrail.side ? new PIXI.Rectangle(tempTrail.trail.position.x - Math.abs(tempTrail.trail.width) / 2, tempTrail.trail.position.y - Math.abs(tempTrail.trail.height), Math.abs(tempTrail.trail.width), Math.abs(tempTrail.trail.height)) : new PIXI.Rectangle(tempTrail.trail.position.x - tempTrail.trail.width / 2, tempTrail.trail.position.y, Math.abs(tempTrail.trail.width), Math.abs(tempTrail.trail.height)) : "RIGHT" === tempTrail.side ? new PIXI.Rectangle(tempTrail.trail.position.x, tempTrail.trail.position.y - Math.abs(tempTrail.trail.height), Math.abs(tempTrail.trail.width), Math.abs(tempTrail.trail.height)) : new PIXI.Rectangle(tempTrail.trail.position.x - Math.abs(tempTrail.trail.width), tempTrail.trail.position.y - Math.abs(tempTrail.trail.height), Math.abs(tempTrail.trail.width), Math.abs(tempTrail.trail.height)), 
             rectPlayer.x + tempEntity.velocity.x < rectTrail.x + rectTrail.width && rectPlayer.x + rectPlayer.width + tempEntity.velocity.x > rectTrail.x && rectPlayer.y + tempEntity.velocity.y < rectTrail.y + rectTrail.height && rectPlayer.height + rectPlayer.y + tempEntity.velocity.y > rectTrail.y && ("enemy" === tempEntity.type ? (tempEntity.preKill(), 
-            this.gameOver()) : this.player.stop());
+            this.gameOver()) : (this.player.explode2(), this.player.stop()));
         }
     },
     updateMapPosition: function() {
@@ -1359,7 +1360,7 @@ var Application = AbstractApplication.extend({
     },
     initEnvironment: function() {
         this.environment = [];
-        var temp = [ [ 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0 ], [ 1, 1, 0, 5, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0 ], [ 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, [ 14, 0, 2, 1 ], 0, 0, [ 14, 1, 2, 1 ], 0, 1, 0 ], [ 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0 ], [ 1, 1, 1, 0, 0, 1, 1, 1, 3, 0, 0, 0, 5, 0, 0, 1, 0 ], [ 1, 1, 0, 0, 0, 0, 1, 1, 2, 0, 0, 0, 0, 0, 0, 1, 0 ], [ 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, [ 12, 0, 3 ], 0, 0, 1, 1 ], [ 1, 1, 0, 0, 0, [ 13, 0, 2, 1 ], 5, 0, 0, [ 13, 3, 2, 1 ], 8, 0, 0, 0, 0, 1, 0 ], [ 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 5, 0, 1, 0 ], [ 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, [ 12, 1, 3 ], 0, [ 12, 2, 3 ], 1, 0 ], [ 1, 1, 0, 0, 0, [ 13, 1, 2, 1 ], 0, 0, 0, [ 13, 2, 2, 1 ], 0, 6, 0, 0, 0, 1, 0 ], [ 1, 1, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0 ], [ 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, [ 12, 3, 3 ], 1, 0 ] ];
+        var temp = [ [ 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0 ], [ 1, 1, 0, 5, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0 ], [ 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, [ 14, 0, 2, 1 ], 0, 0, [ 14, 1, 2, 1 ], 0, 1, 0 ], [ 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0 ], [ 1, 1, 2, 0, 0, 2, 1, 1, 3, 0, 0, 0, 5, 0, 0, 1, 0 ], [ 1, 3, 0, 0, 0, 0, 1, 1, 2, 0, 0, 0, 0, 0, 0, 1, 0 ], [ 1, 3, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, [ 12, 0, 3 ], 0, 0, 1, 1 ], [ 1, 3, 0, 0, 0, [ 13, 0, 2, 1 ], 5, 0, 0, [ 13, 3, 2, 1 ], 8, 0, 0, 0, 0, 1, 0 ], [ 1, 3, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 5, 0, 1, 0 ], [ 1, 3, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, [ 12, 1, 3 ], 0, [ 12, 2, 3 ], 1, 0 ], [ 1, 3, 0, 0, 0, [ 13, 1, 2, 1 ], 0, 0, 0, [ 13, 2, 2, 1 ], 0, 6, 0, 0, 0, 1, 0 ], [ 1, 3, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0 ], [ 1, 3, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, [ 12, 3, 3 ], 1, 0 ] ];
         this.tileSize = {
             w: 50,
             h: 50

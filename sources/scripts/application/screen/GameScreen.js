@@ -355,6 +355,7 @@ var GameScreen = AbstractScreen.extend({
 					}
 				}
 			}
+			this.trailCollide(true);
 		}else{
 			this.trailCollide();
 		}
@@ -398,12 +399,11 @@ var GameScreen = AbstractScreen.extend({
 					tempStretch.height = dest.y - tempTrail2.position.y;
 				}
 				TweenLite.to(tempTrail2, 0.5, tempStretch);
-				console.log(tempTrail2);
 			}
 			this.player.stop();
 		}
 	},
-	trailCollide:function(){
+	trailCollide:function(justEnemies){
 		for (var i = 0; i < this.trails.length; i++) {
 			if(this.blockCollide){
 				break;
@@ -415,7 +415,7 @@ var GameScreen = AbstractScreen.extend({
 				var tempTrail = this.trails[i];
 				for (var j = 0; j < this.layer.childs.length; j++) {
 					tempEntity = this.layer.childs[j];
-					if(tempEntity.type === 'enemy' || (tempEntity.type === 'player' && i < this.trails.length - 6)){
+					if(tempEntity.type === 'enemy' || (!justEnemies && tempEntity.type === 'player' && i < this.trails.length - 6)){
 						var rectPlayer  = new PIXI.Rectangle(tempEntity.getPosition().x - tempEntity.spriteBall.width/2,
 							tempEntity.getPosition().y - tempEntity.spriteBall.height / 2,
 							tempEntity.spriteBall.width,
@@ -455,6 +455,7 @@ var GameScreen = AbstractScreen.extend({
 								tempEntity.preKill();
 								this.gameOver();
 							}else{
+								this.player.explode2();
 								this.player.stop();
 							}
 						}
@@ -518,15 +519,15 @@ var GameScreen = AbstractScreen.extend({
 			[1,		1,		0,		5,		0,		0,		1,		1,		1,		0,		0,		0,		0,		0,		0,		1,		0],
 			[1,		1,		1,		0,		0,		1,		1,		1,		1,		0,[14,0,2,1],		0,		0,[14,1,2,1],		0,		1,		0],
 			[1,		1,		1,		0,		0,		1,		1,		1,		1,		0,		0,		0,		0,		0,		0,		1,		0],
-			[1,		1,		1,		0,		0,		1,		1,		1,		3,		0,		0,		0,		5,		0,		0,		1,		0],
-			[1,		1,		0,		0,		0,		0,		1,		1,		2,		0,		0,		0,		0,		0,		0,		1,		0],
-			[1,		1,		0,		0,		0,		0,		1,		1,		1,		0,		0,		0,		[12,0,3],0,		0,		1,		1],
-			[1,		1,		0,		0,		0,[13,0,2,1],		5,		0,		0,[13,3,2,1],		8,		0,		0,		0,		0,		1,		0],
-			[1,		1,		0,		0,		0,		0,		1,		1,		1,		0,		0,		0,		0,		5,		0,		1,		0],
-			[1,		1,		0,		0,		0,		0,		1,		1,		1,		0,		0,		0,		[12,1,3],0,		[12,2,3],1,		0],
-			[1,		1,		0,		0,		0,[13,1,2,1],		0,		0,		0,[13,2,2,1],		0,		6,		0,		0,		0,		1,		0],
-			[1,		1,		0,		0,		0,		5,		0,		0,		0,		0,		0,		0,		0,		0,		0,		1,		0],
-			[1,		1,		0,		0,		0,		0,		1,		1,		1,		0,		0,		0,		0,		0,		[12,3,3],1,		0],
+			[1,		1,		2,		0,		0,		2,		1,		1,		3,		0,		0,		0,		5,		0,		0,		1,		0],
+			[1,		3,		0,		0,		0,		0,		1,		1,		2,		0,		0,		0,		0,		0,		0,		1,		0],
+			[1,		3,		0,		0,		0,		0,		1,		1,		1,		0,		0,		0,		[12,0,3],0,		0,		1,		1],
+			[1,		3,		0,		0,		0,[13,0,2,1],		5,		0,		0,[13,3,2,1],		8,		0,		0,		0,		0,		1,		0],
+			[1,		3,		0,		0,		0,		0,		1,		1,		1,		0,		0,		0,		0,		5,		0,		1,		0],
+			[1,		3,		0,		0,		0,		0,		1,		1,		1,		0,		0,		0,		[12,1,3],0,		[12,2,3],1,		0],
+			[1,		3,		0,		0,		0,[13,1,2,1],		0,		0,		0,[13,2,2,1],		0,		6,		0,		0,		0,		1,		0],
+			[1,		3,		0,		0,		0,		5,		0,		0,		0,		0,		0,		0,		0,		0,		0,		1,		0],
+			[1,		3,		0,		0,		0,		0,		1,		1,		1,		0,		0,		0,		0,		0,		[12,3,3],1,		0],
 		];
 		// this.tileSize = {w:windowWidth / temp[0].length,		 h:windowHeight / temp.length};
 		// this.tileSize = {w:Math.ceil(windowWidth * 0.1),h:Math.ceil(windowWidth * 0.1)};
