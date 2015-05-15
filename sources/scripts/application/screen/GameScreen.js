@@ -387,6 +387,19 @@ var GameScreen = AbstractScreen.extend({
 			this.gameOver();
 			this.player.preKill();
 		}else if(typeTile === 3){
+			console.log(this.trails.length);
+			var dest = this.player.returnCollide();
+			if(this.trails.length > 1){
+				var tempTrail2 = this.trails[this.trails.length - 1].trail;
+				var tempStretch = {width:tempTrail2.width, height:tempTrail2.height};
+				if(this.player.velocity.y === 0){
+					tempStretch.width = dest.x - tempTrail2.position.x;
+				}else{
+					tempStretch.height = dest.y - tempTrail2.position.y;
+				}
+				TweenLite.to(tempTrail2, 0.5, tempStretch);
+				console.log(tempTrail2);
+			}
 			this.player.stop();
 		}
 	},

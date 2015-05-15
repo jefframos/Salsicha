@@ -1,4 +1,4 @@
-/*! jefframos 14-05-2015 */
+/*! jefframos 15-05-2015 */
 function rgbToHsl(r, g, b) {
     r /= 255, g /= 255, b /= 255;
     var h, s, max = Math.max(r, g, b), min = Math.min(r, g, b), l = (max + min) / 2;
@@ -449,6 +449,18 @@ var Application = AbstractApplication.extend({
         this.inError = !1, this.perfectShoot = 0, this.perfectShootAcum = 0, this.force = 0, 
         this.inJump = !1, this.standardVelocity = 3, this.friction = .1;
     },
+    returnCollide: function() {
+        console.log("returnCollide");
+        var tempPos = {
+            x: this.getPosition().x,
+            y: this.getPosition().y
+        };
+        return "UP" === this.currentSide ? tempPos.y += this.spriteBall.height / 2 : "DOWN" === this.currentSide ? tempPos.y -= this.spriteBall.height / 2 : "LEFT" === this.currentSide ? tempPos.x += this.spriteBall.width / 2 : "RIGHT" === this.currentSide && (tempPos.x -= this.spriteBall.width / 2), 
+        TweenLite.to(this.getPosition(), .5, {
+            x: tempPos.x,
+            y: tempPos.y
+        }), this.explode2(), tempPos;
+    },
     moveBack: function(side) {
         this.currentSide = "", "UP" === side ? this.velocity.y = 2 * this.standardVelocity : "DOWN" === side ? this.velocity.y = 2 * -this.standardVelocity : "LEFT" === side ? this.velocity.x = 2 * this.standardVelocity : "RIGHT" === side && (this.velocity.x = 2 * -this.standardVelocity);
     },
@@ -544,6 +556,15 @@ var Application = AbstractApplication.extend({
         particle.build(), particle.alphadecress = .08, particle.scaledecress = .1, particle.setPosition(this.getPosition().x, this.getPosition().y), 
         this.layer.addChild(particle);
     },
+    explode2: function() {
+        tempParticle = new PIXI.Graphics(), tempParticle.beginFill(this.color), tempParticle.drawCircle(0, 0, this.spriteBall.width), 
+        particle = new Particles({
+            x: 0,
+            y: 0
+        }, 600, tempParticle, 0), particle.maxScale = 5 * this.getContent().scale.x, particle.maxInitScale = 1, 
+        particle.build(), particle.alphadecress = .05, particle.scaledecress = .1, particle.setPosition(this.getPosition().x, this.getPosition().y), 
+        this.layer.addChild(particle);
+    },
     preKill: function() {
         if (!this.invencible) {
             APP.audioController.playSound("explode1"), this.collidable = !1, this.kill = !0;
@@ -554,13 +575,7 @@ var Application = AbstractApplication.extend({
             }, 600, tempParticle, .05 * Math.random()), particle.build(), particle.alphadecress = .008, 
             particle.setPosition(this.getPosition().x - (Math.random() + .4 * this.getContent().width) + .2 * this.getContent().width, this.getPosition().y - (Math.random() + .4 * this.getContent().width) + .2 * this.getContent().width), 
             this.layer.addChild(particle);
-            tempParticle = new PIXI.Graphics(), tempParticle.beginFill(this.color), tempParticle.drawCircle(0, 0, this.spriteBall.width), 
-            particle = new Particles({
-                x: 0,
-                y: 0
-            }, 600, tempParticle, 0), particle.maxScale = 5 * this.getContent().scale.x, particle.maxInitScale = 1, 
-            particle.build(), particle.alphadecress = .05, particle.scaledecress = .1, particle.setPosition(this.getPosition().x, this.getPosition().y), 
-            this.layer.addChild(particle);
+            this.explode2();
         }
     }
 }), Coin = Entity.extend({
@@ -1290,9 +1305,21 @@ var Application = AbstractApplication.extend({
                     0 === this.player.velocity.y ? tempTrail.width = this.player.getPosition().x - tempTrail.position.x : tempTrail.height = this.player.getPosition().y - tempTrail.position.y;
                 }
                 var tempTiles = this.getTileByPos(this.player.getPosition().x, this.player.getPosition().y), typeTile = this.getTileType(tempTiles.i, tempTiles.j);
-                1 === typeTile ? (this.player.getContent().position.x -= this.player.velocity.x, 
+                if (1 === typeTile) this.player.getContent().position.x -= this.player.velocity.x, 
                 this.player.getContent().position.y -= this.player.velocity.y, this.player.stop(), 
-                this.collideWall()) : 2 === typeTile ? (this.gameOver(), this.player.preKill()) : 3 === typeTile && this.player.stop();
+                this.collideWall(); else if (2 === typeTile) this.gameOver(), this.player.preKill(); else if (3 === typeTile) {
+                    console.log(this.trails.length);
+                    var dest = this.player.returnCollide();
+                    if (this.trails.length > 1) {
+                        var tempTrail2 = this.trails[this.trails.length - 1].trail, tempStretch = {
+                            width: tempTrail2.width,
+                            height: tempTrail2.height
+                        };
+                        0 === this.player.velocity.y ? tempStretch.width = dest.x - tempTrail2.position.x : tempStretch.height = dest.y - tempTrail2.position.y, 
+                        TweenLite.to(tempTrail2, .5, tempStretch), console.log(tempTrail2);
+                    }
+                    this.player.stop();
+                }
             }
         }
     },

@@ -74,6 +74,23 @@ var Ball = Entity.extend({
 		this.friction = 0.1;
 
 	},
+	returnCollide: function(){
+		console.log('returnCollide');
+		var tempPos = {x:this.getPosition().x, y:this.getPosition().y};
+		if(this.currentSide === 'UP'){
+			tempPos.y += this.spriteBall.height / 2;
+		}else if(this.currentSide === 'DOWN'){
+			tempPos.y -= this.spriteBall.height / 2;
+		}else if(this.currentSide === 'LEFT'){
+			tempPos.x += this.spriteBall.width / 2;
+		}else if(this.currentSide === 'RIGHT'){
+			tempPos.x -= this.spriteBall.width / 2;
+		}
+
+		TweenLite.to(this.getPosition(), 0.5, {x:tempPos.x ,y:tempPos.y});
+		this.explode2();
+		return tempPos;
+	},
 	moveBack: function(side){
 		this.currentSide = '';
 		if(side === 'UP'){
@@ -263,6 +280,22 @@ var Ball = Entity.extend({
 		particle.setPosition(this.getPosition().x,this.getPosition().y);
 		this.layer.addChild(particle);
 	},
+	explode2:function(){
+		tempParticle = new PIXI.Graphics();
+		tempParticle.beginFill(this.color);
+		tempParticle.drawCircle(0,0,this.spriteBall.width);
+
+		particle = new Particles({x: 0, y:0}, 600, tempParticle, 0);
+		particle.maxScale = this.getContent().scale.x * 5;
+        particle.maxInitScale = 1;
+		particle.build();
+		// particle.getContent().tint = 0xf5c30c;
+		// particle.gravity = 0.3 * Math.random();
+		particle.alphadecress = 0.05;
+		particle.scaledecress = 0.1;
+		particle.setPosition(this.getPosition().x,this.getPosition().y);
+		this.layer.addChild(particle);
+	},
 	preKill:function(){
 		if(this.invencible){
 			return;
@@ -289,20 +322,7 @@ var Ball = Entity.extend({
                 this.getPosition().y - (Math.random() + this.getContent().width * 0.4)+ this.getContent().width * 0.2);
 			this.layer.addChild(particle);
 		}
-
-		tempParticle = new PIXI.Graphics();
-		tempParticle.beginFill(this.color);
-		tempParticle.drawCircle(0,0,this.spriteBall.width);
-
-		particle = new Particles({x: 0, y:0}, 600, tempParticle, 0);
-		particle.maxScale = this.getContent().scale.x * 5;
-        particle.maxInitScale = 1;
-		particle.build();
-		// particle.getContent().tint = 0xf5c30c;
-		// particle.gravity = 0.3 * Math.random();
-		particle.alphadecress = 0.05;
-		particle.scaledecress = 0.1;
-		particle.setPosition(this.getPosition().x,this.getPosition().y);
-		this.layer.addChild(particle);
+		this.explode2();
+		
 	},
 });
