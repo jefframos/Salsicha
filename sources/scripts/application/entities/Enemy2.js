@@ -26,7 +26,8 @@ var Enemy2 = Entity.extend({
 
 		// this.sprite = new PIXI.Sprite.fromFrame(this.imgSource);
 		this.spriteBall = new PIXI.Graphics();
-		this.spriteBall.beginFill(0xFF8888);
+		// this.spriteBall.beginFill(0xFF8888);
+		this.spriteBall.lineStyle(1,0);
 		var size = windowHeight * 0.02;
 		this.spriteBall.drawRect(-size/2,-size/2,size,size);
 		// this.spriteBall.drawCircle(0,0,windowHeight * 0.02);
@@ -111,7 +112,7 @@ var Enemy2 = Entity.extend({
 		}
 		this.range = this.spriteBall.width / 2;
 		this._super();
-		this.rot += this.standardVelocity / 10;
+		this.rot += this.standardVelocity / 50;
 		this.spriteBall.rotation = this.rot;
 	},
 	changeShape:function(){

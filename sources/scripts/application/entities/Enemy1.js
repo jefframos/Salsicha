@@ -15,7 +15,8 @@ var Enemy1 = Entity.extend({
 
 		// this.sprite = new PIXI.Sprite.fromFrame(this.imgSource);
 		this.spriteBall = new PIXI.Graphics();
-		this.spriteBall.beginFill(0xFF8888);
+		// this.spriteBall.beginFill(0xFF8888);
+		this.spriteBall.lineStyle(1,0);
 		var size = windowHeight * 0.02;
 		this.spriteBall.drawRect(-size/2,-size/2,size,size);
 		// this.spriteBall.drawCircle(0,0,windowHeight * 0.02);

@@ -668,7 +668,7 @@ var Application = AbstractApplication.extend({
         this.height = 1, this.type = "enemy", this.screen = screen, this.rot = 0;
     },
     build: function() {
-        this.spriteBall = new PIXI.Graphics(), this.spriteBall.beginFill(16746632);
+        this.spriteBall = new PIXI.Graphics(), this.spriteBall.lineStyle(1, 0);
         var size = .02 * windowHeight;
         this.spriteBall.drawRect(-size / 2, -size / 2, size, size), this.sprite = new PIXI.Sprite(), 
         this.sprite.addChild(this.spriteBall), this.updateable = !0, this.collidable = !0, 
@@ -713,7 +713,7 @@ var Application = AbstractApplication.extend({
         this.testHorizontal(), this.testVertical();
     },
     build: function() {
-        this.spriteBall = new PIXI.Graphics(), this.spriteBall.beginFill(16746632);
+        this.spriteBall = new PIXI.Graphics(), this.spriteBall.lineStyle(1, 0);
         var size = .02 * windowHeight;
         this.spriteBall.drawRect(-size / 2, -size / 2, size, size), this.sprite = new PIXI.Sprite(), 
         this.sprite.addChild(this.spriteBall), this.updateable = !0, this.collidable = !0, 
@@ -737,7 +737,7 @@ var Application = AbstractApplication.extend({
         this.indo ? this.targetWay++ : this.targetWay--, this.loop ? this.targetWay >= this.wayPoints.length && (this.targetWay = 0) : this.targetWay >= this.wayPoints.length - 1 ? this.indo = !1 : this.targetWay < 1 && (this.indo = !0)), 
         pointDistance(this.getPosition().x, 0, this.wayPoints[this.targetWay].x, 0) > 2 * this.standardVelocity && this.testHorizontal(), 
         pointDistance(this.getPosition().y, 0, this.wayPoints[this.targetWay].y, 0) > 2 * this.standardVelocity && this.testVertical()) : this.collideAccum--, 
-        this.range = this.spriteBall.width / 2, this._super(), this.rot += this.standardVelocity / 10, 
+        this.range = this.spriteBall.width / 2, this._super(), this.rot += this.standardVelocity / 50, 
         this.spriteBall.rotation = this.rot;
     },
     changeShape: function() {},
