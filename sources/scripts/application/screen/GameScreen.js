@@ -95,6 +95,23 @@ var GameScreen = AbstractScreen.extend({
 		// this.hitTouch.touchend = this.hitTouch.mouseup = function(touchData){
 			
 		// };
+		document.body.addEventListener('keydown', function(e){
+			//console.log('keydown');
+			if(self.player){
+				if(e.keyCode === 87 || e.keyCode === 38){
+					self.player.stretch('UP');
+				}
+				else if(e.keyCode === 83 || e.keyCode === 40){
+					self.player.stretch('DOWN');
+				}
+				else if(e.keyCode === 65 || e.keyCode === 37){
+					self.player.stretch('LEFT');
+				}
+				else if(e.keyCode === 68 || e.keyCode === 39){
+					self.player.stretch('RIGHT');
+				}
+			}
+		});
 
 		this.hitTouch.touchstart = this.hitTouch.mousedown = function(touchData){
 			if(self.recoil){
@@ -514,26 +531,11 @@ var GameScreen = AbstractScreen.extend({
 	},
 	initEnvironment: function(){
 		this.environment = [];
-		var temp = [
-			[1,		0,		0,		0,		0,		0,		0,		1,		1,		0,		0,		0,		0,		0,		0,		1,		0],
-			[1,		1,		0,		5,		0,		0,		1,		1,		1,		0,		0,		0,		0,		0,		0,		1,		0],
-			[1,		1,		1,		0,		0,		1,		1,		1,		1,		0,[14,0,2,1],		0,		0,[14,1,2,1],		0,		1,		0],
-			[1,		1,		1,		0,		0,		1,		1,		1,		1,		0,		0,		0,		0,		0,		0,		1,		0],
-			[1,		1,		2,		0,		0,		2,		1,		1,		3,		0,		0,		0,		5,		0,		0,		1,		0],
-			[1,		3,		0,		0,		0,		0,		1,		1,		2,		0,		0,		0,		0,		0,		0,		1,		0],
-			[1,		3,		0,		0,		0,		0,		1,		1,		1,		0,		0,		0,		[12,0,3],0,		0,		1,		1],
-			[1,		3,		0,		0,		0,[13,0,2,1],		5,		0,		0,[13,3,2,1],		8,		0,		0,		0,		0,		1,		0],
-			[1,		3,		0,		0,		0,		0,		1,		1,		1,		0,		0,		0,		0,		5,		0,		1,		0],
-			[1,		3,		0,		0,		0,		0,		1,		1,		1,		0,		0,		0,		[12,1,3],0,		[12,2,3],1,		0],
-			[1,		3,		0,		0,		0,[13,1,2,1],		0,		0,		0,[13,2,2,1],		0,		6,		0,		0,		0,		1,		0],
-			[1,		3,		0,		0,		0,		5,		0,		0,		0,		0,		0,		0,		0,		0,		0,		1,		0],
-			[1,		3,		0,		0,		0,		0,		1,		1,		1,		0,		0,		0,		0,		0,		[12,3,3],1,		0],
-		];
 		// this.tileSize = {w:windowWidth / temp[0].length,		 h:windowHeight / temp.length};
 		// this.tileSize = {w:Math.ceil(windowWidth * 0.1),h:Math.ceil(windowWidth * 0.1)};
 		this.tileSize = {w:50,h:50};
-		this.mapSize = {i:temp[0].length,j:temp.length};
-		this.environment = temp;
+		this.mapSize = {i:LEVELS[0][0].length,j:LEVELS[0].length};
+		this.environment = LEVELS[0];
 
 		this.drawMap();
 		this.drawPlayer();

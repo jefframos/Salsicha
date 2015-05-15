@@ -1139,7 +1139,11 @@ var Application = AbstractApplication.extend({
         });
         this.highscore = JSON.parse(sendObject), APP.cookieManager.setCookie("highScore", this.highscore, 500);
     }
-}), GameScreen = AbstractScreen.extend({
+}), LEVELS = [];
+
+LEVELS.push([ [ 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0 ], [ 1, 1, 0, 5, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0 ], [ 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, [ 14, 0, 2, 1 ], 0, 0, [ 14, 1, 2, 1 ], 0, 1, 0 ], [ 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0 ], [ 1, 1, 2, 0, 0, 2, 1, 1, 3, 0, 0, 0, 5, 0, 0, 1, 0 ], [ 1, 3, 0, 0, 0, 0, 1, 1, 2, 0, 0, 0, 0, 0, 0, 1, 0 ], [ 1, 3, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, [ 12, 0, 3 ], 0, 0, 1, 1 ], [ 1, 3, 0, 0, 0, [ 13, 0, 2, 1 ], 5, 0, 0, [ 13, 3, 2, 1 ], 8, 0, 0, 0, 0, 1, 0 ], [ 1, 3, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 5, 0, 1, 0 ], [ 1, 3, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, [ 12, 1, 3 ], 0, [ 12, 2, 3 ], 1, 0 ], [ 1, 3, 0, 0, 0, [ 13, 1, 2, 1 ], 0, 0, 0, [ 13, 2, 2, 1 ], 0, 6, 0, 0, 0, 1, 0 ], [ 1, 3, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0 ], [ 1, 3, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, [ 12, 3, 3 ], 1, 0 ] ]);
+
+var GameScreen = AbstractScreen.extend({
     init: function(label) {
         this._super(label), this.isLoaded = !1, this.fistTime = !1, APP.points = 0, APP.cookieManager.getSafeCookie("highscore") ? APP.highscore = APP.cookieManager.getSafeCookie("highscore") : (APP.cookieManager.setSafeCookie("highscore", 0), 
         APP.highscore = 0), APP.audioController.playAmbientSound("loop"), APP.mute = !0, 
@@ -1171,7 +1175,9 @@ var Application = AbstractApplication.extend({
         this.interactiveBackground.build(), this.addChild(this.interactiveBackground)), 
         this.hitTouch = new PIXI.Graphics(), this.hitTouch.interactive = !0, this.hitTouch.beginFill(0), 
         this.hitTouch.drawRect(0, 0, windowWidth, windowHeight), this.hitTouch.alpha = 0, 
-        APP.stage.addChild(this.hitTouch), this.tapDown = !1, this.hitTouch.touchstart = this.hitTouch.mousedown = function(touchData) {
+        APP.stage.addChild(this.hitTouch), this.tapDown = !1, document.body.addEventListener("keydown", function(e) {
+            self.player && (87 === e.keyCode || 38 === e.keyCode ? self.player.stretch("UP") : 83 === e.keyCode || 40 === e.keyCode ? self.player.stretch("DOWN") : 65 === e.keyCode || 37 === e.keyCode ? self.player.stretch("LEFT") : (68 === e.keyCode || 39 === e.keyCode) && self.player.stretch("RIGHT"));
+        }), this.hitTouch.touchstart = this.hitTouch.mousedown = function(touchData) {
             if (!self.recoil) {
                 var angle = 180 * Math.atan2(touchData.global.y - windowHeight / 2, touchData.global.x - windowWidth / 2) / Math.PI;
                 self.player.stretch(angle > -135 && -45 > angle ? "UP" : angle > -45 && 45 > angle ? "RIGHT" : angle > 45 && 135 > angle ? "DOWN" : "LEFT");
@@ -1359,15 +1365,13 @@ var Application = AbstractApplication.extend({
         this.endGame = !1, this.initEnvironment(), this.updateMapPosition();
     },
     initEnvironment: function() {
-        this.environment = [];
-        var temp = [ [ 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0 ], [ 1, 1, 0, 5, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0 ], [ 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, [ 14, 0, 2, 1 ], 0, 0, [ 14, 1, 2, 1 ], 0, 1, 0 ], [ 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0 ], [ 1, 1, 2, 0, 0, 2, 1, 1, 3, 0, 0, 0, 5, 0, 0, 1, 0 ], [ 1, 3, 0, 0, 0, 0, 1, 1, 2, 0, 0, 0, 0, 0, 0, 1, 0 ], [ 1, 3, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, [ 12, 0, 3 ], 0, 0, 1, 1 ], [ 1, 3, 0, 0, 0, [ 13, 0, 2, 1 ], 5, 0, 0, [ 13, 3, 2, 1 ], 8, 0, 0, 0, 0, 1, 0 ], [ 1, 3, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 5, 0, 1, 0 ], [ 1, 3, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, [ 12, 1, 3 ], 0, [ 12, 2, 3 ], 1, 0 ], [ 1, 3, 0, 0, 0, [ 13, 1, 2, 1 ], 0, 0, 0, [ 13, 2, 2, 1 ], 0, 6, 0, 0, 0, 1, 0 ], [ 1, 3, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0 ], [ 1, 3, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, [ 12, 3, 3 ], 1, 0 ] ];
-        this.tileSize = {
+        this.environment = [], this.tileSize = {
             w: 50,
             h: 50
         }, this.mapSize = {
-            i: temp[0].length,
-            j: temp.length
-        }, this.environment = temp, this.drawMap(), this.drawPlayer();
+            i: LEVELS[0][0].length,
+            j: LEVELS[0].length
+        }, this.environment = LEVELS[0], this.drawMap(), this.drawPlayer();
     },
     drawMap: function() {
         if (this.environment) if (this.vecTiles && this.vecTiles.length > 0) for (var k = 0; k < this.vecTiles.length; k++) {
