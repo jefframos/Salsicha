@@ -1,4 +1,4 @@
-/*! jefframos 15-05-2015 */
+/*! jefframos 16-05-2015 */
 function rgbToHsl(r, g, b) {
     r /= 255, g /= 255, b /= 255;
     var h, s, max = Math.max(r, g, b), min = Math.min(r, g, b), l = (max + min) / 2;
@@ -438,31 +438,53 @@ var Application = AbstractApplication.extend({
     build: function() {
         this.color = 16777215, this.spriteBall = new PIXI.Graphics(), this.spriteBall.beginFill(this.color), 
         this.maxSize = .02 * windowHeight, this.spriteBall.drawCircle(0, 0, this.maxSize), 
-        console.log(this.spriteBall.width), this.sprite = new PIXI.Sprite(), this.sprite.addChild(this.spriteBall), 
-        this.spriteBall.position.y = this.spriteBall.height / 2, this.range = this.spriteBall.height / 2, 
-        this.sprite.anchor.x = .5, this.sprite.anchor.y = .5, this.updateable = !0, this.collidable = !0, 
-        this.getContent().alpha = .1, TweenLite.to(this.getContent(), .3, {
+        this.width = this.spriteBall.width, this.height = this.spriteBall.height, console.log(this.spriteBall.width), 
+        this.sprite = new PIXI.Sprite(), this.sprite.addChild(this.spriteBall), this.spriteBall.position.y = this.spriteBall.height / 2, 
+        this.range = this.spriteBall.height / 2, this.sprite.anchor.x = .5, this.sprite.anchor.y = .5, 
+        this.updateable = !0, this.collidable = !0, this.getContent().alpha = .1, TweenLite.to(this.getContent(), .3, {
             alpha: 1
         }), this.collideArea = new PIXI.Rectangle(50, 50, windowWidth - 100, windowHeight - 100), 
         this.particlesCounterMax = 2, this.particlesCounter = 1, this.floorPos = windowHeight, 
         this.gravity = 0, this.gravityVal = .15, this.breakJump = !1, this.blockCollide = !1, 
         this.inError = !1, this.perfectShoot = 0, this.perfectShootAcum = 0, this.force = 0, 
-        this.inJump = !1, this.standardVelocity = 3, this.friction = .1;
+        this.inJump = !1, this.standardVelocity = 3, this.friction = .15, this.blockCollide2 = !1;
     },
-    returnCollide: function() {
-        console.log("returnCollide");
+    returnCollide: function(half) {
+        console.log("returnCollide"), this.blockMove = !0;
+        var multiplyer = 1;
+        half && (multiplyer = .2);
         var tempPos = {
             x: this.getPosition().x,
             y: this.getPosition().y
         };
-        return "UP" === this.currentSide ? tempPos.y += this.spriteBall.height / 2 : "DOWN" === this.currentSide ? tempPos.y -= this.spriteBall.height / 2 : "LEFT" === this.currentSide ? tempPos.x += this.spriteBall.width / 2 : "RIGHT" === this.currentSide && (tempPos.x -= this.spriteBall.width / 2), 
-        TweenLite.to(this.getPosition(), .5, {
+        "UP" === this.currentSide ? tempPos.y += this.spriteBall.height * multiplyer / 2 : "DOWN" === this.currentSide ? tempPos.y -= this.spriteBall.height * multiplyer / 2 : "LEFT" === this.currentSide ? tempPos.x += this.spriteBall.width * multiplyer / 2 : "RIGHT" === this.currentSide && (tempPos.x -= this.spriteBall.width * multiplyer / 2);
+        var self = this;
+        return TweenLite.to(this.getPosition(), .1, {
             x: tempPos.x,
-            y: tempPos.y
+            y: tempPos.y,
+            onComplete: function() {
+                self.blockMove = !1;
+            }
+        }), this.explode2(), tempPos;
+    },
+    returnCollide2: function(half) {
+        console.log("returnCollide2"), this.blockCollide2 = !0;
+        var tempPos = {
+            x: this.getPosition().x,
+            y: this.getPosition().y
+        };
+        tempPos.y -= this.velocity.y / 2, tempPos.x -= this.velocity.x / 2;
+        var self = this;
+        return TweenLite.to(this.getPosition(), .1, {
+            x: tempPos.x,
+            y: tempPos.y,
+            onComplete: function() {
+                self.blockCollide2 = !1;
+            }
         }), this.explode2(), tempPos;
     },
     moveBack: function(side) {
-        this.currentSide = "", "UP" === side ? this.velocity.y = 2 * this.standardVelocity : "DOWN" === side ? this.velocity.y = 2 * -this.standardVelocity : "LEFT" === side ? this.velocity.x = 2 * this.standardVelocity : "RIGHT" === side && (this.velocity.x = 2 * -this.standardVelocity);
+        console.log("moveBack"), this.currentSide = "", "UP" === side ? this.velocity.y = 3 * this.standardVelocity : "DOWN" === side ? this.velocity.y = 3 * -this.standardVelocity : "LEFT" === side ? this.velocity.x = 3 * this.standardVelocity : "RIGHT" === side && (this.velocity.x = 3 * -this.standardVelocity);
     },
     stretch: function(side) {
         this.currentSide !== side && (this.currentSide = side, "UP" === this.currentSide ? (this.velocity.x = 0, 
@@ -470,6 +492,9 @@ var Application = AbstractApplication.extend({
         this.velocity.y = 2 * this.standardVelocity) : "LEFT" === this.currentSide ? (this.velocity.x = 2 * -this.standardVelocity, 
         this.velocity.y = 0) : (this.velocity.x = 2 * this.standardVelocity, this.velocity.y = 0), 
         this.screen.addTrail());
+    },
+    stopReturn: function() {
+        this.getPosition().x -= this.velocity.x, this.getPosition().x -= this.velocity.y;
     },
     stop: function() {
         this.velocity = {
@@ -557,8 +582,8 @@ var Application = AbstractApplication.extend({
         this.layer.addChild(particle);
     },
     explode2: function() {
-        tempParticle = new PIXI.Graphics(), tempParticle.beginFill(this.color), tempParticle.drawCircle(0, 0, this.spriteBall.width), 
-        particle = new Particles({
+        console.log("explode2"), tempParticle = new PIXI.Graphics(), tempParticle.beginFill(this.color), 
+        tempParticle.drawCircle(0, 0, this.spriteBall.width), particle = new Particles({
             x: 0,
             y: 0
         }, 600, tempParticle, 0), particle.maxScale = 5 * this.getContent().scale.x, particle.maxInitScale = 1, 
@@ -1139,9 +1164,9 @@ var Application = AbstractApplication.extend({
         });
         this.highscore = JSON.parse(sendObject), APP.cookieManager.setCookie("highScore", this.highscore, 500);
     }
-}), LEVELS = [];
+}), LEVELS = [], tempMap = [ [ 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, [ 15, 1, 3 ], 0, 0, 0, 0, [ 15, 2, 3 ], 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 4, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0 ], [ [ 14, 0, 2, 1 ], 0, 0, 0, 0, [ 14, 3, 2, 1 ], 0, 0, 0, [ 15, 0, 3 ], 0, 0, 0, 0, [ 13, 0, 2, 1 ], 0, 0, 0, 0, [ 13, 3, 2, 1 ] ], [ 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0 ], [ 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0 ], [ 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 1, 1, 1, 1, 0 ], [ 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0 ], [ [ 14, 1, 2, 1 ], 0, 0, 0, 0, [ 14, 2, 2, 1 ], 0, 0, 0, 0, 0, 0, 0, 0, [ 13, 1, 2, 1 ], 0, 0, 0, 0, [ 13, 2, 2, 1 ] ], [ 2, 0, 0, 0, 0, 0, 0, 0, 0, [ 12, 0, 3 ], 0, 0, 0, 0, 0, 0, [ 12, 1, 3 ], 0, 0, 0 ], [ 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 3, 1, 0, 0, 0, 4 ], [ 2, 0, 0, 1, 1, 1, 1, 1, 1, 1, 3, 0, 0, 0, 0, 3, 0, 0, 0, 0 ], [ 2, 0, 0, 1, 1, 1, 1, 1, 1, 1, 3, 0, 0, 0, 0, 3, [ 12, 2, 3 ], 0, 0, [ 12, 3, 3 ] ], [ 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 3, 3, 3, 3, 3 ], [ 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 2, 2, 2, 2, 2, 1, 0, 0, 0, 0, 3, 0, 0, 3, 3, 3, 3, 3, 3, 3 ], [ 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 3, 0, 0, 3, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 3, 0, 0, 3, 0, [ 16, 0, 3, 1 ], 0, 4, 0, [ 16, 1, 3, 1 ] ], [ 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 3 ], [ 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 2, 2, 2, 0, 0, 2, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 1, 0, 0, 5, 0, 1, 0, 0, 1, 0, 0, 2, 0, 0, 0 ] ];
 
-LEVELS.push([ [ 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0 ], [ 1, 1, 0, 5, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0 ], [ 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, [ 14, 0, 2, 1 ], 0, 0, [ 14, 1, 2, 1 ], 0, 1, 0 ], [ 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0 ], [ 1, 1, 2, 0, 0, 2, 1, 1, 3, 0, 0, 0, 5, 0, 0, 1, 0 ], [ 1, 3, 0, 0, 0, 0, 1, 1, 2, 0, 0, 0, 0, 0, 0, 1, 0 ], [ 1, 3, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, [ 12, 0, 3 ], 0, 0, 1, 1 ], [ 1, 3, 0, 0, 0, [ 13, 0, 2, 1 ], 5, 0, 0, [ 13, 3, 2, 1 ], 8, 0, 0, 0, 0, 1, 0 ], [ 1, 3, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 5, 0, 1, 0 ], [ 1, 3, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, [ 12, 1, 3 ], 0, [ 12, 2, 3 ], 1, 0 ], [ 1, 3, 0, 0, 0, [ 13, 1, 2, 1 ], 0, 0, 0, [ 13, 2, 2, 1 ], 0, 6, 0, 0, 0, 1, 0 ], [ 1, 3, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0 ], [ 1, 3, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, [ 12, 3, 3 ], 1, 0 ] ]);
+LEVELS.push(tempMap);
 
 var GameScreen = AbstractScreen.extend({
     init: function(label) {
@@ -1169,24 +1194,30 @@ var GameScreen = AbstractScreen.extend({
     },
     initApplication: function() {
         var self = this;
-        this.background ? this.addChild(this.background) : (this.background = new PIXI.Graphics(), 
+        if (this.background ? this.addChild(this.background) : (this.background = new PIXI.Graphics(), 
         this.background.beginFill(APP.backColor), this.background.drawRect(0, 0, windowWidth, windowHeight), 
         this.addChild(this.background)), this.interactiveBackground ? this.addChild(this.interactiveBackground) : (this.interactiveBackground = new InteractiveBackground(this), 
         this.interactiveBackground.build(), this.addChild(this.interactiveBackground)), 
         this.hitTouch = new PIXI.Graphics(), this.hitTouch.interactive = !0, this.hitTouch.beginFill(0), 
         this.hitTouch.drawRect(0, 0, windowWidth, windowHeight), this.hitTouch.alpha = 0, 
-        APP.stage.addChild(this.hitTouch), this.tapDown = !1, document.body.addEventListener("keydown", function(e) {
-            self.player && (87 === e.keyCode || 38 === e.keyCode ? self.player.stretch("UP") : 83 === e.keyCode || 40 === e.keyCode ? self.player.stretch("DOWN") : 65 === e.keyCode || 37 === e.keyCode ? self.player.stretch("LEFT") : (68 === e.keyCode || 39 === e.keyCode) && self.player.stretch("RIGHT"));
-        }), this.hitTouch.touchstart = this.hitTouch.mousedown = function(touchData) {
-            if (!self.recoil) {
-                var angle = 180 * Math.atan2(touchData.global.y - windowHeight / 2, touchData.global.x - windowWidth / 2) / Math.PI;
-                self.player.stretch(angle > -135 && -45 > angle ? "UP" : angle > -45 && 45 > angle ? "RIGHT" : angle > 45 && 135 > angle ? "DOWN" : "LEFT");
-            }
-        }, this.updateable = !0, document.body.addEventListener("keyup", function(e) {
-            (32 === e.keyCode || 40 === e.keyCode) && self.getTileByPos(self.player.getPosition().x, self.player.getPosition().y);
-        }), document.body.addEventListener("keydown", function(e) {
-            (32 === e.keyCode || 40 === e.keyCode) && (self.tapDown = !0);
-        }), APP.withAPI && GameAPI.GameBreak.request(function() {
+        APP.stage.addChild(this.hitTouch), this.tapDown = !1, testMobile()) {
+            this.hammer && (this.hammer.off("swipeup"), this.hammer.off("swiperight"), this.hammer.off("swipeleft"), 
+            this.hammer.off("swipedown"));
+            var swipe = new Hammer.Swipe();
+            this.hammer = new Hammer.Manager(renderer.view), this.hammer.add(swipe), console.log(this.hammer), 
+            this.hammer.on("swipeup", function() {
+                self.player.stretch("UP");
+            }), this.hammer.on("swipedown", function() {
+                self.player.stretch("DOWN");
+            }), this.hammer.on("swiperight", function() {
+                self.player.stretch("RIGHT");
+            }), this.hammer.on("swipeleft", function() {
+                self.player.stretch("LEFT");
+            }), this.updateable = !0;
+        } else document.body.addEventListener("keydown", function(e) {
+            self.player && !self.player.blockMove && (87 === e.keyCode || 38 === e.keyCode ? self.player.stretch("UP") : 83 === e.keyCode || 40 === e.keyCode ? self.player.stretch("DOWN") : 65 === e.keyCode || 37 === e.keyCode ? self.player.stretch("LEFT") : (68 === e.keyCode || 39 === e.keyCode) && self.player.stretch("RIGHT"));
+        });
+        APP.withAPI && GameAPI.GameBreak.request(function() {
             self.pauseModal.show();
         }, function() {
             self.pauseModal.hide();
@@ -1243,7 +1274,7 @@ var GameScreen = AbstractScreen.extend({
                 y: .5,
                 ease: "easeOutElastic",
                 onStart: onStart
-            })), this.trails = [];
+            })), this.player.returnCollide(), this.trails = [];
         }
     },
     addTrail: function() {
@@ -1254,29 +1285,22 @@ var GameScreen = AbstractScreen.extend({
         };
         if (0 === this.player.velocity.y) {
             if (this.trails.length > 1 && "HORIZONTAL" === this.trails[this.trails.length - 1].type) return void (this.onBack = !0);
-            trail.drawRect(0, -this.player.spriteBall.height, 1, this.player.spriteBall.height), 
-            trail.position.x = this.player.getPosition().x, trail.position.y = this.player.getPosition().y + this.player.spriteBall.height / 2, 
-            trailObj.type = "HORIZONTAL", trailObj.side = this.player.velocity.x < 0 ? "LEFT" : "RIGHT";
+            trail.drawRect(0, -this.player.height, 1, this.player.height), trail.position.x = this.player.getPosition().x, 
+            trail.position.y = this.player.getPosition().y + this.player.height / 2, trailObj.type = "HORIZONTAL", 
+            trailObj.side = this.player.velocity.x < 0 ? "LEFT" : "RIGHT";
         } else {
             if (this.trails.length > 1 && "VERTICAL" === this.trails[this.trails.length - 1].type) return void (this.onBack = !0);
-            trail.drawRect(-this.player.spriteBall.width / 2, 0, this.player.spriteBall.width, 1), 
-            trail.position.x = this.player.getPosition().x, trail.position.y = this.player.getPosition().y, 
-            trailObj.type = "VERTICAL", trailObj.side = this.player.velocity.y < 0 ? "UP" : "DOWN";
+            trail.drawRect(-this.player.width / 2, 0, this.player.width, 1), trail.position.x = this.player.getPosition().x, 
+            trail.position.y = this.player.getPosition().y, trailObj.type = "VERTICAL", trailObj.side = this.player.velocity.y < 0 ? "UP" : "DOWN";
         }
         var joint = new PIXI.Graphics();
-        if (joint.beginFill(this.player.color), joint.drawCircle(0, 0, this.player.spriteBall.width / 2), 
+        joint.beginFill(this.player.color), joint.drawCircle(0, 0, this.player.width / 2), 
         this.trailContainer.addChild(joint), this.trailContainer.addChild(trail), joint.position.x = this.player.getPosition().x, 
         joint.position.y = this.player.getPosition().y, this.trails.push({
             trail: joint,
             type: "JOINT",
             side: trailObj.side
-        }), this.trails.push(trailObj), this.onBack) {
-            var self = this;
-            this.blockCollide = !0, setTimeout(function() {
-                self.blockCollide = !1;
-            }, 300);
-        }
-        this.onBack = !1;
+        }), this.trails.push(trailObj), this.onBack = !1;
     },
     update: function() {
         if (this.updateable && (this.updateMapPosition(), this._super(), this.layerManager && this.layerManager.update(), 
@@ -1315,7 +1339,6 @@ var GameScreen = AbstractScreen.extend({
                 if (1 === typeTile) this.player.getContent().position.x -= this.player.velocity.x, 
                 this.player.getContent().position.y -= this.player.velocity.y, this.player.stop(), 
                 this.collideWall(); else if (2 === typeTile) this.gameOver(), this.player.preKill(); else if (3 === typeTile) {
-                    console.log(this.trails.length);
                     var dest = this.player.returnCollide();
                     if (this.trails.length > 1) {
                         var tempTrail2 = this.trails[this.trails.length - 1].trail, tempStretch = {
@@ -1332,11 +1355,13 @@ var GameScreen = AbstractScreen.extend({
     },
     trailCollide: function(justEnemies) {
         for (var i = 0; i < this.trails.length && !this.blockCollide; i++) if ("JOINT" !== this.trails[i].type) for (var rectTrail, tempEntity = null, tempTrail = this.trails[i], j = 0; j < this.layer.childs.length; j++) if (tempEntity = this.layer.childs[j], 
-        "enemy" === tempEntity.type || !justEnemies && "player" === tempEntity.type && i < this.trails.length - 6) {
+        "enemy" === tempEntity.type || !justEnemies && "player" === tempEntity.type && i < this.trails.length - 4) {
             var rectPlayer = new PIXI.Rectangle(tempEntity.getPosition().x - tempEntity.spriteBall.width / 2, tempEntity.getPosition().y - tempEntity.spriteBall.height / 2, tempEntity.spriteBall.width, tempEntity.spriteBall.height);
             rectTrail = "VERTICAL" === tempTrail.type ? "UP" === tempTrail.side ? new PIXI.Rectangle(tempTrail.trail.position.x - Math.abs(tempTrail.trail.width) / 2, tempTrail.trail.position.y - Math.abs(tempTrail.trail.height), Math.abs(tempTrail.trail.width), Math.abs(tempTrail.trail.height)) : new PIXI.Rectangle(tempTrail.trail.position.x - tempTrail.trail.width / 2, tempTrail.trail.position.y, Math.abs(tempTrail.trail.width), Math.abs(tempTrail.trail.height)) : "RIGHT" === tempTrail.side ? new PIXI.Rectangle(tempTrail.trail.position.x, tempTrail.trail.position.y - Math.abs(tempTrail.trail.height), Math.abs(tempTrail.trail.width), Math.abs(tempTrail.trail.height)) : new PIXI.Rectangle(tempTrail.trail.position.x - Math.abs(tempTrail.trail.width), tempTrail.trail.position.y - Math.abs(tempTrail.trail.height), Math.abs(tempTrail.trail.width), Math.abs(tempTrail.trail.height)), 
             rectPlayer.x + tempEntity.velocity.x < rectTrail.x + rectTrail.width && rectPlayer.x + rectPlayer.width + tempEntity.velocity.x > rectTrail.x && rectPlayer.y + tempEntity.velocity.y < rectTrail.y + rectTrail.height && rectPlayer.height + rectPlayer.y + tempEntity.velocity.y > rectTrail.y && ("enemy" === tempEntity.type ? (tempEntity.preKill(), 
-            this.gameOver()) : (this.player.explode2(), this.player.stop()));
+            this.gameOver()) : this.player.blockCollide2 || (this.player.explode2(), this.player.stopReturn(), 
+            this.player.stop(), this.player.moveBack(this.trails[this.trails.length - 1].side), 
+            this.onBack = !0));
         }
     },
     updateMapPosition: function() {
@@ -1386,13 +1411,13 @@ var GameScreen = AbstractScreen.extend({
     },
     drawTile: function(type, i, j) {
         if (type >= 1 && 3 >= type) {
-            var tempColor = this.player.color;
-            2 === type ? tempColor = addBright(this.player.color, .5) : 3 === type && (tempColor = addBright(this.player.color, .8));
-            var tempGraphics = new PIXI.Graphics();
-            tempGraphics.beginFill(tempColor), tempGraphics.drawRect(0, 0, this.tileSize.w, this.tileSize.h), 
+            var tempColor = this.player.color, tempGraphics = new PIXI.Graphics(), isEnemy = !1;
+            2 === type ? (tempColor = addBright(this.player.color, .5), isEnemy = !0) : 3 === type && (tempColor = addBright(this.player.color, .8)), 
+            tempGraphics.beginFill(tempColor), isEnemy ? (tempGraphics.drawRect(0, 0, this.tileSize.w, this.tileSize.h), 
+            tempGraphics.moveTo(0, 0)) : tempGraphics.drawRect(0, 0, this.tileSize.w, this.tileSize.h), 
             tempGraphics.position.x = i * this.tileSize.w, tempGraphics.position.y = j * this.tileSize.h, 
             this.gameContainer.addChild(tempGraphics), this.vecTiles.push(tempGraphics);
-        } else if (5 === type) {
+        } else if (4 === type) {
             var coin = new Coin(this);
             coin.build(), this.layer.addChild(coin), coin.getContent().position.x = i * this.tileSize.w + this.tileSize.w / 2, 
             coin.getContent().position.y = j * this.tileSize.h + this.tileSize.h / 2;
@@ -1426,7 +1451,7 @@ var GameScreen = AbstractScreen.extend({
         }
     },
     drawPlayer: function() {
-        for (var i = 0; i < this.environment.length; i++) for (var j = 0; j < this.environment[i].length; j++) 8 === this.environment[i][j] && (this.player.getContent().position.x = j * this.tileSize.w + this.tileSize.w / 2, 
+        for (var i = 0; i < this.environment.length; i++) for (var j = 0; j < this.environment[i].length; j++) 5 === this.environment[i][j] && (this.player.getContent().position.x = j * this.tileSize.w + this.tileSize.w / 2, 
         this.player.getContent().position.y = i * this.tileSize.h + this.tileSize.h / 2);
     },
     getTileByPos: function(x, y) {
@@ -1550,7 +1575,7 @@ var GameScreen = AbstractScreen.extend({
             }, 50), this.earthquake(40), this.endGame = !0, this.crazyContent.alpha = 0, this.coinsLabel.alpha = 0;
             var self = this;
             setTimeout(function() {
-                self.endGame = !1, APP.audioController.playSound("wub"), self.recoilTimeline.kill(), 
+                self.endGame = !1, APP.audioController.playSound("wub"), self.recoilTimeline && self.recoilTimeline.kill(), 
                 self.reset();
             }, 1e3);
         }

@@ -35,6 +35,9 @@ var Ball = Entity.extend({
 		this.maxSize = windowHeight * 0.02;
 		this.spriteBall.drawCircle(0,0,this.maxSize);
 
+		this.width = this.spriteBall.width;
+		this.height = this.spriteBall.height;
+
 
 		console.log(this.spriteBall.width);
 
@@ -71,36 +74,63 @@ var Ball = Entity.extend({
 		this.inJump = false;
 
 		this.standardVelocity = 3;
-		this.friction = 0.1;
+		this.friction = 0.15;
+
+		this.blockCollide2 = false;
 
 	},
-	returnCollide: function(){
+	returnCollide: function(half){
 		console.log('returnCollide');
+		this.blockMove = true;
+		var multiplyer = 1;
+		if(half){
+			multiplyer = 0.2;
+		}
 		var tempPos = {x:this.getPosition().x, y:this.getPosition().y};
 		if(this.currentSide === 'UP'){
-			tempPos.y += this.spriteBall.height / 2;
+			tempPos.y += (this.spriteBall.height * multiplyer) / 2;
 		}else if(this.currentSide === 'DOWN'){
-			tempPos.y -= this.spriteBall.height / 2;
+			tempPos.y -= (this.spriteBall.height * multiplyer) / 2;
 		}else if(this.currentSide === 'LEFT'){
-			tempPos.x += this.spriteBall.width / 2;
+			tempPos.x += (this.spriteBall.width * multiplyer) / 2;
 		}else if(this.currentSide === 'RIGHT'){
-			tempPos.x -= this.spriteBall.width / 2;
+			tempPos.x -= (this.spriteBall.width * multiplyer) / 2;
 		}
-
-		TweenLite.to(this.getPosition(), 0.5, {x:tempPos.x ,y:tempPos.y});
+		var self = this;
+		TweenLite.to(this.getPosition(), 0.1, {x:tempPos.x ,y:tempPos.y, onComplete:function(){
+			// alert('unblock');
+			self.blockMove = false;
+		}});
+		this.explode2();
+		return tempPos;
+	},
+	returnCollide2: function(half){
+		console.log('returnCollide2');
+		// this.moveBack(this.currentSide);
+		this.blockCollide2 = true;
+		var multiplyer = 1;
+		var tempPos = {x:this.getPosition().x, y:this.getPosition().y};
+		tempPos.y -= this.velocity.y / 2;
+		tempPos.x -= this.velocity.x / 2;
+		var self = this;
+		TweenLite.to(this.getPosition(), 0.1, {x:tempPos.x ,y:tempPos.y, onComplete:function(){
+			// alert('unblock');
+			self.blockCollide2 = false;
+		}});
 		this.explode2();
 		return tempPos;
 	},
 	moveBack: function(side){
+		console.log('moveBack');
 		this.currentSide = '';
 		if(side === 'UP'){
-			this.velocity.y = this.standardVelocity * 2;
+			this.velocity.y = this.standardVelocity * 3;
 		}else if(side === 'DOWN'){
-			this.velocity.y = -this.standardVelocity * 2;
+			this.velocity.y = -this.standardVelocity * 3;
 		}else if(side === 'LEFT'){
-			this.velocity.x = this.standardVelocity * 2;
+			this.velocity.x = this.standardVelocity * 3;
 		}else if(side === 'RIGHT'){
-			this.velocity.x = -this.standardVelocity * 2;
+			this.velocity.x = -this.standardVelocity * 3;
 		}
 	},
 	stretch: function(side){
@@ -123,6 +153,10 @@ var Ball = Entity.extend({
 		}
 		this.screen.addTrail();
 	},
+	stopReturn: function(){
+		this.getPosition().x -= this.velocity.x;
+		this.getPosition().x -= this.velocity.y;
+	},
 	stop: function(){
 		this.velocity = {x:0, y:0};
 	},
@@ -142,6 +176,7 @@ var Ball = Entity.extend({
 
 	},
 	update: function(){
+		// console.log(this.blockMove);
 		this.range = this.spriteBall.height / 2;
 		this._super();
 		this.applyFriction();
@@ -281,6 +316,8 @@ var Ball = Entity.extend({
 		this.layer.addChild(particle);
 	},
 	explode2:function(){
+		console.log('explode2');
+		// this.stop();
 		tempParticle = new PIXI.Graphics();
 		tempParticle.beginFill(this.color);
 		tempParticle.drawCircle(0,0,this.spriteBall.width);

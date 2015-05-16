@@ -78,10 +78,6 @@ var GameScreen = AbstractScreen.extend({
 			this.addChild(this.interactiveBackground);
 
 		}
-		// this.changeColor();
-		// this.background.alpha = 0;
-
-
 		this.hitTouch = new PIXI.Graphics();
 		this.hitTouch.interactive = true;
 		this.hitTouch.beginFill(0);
@@ -92,65 +88,83 @@ var GameScreen = AbstractScreen.extend({
 
 		this.tapDown = false;
 
-		// this.hitTouch.touchend = this.hitTouch.mouseup = function(touchData){
-			
-		// };
-		document.body.addEventListener('keydown', function(e){
-			//console.log('keydown');
-			if(self.player){
-				if(e.keyCode === 87 || e.keyCode === 38){
-					self.player.stretch('UP');
+		if(!testMobile()){
+
+			document.body.addEventListener('keydown', function(e){
+				if(self.player && !self.player.blockMove){
+					if(e.keyCode === 87 || e.keyCode === 38){
+						self.player.stretch('UP');
+					}
+					else if(e.keyCode === 83 || e.keyCode === 40){
+						self.player.stretch('DOWN');
+					}
+					else if(e.keyCode === 65 || e.keyCode === 37){
+						self.player.stretch('LEFT');
+					}
+					else if(e.keyCode === 68 || e.keyCode === 39){
+						self.player.stretch('RIGHT');
+					}
 				}
-				else if(e.keyCode === 83 || e.keyCode === 40){
-					self.player.stretch('DOWN');
-				}
-				else if(e.keyCode === 65 || e.keyCode === 37){
-					self.player.stretch('LEFT');
-				}
-				else if(e.keyCode === 68 || e.keyCode === 39){
-					self.player.stretch('RIGHT');
-				}
+			});
+		}else{
+
+			if(this.hammer){
+				this.hammer.off('swipeup');
+				this.hammer.off('swiperight');
+				this.hammer.off('swipeleft');
+				this.hammer.off('swipedown');
 			}
-		});
+			var swipe     = new Hammer.Swipe();
+			this.hammer    = new Hammer.Manager(renderer.view);
+			this.hammer.add(swipe);
 
-		this.hitTouch.touchstart = this.hitTouch.mousedown = function(touchData){
-			if(self.recoil){
-				return;
-			}
-			// console.log(touchData);
-			// var angle = Math.atan2(touchData.global.y - (self.player.getPosition().y + self.getContent().position.y * self.getContent().scale.y),
-			// (touchData.global.x) - (self.player.getPosition().x + self.getContent().position.x * self.getContent().scale.x)) * 180 / Math.PI;
-
-			var angle = Math.atan2(touchData.global.y - windowHeight / 2, touchData.global.x - windowWidth / 2) * 180 / Math.PI;
-
-			// var angle = Math.atan2(touchData.global.y - (self.player.getPosition().y + self.getContent().position.y),
-			// (touchData.global.x) - (self.player.getPosition().x + self.getContent().position.x)) * 180 / Math.PI;
-			//console.log(angle);
-			if(angle > -135 && angle < -45){
+			console.log(this.hammer);
+			this.hammer.on('swipeup', function() {
 				self.player.stretch('UP');
-			}else if(angle > -45 && angle < 45){
-				self.player.stretch('RIGHT');
-			}else if(angle > 45 && angle < 135){
+			});
+
+			this.hammer.on('swipedown', function() {
 				self.player.stretch('DOWN');
-			}else{
+			});
+
+			this.hammer.on('swiperight', function() {
+				self.player.stretch('RIGHT');
+			});
+
+			this.hammer.on('swipeleft', function() {
 				self.player.stretch('LEFT');
-			}
-		};
-		this.updateable = true;
+			});
 
 
-		document.body.addEventListener('keyup', function(e){
-			if(e.keyCode === 32 || e.keyCode === 40){
-				self.getTileByPos(self.player.getPosition().x, self.player.getPosition().y);
-				// self.tapDown = false;
-				// self.shoot((APP.force / 30) * windowHeight * 0.1);
-			}
-		});
-		document.body.addEventListener('keydown', function(e){
-			if(e.keyCode === 32 || e.keyCode === 40){
-				self.tapDown = true;
-			}
-		});
+			// this.hitTouch.touchstart = this.hitTouch.mousedown = function(touchData){
+			// 	if(true){//self.recoil){
+			// 		return;
+			// 	}
+			// 	var angle = Math.atan2(touchData.global.y - windowHeight / 2, touchData.global.x - windowWidth / 2) * 180 / Math.PI;
+
+			// 	if(angle > -135 && angle < -45){
+			// 		self.player.stretch('UP');
+			// 	}else if(angle > -45 && angle < 45){
+			// 		self.player.stretch('RIGHT');
+			// 	}else if(angle > 45 && angle < 135){
+			// 		self.player.stretch('DOWN');
+			// 	}else{
+			// 		self.player.stretch('LEFT');
+			// 	}
+			// };
+			this.updateable = true;
+		}
+
+		// document.body.addEventListener('keyup', function(e){
+		// 	if(e.keyCode === 32 || e.keyCode === 40){
+		// 		self.getTileByPos(self.player.getPosition().x, self.player.getPosition().y);
+		// 	}
+		// });
+		// document.body.addEventListener('keydown', function(e){
+		// 	if(e.keyCode === 32 || e.keyCode === 40){
+		// 		self.tapDown = true;
+		// 	}
+		// });
 
 
 		if(APP.withAPI){
@@ -238,6 +252,7 @@ var GameScreen = AbstractScreen.extend({
 		}else{
 			this.recoilTimeline.append(TweenLite.from(this.player.getContent().scale,  1, {y:0.5, ease:'easeOutElastic', onStart:onStart}));
 		}
+		this.player.returnCollide();
 		this.trails = [];
 
 
@@ -257,11 +272,11 @@ var GameScreen = AbstractScreen.extend({
 					return;
 				}
 			}
-			trail.drawRect(0, -this.player.spriteBall.height, 1, this.player.spriteBall.height);
+			trail.drawRect(0, -this.player.height, 1, this.player.height);
 
 
 			trail.position.x = this.player.getPosition().x;
-			trail.position.y = this.player.getPosition().y + this.player.spriteBall.height / 2;
+			trail.position.y = this.player.getPosition().y + this.player.height / 2;
 			trailObj.type = 'HORIZONTAL';
 			trailObj.side = this.player.velocity.x < 0?'LEFT':'RIGHT';
 		}else{
@@ -271,11 +286,11 @@ var GameScreen = AbstractScreen.extend({
 					return;
 				}
 			}
-			trail.drawRect(-this.player.spriteBall.width / 2, 0, this.player.spriteBall.width, 1);
+			trail.drawRect(-this.player.width / 2, 0, this.player.width, 1);
 			trail.position.x = this.player.getPosition().x;
 
-			// trail.position.y = this.player.getPosition().y + (this.player.velocity.y > 0 ?-this.player.spriteBall.height / 2 : this.player.spriteBall.height / 2);
-			trail.position.y = this.player.getPosition().y;// - this.player.spriteBall.height / 2;
+			// trail.position.y = this.player.getPosition().y + (this.player.velocity.y > 0 ?-this.player.height / 2 : this.player.height / 2);
+			trail.position.y = this.player.getPosition().y;// - this.player.height / 2;
 			trailObj.type = 'VERTICAL';
 			trailObj.side = this.player.velocity.y < 0?'UP':'DOWN';
 		}
@@ -283,7 +298,7 @@ var GameScreen = AbstractScreen.extend({
 
 		var joint = new PIXI.Graphics();
 		joint.beginFill(this.player.color);
-		joint.drawCircle(0,0,this.player.spriteBall.width/2);
+		joint.drawCircle(0,0,this.player.width/2);
 		this.trailContainer.addChild(joint);
 		this.trailContainer.addChild(trail);
 		joint.position.x = this.player.getPosition().x;
@@ -292,13 +307,13 @@ var GameScreen = AbstractScreen.extend({
 		this.trails.push({trail:joint, type:'JOINT', side:trailObj.side});
 		this.trails.push(trailObj);
 
-		if(this.onBack){
-			var self = this;
-			this.blockCollide = true;
-			setTimeout(function(){
-				self.blockCollide = false;
-			}, 300);
-		}
+		// if(this.onBack){
+		// 	var self = this;
+		// 	this.blockCollide = true;
+		// 	setTimeout(function(){
+		// 		self.blockCollide = false;
+		// 	}, 300);
+		// }
 		this.onBack = false;
 	},
 	update:function(){
@@ -405,7 +420,7 @@ var GameScreen = AbstractScreen.extend({
 			this.gameOver();
 			this.player.preKill();
 		}else if(typeTile === 3){
-			console.log(this.trails.length);
+			// console.log(this.trails.length);
 			var dest = this.player.returnCollide();
 			if(this.trails.length > 1){
 				var tempTrail2 = this.trails[this.trails.length - 1].trail;
@@ -421,6 +436,7 @@ var GameScreen = AbstractScreen.extend({
 		}
 	},
 	trailCollide:function(justEnemies){
+		// console.log(this.blockCollide);
 		for (var i = 0; i < this.trails.length; i++) {
 			if(this.blockCollide){
 				break;
@@ -432,7 +448,7 @@ var GameScreen = AbstractScreen.extend({
 				var tempTrail = this.trails[i];
 				for (var j = 0; j < this.layer.childs.length; j++) {
 					tempEntity = this.layer.childs[j];
-					if(tempEntity.type === 'enemy' || (!justEnemies && tempEntity.type === 'player' && i < this.trails.length - 6)){
+					if(tempEntity.type === 'enemy' || (!justEnemies && tempEntity.type === 'player' && i < this.trails.length - 4)){ //ERA 6 isso antes
 						var rectPlayer  = new PIXI.Rectangle(tempEntity.getPosition().x - tempEntity.spriteBall.width/2,
 							tempEntity.getPosition().y - tempEntity.spriteBall.height / 2,
 							tempEntity.spriteBall.width,
@@ -471,9 +487,13 @@ var GameScreen = AbstractScreen.extend({
 							if(tempEntity.type === 'enemy'){
 								tempEntity.preKill();
 								this.gameOver();
-							}else{
+							}else if(!this.player.blockCollide2){
 								this.player.explode2();
+								this.player.stopReturn();
 								this.player.stop();
+								this.player.moveBack(this.trails[this.trails.length - 1].side);
+								this.onBack = true;
+								// this.player.returnCollide2();
 							}
 						}
 					}
@@ -576,22 +596,35 @@ var GameScreen = AbstractScreen.extend({
 		
 		if(type >= 1 && type <= 3){
 			var tempColor = this.player.color;//type === 1 ? this.player.color: 0xFF0000;
+			var tempGraphics = new PIXI.Graphics();
+			var isEnemy = false;
 			if(type === 2){
 				tempColor = addBright(this.player.color,0.5);
+				isEnemy = true;
 			}else if(type === 3){
 				tempColor = addBright(this.player.color,0.8);
 			}
-			var tempGraphics = new PIXI.Graphics();
-			// tempGraphics.lineStyle(1,color); APP.vecColors[APP.currentColorID]
 			tempGraphics.beginFill(tempColor);
-			tempGraphics.drawRect(0,0,this.tileSize.w, this.tileSize.h);
+			if(isEnemy){
+
+				tempGraphics.drawRect(0,0,this.tileSize.w, this.tileSize.h);
+				tempGraphics.moveTo(0,0);
+
+				// var dentes = 5;
+				// for (var i = 0; i < dentes; i++) {
+				// }
+				// tempGraphics.lineTo(this.tileSize.w * 2,0);
+				// tempGraphics.lineTo(this.tileSize.w * 2, this.tileSize.w * 2);
+			}else{
+				tempGraphics.drawRect(0,0,this.tileSize.w, this.tileSize.h);
+			}
+
+
 			tempGraphics.position.x = i * this.tileSize.w;
 			tempGraphics.position.y = j * this.tileSize.h;
-			// tempGraphics.alpha = 0.5;
-			// console.log('addTile');
 			this.gameContainer.addChild(tempGraphics);
 			this.vecTiles.push(tempGraphics);
-		}else if(type === 5){
+		}else if(type === 4){
 			var coin = new Coin(this);
 			coin.build();
 			this.layer.addChild(coin);
@@ -652,7 +685,7 @@ var GameScreen = AbstractScreen.extend({
 	drawPlayer: function(){
 		for (var i = 0; i < this.environment.length; i++) {
 			for (var j = 0; j < this.environment[i].length; j++) {
-				if(this.environment[i][j] === 8){
+				if(this.environment[i][j] === 5){
 					this.player.getContent().position.x = j * this.tileSize.w + this.tileSize.w/2;
 					this.player.getContent().position.y = i * this.tileSize.h + this.tileSize.h/2;
 				}
@@ -886,7 +919,9 @@ var GameScreen = AbstractScreen.extend({
 		setTimeout(function(){
 			self.endGame = false;
 			APP.audioController.playSound('wub');
-			self.recoilTimeline.kill();
+			if(self.recoilTimeline){
+				self.recoilTimeline.kill();
+			}
 			self.reset();
 		}, 1000);
 		// this.reset();
