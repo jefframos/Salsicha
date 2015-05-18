@@ -517,7 +517,7 @@ var Application = AbstractApplication.extend({
     },
     update: function() {
         this.moveAccum > 0 && this.moveAccum--, this.updateableParticles(), this.range = this.spriteBall.height / 2, 
-        this._super(), console.log(this.velocity), this.layer.collideChilds(this), this.heartParticle && (this.heartParticle.kill && this.heartParticle.getContent().parent ? this.heartParticle.getContent().parent.removeChild(this.heartParticle.getContent()) : this.heartParticle.update());
+        this._super(), this.layer.collideChilds(this), this.heartParticle && (this.heartParticle.kill && this.heartParticle.getContent().parent ? this.heartParticle.getContent().parent.removeChild(this.heartParticle.getContent()) : this.heartParticle.update());
     },
     updateableParticles: function() {
         if (this.particlesCounter--, this.particlesCounter <= 0) {
@@ -536,7 +536,8 @@ var Application = AbstractApplication.extend({
         if (this.collidable) for (var i = arrayCollide.length - 1; i >= 0; i--) if ("enemy" === arrayCollide[i].type) {
             var enemy = arrayCollide[i];
             this.screen.gameOver(), enemy.preKill();
-        } else if ("killer" === arrayCollide[i].type) this.screen.gameOver(), this.preKill(); else if ("coin" === arrayCollide[i].type) {
+        } else if ("portal" === arrayCollide[i].type) this.screen.nextLevel(), arrayCollide[i].preKill(), 
+        arrayCollide[i].collidable = !1; else if ("coin" === arrayCollide[i].type) {
             arrayCollide[i].preKill(), this.blockCollide = !0;
             var value = 1 + this.perfectShootAcum;
             APP.points += value, APP.audioController.playSound("explode1");
@@ -694,6 +695,52 @@ var Application = AbstractApplication.extend({
                 strokeThickness: 5
             }));
         }
+    }
+}), EndPortal = Entity.extend({
+    init: function(screen) {
+        this._super(!0), this.updateable = !1, this.deading = !1, this.range = 1, this.width = 1, 
+        this.height = 1, this.type = "portal", this.screen = screen;
+    },
+    build: function() {
+        this.spriteBall = new PIXI.Graphics(), this.spriteBall.lineStyle(1, 16777215);
+        var size = .4 * APP.tileSize.w;
+        this.spriteBall.drawRect(-size / 2, -size / 2, size, size), this.spriteBallBack = new PIXI.Graphics(), 
+        this.spriteBallBack.beginFill(16777215), this.spriteBallBack.drawCircle(0, 0, APP.tileSize.w / 2), 
+        this.spriteBallBack.alpha = .3, this.sprite = new PIXI.Sprite(), this.sprite.addChild(this.spriteBall), 
+        this.sprite.addChild(this.spriteBallBack), this.updateable = !0, this.collidable = !0, 
+        this.getContent().alpha = .5, TweenLite.to(this.getContent(), .3, {
+            alpha: 1
+        }), this.collideArea = new PIXI.Rectangle(-50, -50, windowWidth + 100, windowHeight + 100), 
+        this.particlesCounterMax = 8, this.particlesCounter = 1, this.rot = 0, this.scale = 0;
+    },
+    update: function() {
+        this.range = this.spriteBallBack.width / 2, this._super(), this.spriteBall.rotation = this.rot, 
+        this.rot += .05, this.scale += .05, this.spriteBall.scale = {
+            x: Math.sin(this.scale),
+            y: Math.sin(this.scale)
+        };
+    },
+    changeShape: function() {},
+    explode: function(velX, velY) {
+        var particle = null, tempParticle = null;
+        this.size = 8;
+        for (var i = 10; i >= 0; i--) tempParticle = new PIXI.Graphics(), tempParticle.beginFill(16777215), 
+        tempParticle.drawRect(-this.size / 2, -this.size / 2, this.size, this.size), particle = new Particles({
+            x: 10 * Math.random() - 5 + (velX ? velX : 0),
+            y: 10 * Math.random() - 5 + (velY ? velY : 0)
+        }, 600, tempParticle, .05 * Math.random()), particle.build(), particle.alphadecress = .008, 
+        particle.setPosition(this.getPosition().x - (Math.random() + .4 * this.getContent().width) + .2 * this.getContent().width, this.getPosition().y - (Math.random() + .4 * this.getContent().width) + .2 * this.getContent().width), 
+        this.layer.addChild(particle);
+        tempParticle = new PIXI.Graphics(), this.size = .05 * windowHeight, tempParticle.beginFill(16777215), 
+        tempParticle.drawRect(-this.size / 2, -this.size / 2, this.size, this.size), particle = new Particles({
+            x: 0,
+            y: 0
+        }, 600, tempParticle, 0), particle.maxScale = 5 * this.getContent().scale.x, particle.maxInitScale = 1, 
+        particle.build(), particle.alphadecress = .05, particle.scaledecress = .1, particle.setPosition(this.getPosition().x, this.getPosition().y), 
+        this.layer.addChild(particle);
+    },
+    preKill: function() {
+        this.invencible || (this.explode(-2, 2), this.collidable = !1, this.kill = !0);
     }
 }), Enemy1 = Entity.extend({
     init: function(screen) {
@@ -1172,15 +1219,19 @@ var Application = AbstractApplication.extend({
         });
         this.highscore = JSON.parse(sendObject), APP.cookieManager.setCookie("highScore", this.highscore, 500);
     }
-}), LEVELS = [], tempMap = [ [ 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, [ [ 15, 1, 3 ] ], 0, 0, 0, 0, [ [ 15, 2, 3 ] ], 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 4, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0 ], [ [ [ 14, 0, 2, 1 ] ], 0, 0, 0, 0, [ [ 14, 3, 2, 1 ] ], 0, 0, 0, [ [ 15, 0, 3 ] ], 0, 0, 0, 0, [ [ 13, 0, 2, 1 ], [ 15, 3, 3 ] ], 0, 0, 0, 0, [ [ 13, 3, 2, 1 ] ] ], [ 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0 ], [ 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0 ], [ 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 1, 1, 1, 1, 0 ], [ 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0 ], [ [ [ 14, 1, 2, 1 ] ], 0, 0, 0, 0, [ [ 14, 2, 2, 1 ] ], 0, 0, 0, 0, 0, 0, 0, 0, [ [ 13, 1, 2, 1 ] ], 0, 0, 0, 0, [ [ 13, 2, 2, 1 ] ] ], [ 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, [ [ 12, 0, 3 ] ], 0, 0, 0, 0, 0, [ [ 12, 1, 3 ] ], 0, 0, 0 ], [ 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 3, 1, 0, 0, 0, 4 ], [ 2, 0, 0, 1, 1, 1, 1, 1, 1, 1, 3, 0, 0, 0, 0, 3, 0, 0, 0, 0 ], [ 2, 0, 0, 1, 1, 1, 1, 1, 1, 1, 3, 0, 0, 0, 0, 3, [ [ 12, 2, 3 ] ], 0, 0, [ [ 12, 3, 3 ] ] ], [ 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 3, 3, 3, 3, 3 ], [ 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 2, 2, 2, 2, 2, 1, 0, 0, 0, 0, 3, 0, 0, 3, 3, 3, 3, 3, 3, 3 ], [ 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 3, 0, 0, 3, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 3, 0, 0, 3, 0, [ [ 16, 0, 3, 1 ] ], 0, 4, 0, [ [ 16, 1, 3, 1 ] ] ], [ 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 3 ], [ 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 2, 2, 2, 0, 0, 2, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 1, 0, 0, 5, 0, 1, 0, 0, 1, 0, 0, 2, 0, 0, 0 ] ];
+}), LEVELS = [], tempMap = [ [ 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 1, 0, 8, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 1, 0, 4, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 1, 0, 4, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 1, 0, 4, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 1, 0, 4, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 1, 0, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 1, 0, 7, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] ];
 
+LEVELS.push(tempMap), tempMap = [ [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 1, 0, 0, 8, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 1, 0, 0, 4, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 1, 0, 0, 4, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 1, 0, 0, 7, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] ], 
+LEVELS.push(tempMap), tempMap = [ [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 8, 1, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 1, 4, 2, 2, 2, 2, 4, 1, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 1, 7, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] ], 
+LEVELS.push(tempMap), tempMap = [ [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 3, 0, 0, 8, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 3, 4, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 3, 0, 0, 7, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 3, 1, 1, 1, 1, 1, 3, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] ], 
+LEVELS.push(tempMap), tempMap = [ [ 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, [ [ 15, 1, 3 ] ], 0, 0, 0, 0, [ [ 15, 2, 3 ] ], 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 4, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0 ], [ [ [ 14, 0, 2, 1 ] ], 0, 0, 0, 0, [ [ 14, 3, 2, 1 ] ], 0, 0, 0, [ [ 15, 0, 3 ] ], 0, 0, 0, 0, [ [ 13, 0, 2, 1 ], [ 15, 3, 3 ] ], 0, 0, 0, 0, [ [ 13, 3, 2, 1 ] ] ], [ 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0 ], [ 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0 ], [ 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 1, 1, 1, 1, 0 ], [ 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0 ], [ [ [ 14, 1, 2, 1 ] ], 0, 0, 0, 0, [ [ 14, 2, 2, 1 ] ], 0, 0, 0, 0, 0, 0, 0, 0, [ [ 13, 1, 2, 1 ] ], 0, 0, 0, 0, [ [ 13, 2, 2, 1 ] ] ], [ 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, [ [ 12, 0, 3 ] ], 0, 0, 0, 0, 0, [ [ 12, 1, 3 ] ], 0, 0, 0 ], [ 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 3, 1, 0, 0, 0, 4 ], [ 2, 0, 0, 1, 1, 1, 1, 1, 1, 1, 3, 0, 0, 0, 0, 3, 0, 0, 0, 0 ], [ 2, 0, 0, 1, 1, 1, 1, 1, 1, 1, 3, 0, 0, 0, 0, 3, [ [ 12, 2, 3 ] ], 0, 0, [ [ 12, 3, 3 ] ] ], [ 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 3, 3, 3, 3, 3 ], [ 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 2, 2, 2, 2, 2, 1, 0, 0, 0, 0, 3, 0, 0, 3, 3, 3, 3, 3, 3, 3 ], [ 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 3, 0, 0, 3, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 3, 0, 0, 3, 0, [ [ 16, 0, 3, 1 ] ], 0, 4, 0, [ [ 16, 1, 3, 1 ] ] ], [ 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 3 ], [ 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 2, 2, 2, 0, 0, 2, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 1, 0, 0, 7, 0, 1, 0, 0, 1, 0, 0, 2, 0, 0, 0 ] ], 
 LEVELS.push(tempMap);
 
 var GameScreen = AbstractScreen.extend({
     init: function(label) {
         this._super(label), this.isLoaded = !1, this.fistTime = !1, APP.points = 0, APP.cookieManager.getSafeCookie("highscore") ? APP.highscore = APP.cookieManager.getSafeCookie("highscore") : (APP.cookieManager.setSafeCookie("highscore", 0), 
         APP.highscore = 0), APP.audioController.playAmbientSound("loop"), APP.mute = !0, 
-        Howler.mute();
+        Howler.mute(), APP.currentLevel = 0;
     },
     destroy: function() {
         this._super(), this.environment = [], this.trails = [], this.vecTiles = null;
@@ -1223,7 +1274,8 @@ var GameScreen = AbstractScreen.extend({
                 self.player.stretch("LEFT");
             }), this.updateable = !0;
         } else document.body.addEventListener("keydown", function(e) {
-            self.player.moveAccum > 0 || self.player && !self.player.blockMove && (87 === e.keyCode || 38 === e.keyCode ? self.player.stretch("UP") : 83 === e.keyCode || 40 === e.keyCode ? self.player.stretch("DOWN") : 65 === e.keyCode || 37 === e.keyCode ? self.player.stretch("LEFT") : (68 === e.keyCode || 39 === e.keyCode) && self.player.stretch("RIGHT"));
+            self.player.moveAccum > 0 || self.player && !self.player.blockMove && (87 === e.keyCode || 38 === e.keyCode ? self.player.stretch("UP") : 83 === e.keyCode || 40 === e.keyCode ? self.player.stretch("DOWN") : 65 === e.keyCode || 37 === e.keyCode ? self.player.stretch("LEFT") : (68 === e.keyCode || 39 === e.keyCode) && self.player.stretch("RIGHT"), 
+            self.onWall = !1);
         });
         APP.withAPI && GameAPI.GameBreak.request(function() {
             self.pauseModal.show();
@@ -1233,6 +1285,7 @@ var GameScreen = AbstractScreen.extend({
         this.trailContainer = new PIXI.DisplayObjectContainer(), this.gameContainer.addChild(this.trailContainer), 
         this.layerManager = new LayerManager(), this.layerManager.build("Main"), this.gameContainer.addChild(this.layerManager.getContent()), 
         this.layer = new Layer(), this.layer.build("EntityLayer"), this.layerManager.addLayer(this.layer), 
+        this.HUDLayer = new Layer(), this.HUDLayer.build("HUDLayer"), this.layerManager.addLayer(this.HUDLayer), 
         this.coinsLabel = new PIXI.Text("0", {
             align: "center",
             font: "72px Vagron",
@@ -1246,12 +1299,9 @@ var GameScreen = AbstractScreen.extend({
         this.loaderBar.getContent().position.y = 0, this.loaderBar.updateBar(0, 100), this.loaderBar.getContent().alpha = 0, 
         this.initLevel(), this.startLevel = !1, this.debugBall = new PIXI.Graphics();
     },
-    collideWall: function() {
+    collideWall: function(nonRecoil) {
         function removeSelf(target) {
             target && target.parent && target.parent.removeChild(target);
-        }
-        function onStart() {
-            self.recoil = !1, self.changeColor();
         }
         if (!(this.trails.length <= 0)) {
             var self = this;
@@ -1272,18 +1322,7 @@ var GameScreen = AbstractScreen.extend({
                 onComplete: removeSelf,
                 onCompleteParams: [ tempTrail ]
             }));
-            this.player.getContent().scale = {
-                x: 1,
-                y: 1
-            }, this.recoilTimeline.append("HORIZONTAL" === this.trails[this.trails.length - 1].type ? TweenLite.from(this.player.getContent().scale, 1, {
-                x: .5,
-                ease: "easeOutElastic",
-                onStart: onStart
-            }) : TweenLite.from(this.player.getContent().scale, 1, {
-                y: .5,
-                ease: "easeOutElastic",
-                onStart: onStart
-            })), this.player.returnCollide(), this.trails = [];
+            nonRecoil || this.player.returnCollide(), this.trails = [];
         }
     },
     addTrail: function() {
@@ -1293,13 +1332,12 @@ var GameScreen = AbstractScreen.extend({
             trail: trail
         };
         if (0 === this.player.velocity.y) {
-            if (this.trails.length > 1 && "HORIZONTAL" === this.trails[this.trails.length - 1].type) return this.onBack = !0, 
-            void console.log("why here?");
+            if (this.trails.length > 1 && !this.onWall && "HORIZONTAL" === this.trails[this.trails.length - 1].type) return void (this.onBack = !0);
             trail.drawRect(0, -this.player.height, 1, this.player.height), trail.position.x = this.player.getPosition().x, 
             trail.position.y = this.player.getPosition().y + this.player.height / 2, trailObj.type = "HORIZONTAL", 
             trailObj.side = this.player.velocity.x < 0 ? "LEFT" : "RIGHT";
         } else {
-            if (this.trails.length > 1 && "VERTICAL" === this.trails[this.trails.length - 1].type) return void (this.onBack = !0);
+            if (this.trails.length > 1 && !this.onWall && "VERTICAL" === this.trails[this.trails.length - 1].type) return void (this.onBack = !0);
             trail.drawRect(-this.player.width / 2, 0, this.player.width, 1), trail.position.x = this.player.getPosition().x, 
             trail.position.y = this.player.getPosition().y, trailObj.type = "VERTICAL", trailObj.side = this.player.velocity.y < 0 ? "UP" : "DOWN";
         }
@@ -1333,7 +1371,7 @@ var GameScreen = AbstractScreen.extend({
                         spl.length;
                         for (j = spl.length - 1; j >= 0; j--) spl[j].trail.parent && spl[j].trail.parent.removeChild(spl[j].trail);
                         for (j = this.trails.length - 1; j >= 0; j--) if ("JOINT" === this.trails[j].type) {
-                            console.log("WHY"), this.player.moveBack(this.trails[j].side);
+                            this.player.moveBack(this.trails[j].side);
                             break;
                         }
                     }
@@ -1346,20 +1384,11 @@ var GameScreen = AbstractScreen.extend({
                     0 === this.player.velocity.y ? tempTrail.width = this.player.getPosition().x - tempTrail.position.x : tempTrail.height = this.player.getPosition().y - tempTrail.position.y;
                 }
                 var tempTiles = this.getTileByPos(this.player.getPosition().x, this.player.getPosition().y), typeTile = this.getTileType(tempTiles.i, tempTiles.j);
-                if (1 === typeTile) this.player.getContent().position.x -= this.player.velocity.x, 
+                1 === typeTile ? (this.player.getContent().position.x -= this.player.velocity.x, 
                 this.player.getContent().position.y -= this.player.velocity.y, this.player.stop(), 
-                this.collideWall(); else if (2 === typeTile) this.gameOver(), this.player.preKill(); else if (3 === typeTile) {
-                    var dest = this.player.returnCollide();
-                    if (this.trails.length > 1) {
-                        var tempTrail2 = this.trails[this.trails.length - 1].trail, tempStretch = {
-                            width: tempTrail2.width,
-                            height: tempTrail2.height
-                        };
-                        0 === this.player.velocity.y ? tempStretch.width = dest.x - tempTrail2.position.x : tempStretch.height = dest.y - tempTrail2.position.y, 
-                        TweenLite.to(tempTrail2, .5, tempStretch);
-                    }
-                    this.player.stop();
-                }
+                this.collideWall()) : 2 === typeTile ? (this.gameOver(), this.player.preKill()) : 3 === typeTile && (this.player.explode2(), 
+                this.player.stop(), this.player.moveBack(this.trails[this.trails.length - 1].side), 
+                this.onBack = !0);
             }
         }
     },
@@ -1370,7 +1399,7 @@ var GameScreen = AbstractScreen.extend({
             rectTrail = "VERTICAL" === tempTrail.type ? "UP" === tempTrail.side ? new PIXI.Rectangle(tempTrail.trail.position.x - Math.abs(tempTrail.trail.width) / 2, tempTrail.trail.position.y - Math.abs(tempTrail.trail.height), Math.abs(tempTrail.trail.width), Math.abs(tempTrail.trail.height)) : new PIXI.Rectangle(tempTrail.trail.position.x - tempTrail.trail.width / 2, tempTrail.trail.position.y, Math.abs(tempTrail.trail.width), Math.abs(tempTrail.trail.height)) : "RIGHT" === tempTrail.side ? new PIXI.Rectangle(tempTrail.trail.position.x, tempTrail.trail.position.y - Math.abs(tempTrail.trail.height), Math.abs(tempTrail.trail.width), Math.abs(tempTrail.trail.height)) : new PIXI.Rectangle(tempTrail.trail.position.x - Math.abs(tempTrail.trail.width), tempTrail.trail.position.y - Math.abs(tempTrail.trail.height), Math.abs(tempTrail.trail.width), Math.abs(tempTrail.trail.height)), 
             rectPlayer.x + tempEntity.velocity.x < rectTrail.x + rectTrail.width && rectPlayer.x + rectPlayer.width + tempEntity.velocity.x > rectTrail.x && rectPlayer.y + tempEntity.velocity.y < rectTrail.y + rectTrail.height && rectPlayer.height + rectPlayer.y + tempEntity.velocity.y > rectTrail.y && ("enemy" === tempEntity.type ? (tempEntity.preKill(), 
             this.gameOver()) : this.player.blockCollide2 || (this.player.explode2(), this.player.stopReturn(), 
-            this.player.stop(), console.log("ESTRANHO"), this.player.moveBack(this.trails[this.trails.length - 1].side), 
+            this.player.stop(), this.player.moveBack(this.trails[this.trails.length - 1].side), 
             this.onBack = !0));
         }
     },
@@ -1390,17 +1419,18 @@ var GameScreen = AbstractScreen.extend({
     },
     initLevel: function(whereInit) {
         windowHeight > windowWidth ? APP.tileSize = {
-            w: .1 * windowWidth,
-            h: .1 * windowWidth
+            w: .08 * windowWidth,
+            h: .08 * windowWidth
         } : APP.tileSize = {
-            w: .1 * windowHeight,
-            h: .1 * windowHeight
+            w: .08 * windowHeight,
+            h: .08 * windowHeight
         }, APP.standerdVel = .05 * APP.tileSize.w, console.log("initLevel"), this.trails = [], 
         this.recoil = !1, APP.points = 0, this.player = new Ball({
             x: 0,
             y: 0
         }, this), this.player.build(), this.layer.addChild(this.player), this.player.getContent().position.x = windowWidth / 2, 
-        this.player.getContent().position.y = windowHeight / 1.2;
+        this.player.getContent().position.y = windowHeight / 1.2, this.portal = new EndPortal(this), 
+        this.portal.build(), this.layer.addChild(this.portal);
         this.force = 0, this.levelCounter = 800, this.levelCounterMax = 800, this.changeColor(!0, !0), 
         this.endGame = !1, this.initEnvironment(), this.updateMapPosition();
     },
@@ -1408,13 +1438,25 @@ var GameScreen = AbstractScreen.extend({
         this.environment = [], this.mapSize = {
             i: LEVELS[0][0].length,
             j: LEVELS[0].length
-        }, this.environment = LEVELS[0], this.drawMap(), this.drawPlayer();
+        }, this.environment = LEVELS[APP.currentLevel], this.drawMap(), this.drawPlayer(), 
+        this.drawEndPortal();
     },
     drawMap: function() {
         if (this.environment) if (this.vecTiles && this.vecTiles.length > 0) for (var k = 0; k < this.vecTiles.length; k++) {
             var tempTile = this.getTileByPos(this.vecTiles[k].x + 5, this.vecTiles[k].y + 5), tempColor = this.player.color, tileType = this.getTileType(tempTile.i, tempTile.j);
-            2 === tileType ? tempColor = addBright(this.player.color, .5) : 3 === tileType && (tempColor = addBright(this.player.color, .8)), 
-            this.vecTiles[k].clear(), this.vecTiles[k].beginFill(tempColor), this.vecTiles[k].drawRect(0, 0, APP.tileSize.w, APP.tileSize.h);
+            if (this.vecTiles[k].clear(), 2 === tileType) {
+                tempColor = addBright(this.player.color, .5), this.vecTiles[k].beginFill(tempColor);
+                for (var temp1 = -1, line = 6, sz = -3, ii = 0; line >= ii; ii++) 0 === ii ? this.vecTiles[k].moveTo(APP.tileSize.w / line * ii, -(sz * temp1)) : this.vecTiles[k].lineTo(APP.tileSize.w / line * ii, -(sz * temp1)), 
+                temp1 *= -1;
+                for (ii = 0; line >= ii; ii++) this.vecTiles[k].lineTo(APP.tileSize.w - sz * temp1, APP.tileSize.h / line * ii), 
+                temp1 *= -1;
+                for (temp1 = 1, ii = 0; line >= ii; ii++) this.vecTiles[k].lineTo(APP.tileSize.w - APP.tileSize.w / line * ii, APP.tileSize.h - sz * temp1), 
+                temp1 *= -1;
+                for (ii = 0; line >= ii; ii++) this.vecTiles[k].lineTo(-sz * temp1, APP.tileSize.h - APP.tileSize.h / line * ii), 
+                temp1 *= -1;
+            } else 3 === tileType ? (tempColor = addBright(this.player.color, .8), this.vecTiles[k].beginFill(tempColor), 
+            this.vecTiles[k].drawRoundedRect(0, 0, APP.tileSize.w, APP.tileSize.h, .2 * APP.tileSize.w)) : (this.vecTiles[k].beginFill(tempColor), 
+            this.vecTiles[k].drawRect(0, 0, APP.tileSize.w, APP.tileSize.h));
         } else {
             this.vecTiles = [], this.vecMovEnemiesTemp = [], this.vecMovEnemies = [];
             for (var i = 0; i < this.environment.length; i++) for (var j = 0; j < this.environment[i].length; j++) if (this.environment[i][j] instanceof Array) for (var l = 0; l < this.environment[i][j].length; l++) this.drawTile(this.environment[i][j][l], j, i); else this.drawTile(this.environment[i][j], j, i);
@@ -1424,16 +1466,27 @@ var GameScreen = AbstractScreen.extend({
     drawTile: function(type, i, j) {
         if (type >= 1 && 3 >= type) {
             var tempColor = this.player.color, tempGraphics = new PIXI.Graphics(), isEnemy = !1;
-            2 === type ? (tempColor = addBright(this.player.color, .5), isEnemy = !0) : 3 === type && (tempColor = addBright(this.player.color, .8)), 
-            tempGraphics.beginFill(tempColor), isEnemy ? (tempGraphics.drawRect(0, 0, APP.tileSize.w, APP.tileSize.h), 
-            tempGraphics.moveTo(0, 0)) : tempGraphics.drawRect(0, 0, APP.tileSize.w, APP.tileSize.h), 
+            if (1 === type) tempGraphics.beginFill(tempColor), tempGraphics.drawRect(0, 0, APP.tileSize.w, APP.tileSize.h); else if (2 === type) {
+                tempColor = addBright(this.player.color, .5), tempGraphics.beginFill(tempColor);
+                for (var temp1 = -1, line = 6, sz = -3, ii = 0; line >= ii; ii++) console.log("ii", APP.tileSize.w / line * ii, line, ii), 
+                0 === ii ? tempGraphics.moveTo(APP.tileSize.w / line * ii, -(sz * temp1)) : tempGraphics.lineTo(APP.tileSize.w / line * ii, -(sz * temp1)), 
+                temp1 *= -1;
+                for (ii = 0; line >= ii; ii++) tempGraphics.lineTo(APP.tileSize.w - sz * temp1, APP.tileSize.h / line * ii), 
+                temp1 *= -1;
+                for (temp1 = 1, ii = 0; line >= ii; ii++) tempGraphics.lineTo(APP.tileSize.w - APP.tileSize.w / line * ii, APP.tileSize.h - sz * temp1), 
+                temp1 *= -1;
+                for (ii = 0; line >= ii; ii++) tempGraphics.lineTo(-sz * temp1, APP.tileSize.h - APP.tileSize.h / line * ii), 
+                temp1 *= -1;
+                isEnemy = !0;
+            } else 3 === type && (tempColor = addBright(this.player.color, .8), tempGraphics.beginFill(tempColor), 
+            tempGraphics.drawRoundedRect(0, 0, APP.tileSize.w, APP.tileSize.h, .2 * APP.tileSize.w));
             tempGraphics.position.x = i * APP.tileSize.w, tempGraphics.position.y = j * APP.tileSize.h, 
             this.gameContainer.addChild(tempGraphics), this.vecTiles.push(tempGraphics);
         } else if (4 === type) {
             var coin = new Coin(this);
             coin.build(), this.layer.addChild(coin), coin.getContent().position.x = i * APP.tileSize.w + APP.tileSize.w / 2, 
             coin.getContent().position.y = j * APP.tileSize.h + APP.tileSize.h / 2;
-        } else type > 5 || type instanceof Array;
+        }
         if (type instanceof Array && type[0] > 10) {
             this.vecMovEnemiesTemp.push({
                 index: type[1],
@@ -1462,8 +1515,12 @@ var GameScreen = AbstractScreen.extend({
             }
         }
     },
+    drawEndPortal: function() {
+        for (var i = 0; i < this.environment.length; i++) for (var j = 0; j < this.environment[i].length; j++) 8 === this.environment[i][j] && (this.portal.getContent().position.x = j * APP.tileSize.w + APP.tileSize.w / 2, 
+        this.portal.getContent().position.y = i * APP.tileSize.h + APP.tileSize.h / 2);
+    },
     drawPlayer: function() {
-        for (var i = 0; i < this.environment.length; i++) for (var j = 0; j < this.environment[i].length; j++) 5 === this.environment[i][j] && (this.player.getContent().position.x = j * APP.tileSize.w + APP.tileSize.w / 2, 
+        for (var i = 0; i < this.environment.length; i++) for (var j = 0; j < this.environment[i].length; j++) 7 === this.environment[i][j] && (this.player.getContent().position.x = j * APP.tileSize.w + APP.tileSize.w / 2, 
         this.player.getContent().position.y = i * APP.tileSize.h + APP.tileSize.h / 2);
     },
     getTileByPos: function(x, y) {
@@ -1497,7 +1554,7 @@ var GameScreen = AbstractScreen.extend({
             self.soundOn.parent && self.soundOn.parent.removeChild(self.soundOn), self.soundButtonContainer.addChild(APP.mute ? self.soundOff : self.soundOn);
         };
     },
-    addCrazyMessage: function(message) {
+    addCrazyMessage: function(message, time) {
         if (this.crazyLabel && this.crazyLabel.parent) {
             if (this.crazyLabel.text === message) return;
             this.crazyLabel.parent.removeChild(this.crazyLabel);
@@ -1537,6 +1594,12 @@ var GameScreen = AbstractScreen.extend({
         }), TweenLite.from(this.crazyLabel2.scale, .2, {
             x: 2 * scl,
             y: 2 * scl
+        }), TweenLite.from(this.crazyLabel, time, {
+            delay: .3,
+            alpha: 0
+        }), TweenLite.from(this.crazyLabel2, time, {
+            delay: .3,
+            alpha: 0
         });
     },
     miss: function() {
@@ -1564,20 +1627,23 @@ var GameScreen = AbstractScreen.extend({
         errou2.getContent().parent.setChildIndex(errou2.getContent(), errou2.getContent().parent.children.length - 1), 
         this.player.inError = !0, this.levelCounter -= .1 * this.levelCounterMax, this.levelCounter < 0 && (this.levelCounter = 0);
     },
-    shoot: function(force) {
-        if (this.player) {
-            if (this.player.inError) return void APP.audioController.playSound("error");
-            this.startLevel = !0, this.player.jump(force), this.player.improveGravity(), this.force = 0, 
-            TweenLite.to(this.loaderBar.getContent(), .2, {
-                delay: .2,
-                alpha: 1
-            });
-            var ls = Math.floor(4 * Math.random()) + 1;
-            APP.audioController.playSound("laser" + ls), this.addCrazyMessage("HOLD");
-        }
+    nextLevel: function() {
+        this.collideWall(!0), this.player.moveAccum = 5e4, this.player.stop(), APP.currentLevel++, 
+        this.addCrazyMessage('YOU"RE AWESOME', 1);
+        var self = this;
+        TweenLite.to(this.gameContainer.scale, .5, {
+            x: 1.5 * this.gameContainer.scale.x,
+            y: 1.5 * this.gameContainer.scale.y
+        }), TweenLite.to(this.gameContainer, .5, {
+            alpha: 0,
+            delay: .8,
+            onComplete: function() {
+                self.reset();
+            }
+        });
     },
     reset: function() {
-        console.log("reset"), this.destroy(), this.build();
+        this.destroy(), this.build();
     },
     gameOver: function() {
         if (!this.endGame) {
@@ -1602,7 +1668,7 @@ var GameScreen = AbstractScreen.extend({
         }, 120, tempLabel, rot);
         perfect.maxScale = this.player.getContent().scale.x, perfect.build(), perfect.gravity = -.2, 
         perfect.alphadecress = .01, perfect.scaledecress = .05, perfect.setPosition(this.player.getPosition().x - tempLabel.width / 2, initY ? initY : this.player.getPosition().y + 50), 
-        this.layer.addChild(perfect);
+        this.HUDLayer.addChild(perfect);
         var perfect2 = new Particles({
             x: 0,
             y: 0
@@ -1612,7 +1678,7 @@ var GameScreen = AbstractScreen.extend({
         }), -rot);
         perfect2.maxScale = this.player.getContent().scale.x, perfect2.build(), perfect2.gravity = -.2, 
         perfect2.alphadecress = .01, perfect2.scaledecress = .05, perfect2.setPosition(this.player.getPosition().x - tempLabel.width / 2 + 2, initY ? initY : this.player.getPosition().y + 50 + 2), 
-        this.layer.addChild(perfect2);
+        this.HUDLayer.addChild(perfect2);
     },
     getPerfect: function() {
         APP.audioController.playSound("perfect"), this.addRegularLabel(APP.vecPerfects[Math.floor(APP.vecPerfects.length * Math.random())], "50px Vagron");
@@ -1654,29 +1720,10 @@ var GameScreen = AbstractScreen.extend({
         }));
     },
     updateCoins: function() {
-        if (this.coinsLabel.setText(APP.points), TweenLite.to(this.coinsLabel, .2, {
+        this.coinsLabel.setText(APP.points), TweenLite.to(this.coinsLabel, .2, {
             alpha: .5
         }), this.coinsLabel.position.x = 20, this.coinsLabel.position.y = 20, this.background.parent && this.background.parent.setChildIndex(this.background, 0), 
-        this.coinsLabel.parent.setChildIndex(this.coinsLabel, 1), !(this.coinsLabel.alpha < .5)) {
-            var tempCoins = new PIXI.Text(APP.points, {
-                align: "center",
-                font: "72px Vagron",
-                fill: "#FFFFFF",
-                wordWrap: !0,
-                wordWrapWidth: 500
-            });
-            tempCoins.anchor = {
-                x: .5,
-                y: .5
-            }, tempCoins.resolution = retina;
-            var particle = new Particles({
-                x: 0,
-                y: 0
-            }, 120, tempCoins, 0);
-            particle.maxScale = 5, particle.maxInitScale = 1, particle.build(), particle.alphadecress = .02, 
-            particle.scaledecress = .02, particle.setPosition(this.coinsLabel.position.x + tempCoins.width / 2 / tempCoins.resolution, this.coinsLabel.position.y + tempCoins.height / 2 / tempCoins.resolution), 
-            this.layer.addChild(particle);
-        }
+        this.coinsLabel.parent.setChildIndex(this.coinsLabel, 1), this.coinsLabel.alpha < .5;
     },
     transitionIn: function() {
         this.build();

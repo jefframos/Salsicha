@@ -208,7 +208,7 @@ var Ball = Entity.extend({
 		this.range = this.spriteBall.height / 2;
 		this._super();
 		// this.applyFriction();
-		console.log(this.velocity);
+		// console.log(this.velocity);
 		this.layer.collideChilds(this);
 		if(this.heartParticle){
 			if(this.heartParticle.kill && this.heartParticle.getContent().parent){
@@ -249,9 +249,10 @@ var Ball = Entity.extend({
 					// enemy.kill
 					enemy.preKill();
 					// arrayCollide[i].prekill();
-				}else if(arrayCollide[i].type === 'killer'){
-					this.screen.gameOver();
-					this.preKill();
+				}else if(arrayCollide[i].type === 'portal'){
+					this.screen.nextLevel();
+					arrayCollide[i].preKill();
+					arrayCollide[i].collidable = false;
 				}else if(arrayCollide[i].type === 'coin'){
 					arrayCollide[i].preKill();
 					this.blockCollide = true;
