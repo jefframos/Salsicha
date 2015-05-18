@@ -179,6 +179,10 @@ var GameScreen = AbstractScreen.extend({
 
 		this.gameContainer = new PIXI.DisplayObjectContainer();
 		this.addChild(this.gameContainer);
+
+		this.trailContainer = new PIXI.DisplayObjectContainer();
+		this.gameContainer.addChild(this.trailContainer);
+
 		this.layerManager = new LayerManager();
 		this.layerManager.build('Main');
 
@@ -269,6 +273,7 @@ var GameScreen = AbstractScreen.extend({
 			if(this.trails.length > 1){
 				if(this.trails[this.trails.length - 1].type === 'HORIZONTAL'){
 					this.onBack = true;
+					console.log('why here?');
 					return;
 				}
 			}
@@ -314,6 +319,7 @@ var GameScreen = AbstractScreen.extend({
 		// 		self.blockCollide = false;
 		// 	}, 300);
 		// }
+		// this.player.getContent().parent.setChildIndex(this.player.getContent(), this.player.getContent().parent.children.length - 1);
 		this.onBack = false;
 	},
 	update:function(){
@@ -380,7 +386,7 @@ var GameScreen = AbstractScreen.extend({
 
 					for (j = this.trails.length - 1; j >= 0; j--) {
 						if(this.trails[j].type === 'JOINT'){
-
+							console.log('WHY');
 							this.player.moveBack(this.trails[j].side);
 							break;
 						}
@@ -448,7 +454,7 @@ var GameScreen = AbstractScreen.extend({
 				var tempTrail = this.trails[i];
 				for (var j = 0; j < this.layer.childs.length; j++) {
 					tempEntity = this.layer.childs[j];
-					if(tempEntity.type === 'enemy' || (!justEnemies && tempEntity.type === 'player' && i < this.trails.length - 4)){ //ERA 6 isso antes
+					if(tempEntity.type === 'enemy' || (!justEnemies && tempEntity.type === 'player' && i < this.trails.length - 6)){ //ERA 6 isso antes
 						var rectPlayer  = new PIXI.Rectangle(tempEntity.getPosition().x - tempEntity.spriteBall.width/2,
 							tempEntity.getPosition().y - tempEntity.spriteBall.height / 2,
 							tempEntity.spriteBall.width,
@@ -491,6 +497,7 @@ var GameScreen = AbstractScreen.extend({
 								this.player.explode2();
 								this.player.stopReturn();
 								this.player.stop();
+								console.log('ESTRANHO');
 								this.player.moveBack(this.trails[this.trails.length - 1].side);
 								this.onBack = true;
 								// this.player.returnCollide2();
@@ -504,8 +511,12 @@ var GameScreen = AbstractScreen.extend({
 		}
 	},
 	updateMapPosition:function(){
-		this.gameContainer.position.x = windowWidth/2 - this.player.getPosition().x * this.gameContainer.scale.x;
-		this.gameContainer.position.y = windowHeight/2 - this.player.getPosition().y * this.gameContainer.scale.y;
+
+
+		TweenLite.to(this.gameContainer.position, 1, {x: windowWidth/2 - this.player.getPosition().x * this.gameContainer.scale.x,
+			y:windowHeight/2 - this.player.getPosition().y * this.gameContainer.scale.y});
+		// this.gameContainer.position.x = windowWidth/2 - this.player.getPosition().x * this.gameContainer.scale.x;
+		// this.gameContainer.position.y = windowHeight/2 - this.player.getPosition().y * this.gameContainer.scale.y;
 
 
 		var tempScale = 1;
@@ -522,8 +533,7 @@ var GameScreen = AbstractScreen.extend({
 	initLevel:function(whereInit){
 		console.log('initLevel');
 		this.trails = [];
-		this.trailContainer = new PIXI.DisplayObjectContainer();
-		this.gameContainer.addChild(this.trailContainer);
+		
 		this.recoil = false;
 		// this.gameOver = false;
 		APP.points = 0;
@@ -553,7 +563,7 @@ var GameScreen = AbstractScreen.extend({
 		this.environment = [];
 		// this.tileSize = {w:windowWidth / temp[0].length,		 h:windowHeight / temp.length};
 		// this.tileSize = {w:Math.ceil(windowWidth * 0.1),h:Math.ceil(windowWidth * 0.1)};
-		this.tileSize = {w:50,h:50};
+		this.tileSize = {w:windowWidth * 0.1,h:windowWidth * 0.1};
 		this.mapSize = {i:LEVELS[0][0].length,j:LEVELS[0].length};
 		this.environment = LEVELS[0];
 

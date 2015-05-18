@@ -32,17 +32,23 @@ var Ball = Entity.extend({
 		this.color = 0xFFFFFF;
 		this.spriteBall = new PIXI.Graphics();
 		this.spriteBall.beginFill(this.color);
-		this.maxSize = windowHeight * 0.02;
+		this.maxSize = windowWidth * 0.04;
 		this.spriteBall.drawCircle(0,0,this.maxSize);
 
 		this.width = this.spriteBall.width;
 		this.height = this.spriteBall.height;
 
 
+		this.heart = new PIXI.Graphics();
+		this.heart.beginFill(0xFFFFFF);
+		this.heart.drawCircle(0,0,2);
+		this.heart.alpha = 0.5;
+
 		console.log(this.spriteBall.width);
 
 		this.sprite = new PIXI.Sprite();
         this.sprite.addChild(this.spriteBall);
+        this.sprite.addChild(this.heart);
         this.spriteBall.position.y = this.spriteBall.height / 2;
 
         this.range = this.spriteBall.height / 2;
@@ -58,7 +64,7 @@ var Ball = Entity.extend({
 
 		this.collideArea = new PIXI.Rectangle(50, 50, windowWidth - 100, windowHeight - 100);
 
-		this.particlesCounterMax = 2;
+		this.particlesCounterMax = 50;
         this.particlesCounter = 1;
 
         this.floorPos = windowHeight;
@@ -74,7 +80,7 @@ var Ball = Entity.extend({
 		this.inJump = false;
 
 		this.standardVelocity = 3;
-		this.friction = 0.15;
+		this.friction = this.spriteBall.width / 3;
 
 		this.blockCollide2 = false;
 
@@ -137,18 +143,19 @@ var Ball = Entity.extend({
 		if(this.currentSide === side){
 			return;
 		}
+		var tempVel = this.spriteBall.width / 2;//this.standardVelocity * 2;
 		this.currentSide = side;
 		if(this.currentSide === 'UP'){
 			this.velocity.x = 0;
-			this.velocity.y = -this.standardVelocity * 2;
+			this.velocity.y = -tempVel;
 		}else if(this.currentSide === 'DOWN'){
 			this.velocity.x = 0;
-			this.velocity.y = this.standardVelocity * 2;
+			this.velocity.y = tempVel;
 		}else if(this.currentSide === 'LEFT'){
-			this.velocity.x = -this.standardVelocity * 2;
+			this.velocity.x = -tempVel;
 			this.velocity.y = 0;
 		}else{
-			this.velocity.x = this.standardVelocity * 2;
+			this.velocity.x = tempVel;
 			this.velocity.y = 0;
 		}
 		this.screen.addTrail();
@@ -159,28 +166,51 @@ var Ball = Entity.extend({
 	},
 	stop: function(){
 		this.velocity = {x:0, y:0};
+		this.currentSide = '';
 	},
 	applyFriction:function(){
 		if(this.velocity.x > this.standardVelocity + this.friction){
 			this.velocity.x -= this.friction;
+			if(this.velocity.x > this.standardVelocity){
+				this.velocity.x = this.standardVelocity;
+			}
 		}
-		if(this.velocity.x < -(this.standardVelocity + this.friction)){
+		else if(this.velocity.x < -(this.standardVelocity + this.friction)){
 			this.velocity.x += this.friction;
+			if(this.velocity.x < this.standardVelocity){
+				this.velocity.x = -this.standardVelocity;
+			}
 		}
-		if(this.velocity.y > this.standardVelocity + this.friction){
+		else if(this.velocity.y > this.standardVelocity + this.friction){
 			this.velocity.y -= this.friction;
+			if(this.velocity.y > this.standardVelocity){
+				this.velocity.y = this.standardVelocity;
+			}
 		}
-		if(this.velocity.y < -(this.standardVelocity + this.friction)){
+		else if(this.velocity.y < -(this.standardVelocity + this.friction)){
 			this.velocity.y += this.friction;
+			if(this.velocity.y < this.standardVelocity){
+				this.velocity.y = -this.standardVelocity;
+			}
 		}
+
 
 	},
 	update: function(){
 		// console.log(this.blockMove);
+		this.updateableParticles();
 		this.range = this.spriteBall.height / 2;
 		this._super();
 		this.applyFriction();
+		// console.log(this.velocity);
 		this.layer.collideChilds(this);
+		if(this.heartParticle){
+			if(this.heartParticle.kill && this.heartParticle.getContent().parent){
+				this.heartParticle.getContent().parent.removeChild(this.heartParticle.getContent());
+			}else{
+				this.heartParticle.update();
+			}
+		}
 	},
 	updateableParticles:function(){
         this.particlesCounter --;
@@ -189,24 +219,19 @@ var Ball = Entity.extend({
             this.particlesCounter = this.particlesCounterMax;
 
             var tempPart = new PIXI.Graphics();
-			tempPart.beginFill(this.color);
+			tempPart.beginFill(0xFFFFFF);
 			tempPart.drawCircle(0,0,this.spriteBall.width);
 
             //efeito 3
-            var particle = new Particles({x: Math.random() * 4 - 2, y:Math.random()}, 120, tempPart, Math.random() * 0.05);
-            // particle.maxScale = this.getContent().scale.x / 2;
-            particle.initScale = this.getContent().scale.x / 2;
-            // particle.maxInitScale = particle.maxScale / 1.5;
-            // particle.growType = -1;
-            particle.build();
-            particle.gravity = 0.0;
-            // particle.getContent().tint = APP.appModel.currentPlayerModel.color;
-            particle.alphadecress = 0.05;
-            particle.scaledecress = -0.05;
-            particle.setPosition(this.getPosition().x - (Math.random() + this.getContent().width * 0.1) / 2,
-                this.getPosition().y - this.spriteBall.height / 2);
-            this.layer.addChild(particle);
-            particle.getContent().parent.setChildIndex(particle.getContent() , 0);
+            this.heartParticle = new Particles({x: 0, y:0}, 120, tempPart, Math.random() * 0.05);
+            this.heartParticle.initScale = 0;
+            this.heartParticle.build();
+            this.heartParticle.getContent().alpha = 0.5;
+            this.heartParticle.gravity = 0.0;
+            this.heartParticle.alphadecress = 0.02;
+            this.heartParticle.scaledecress = 0.02;
+            this.heartParticle.setPosition(0,0);
+            this.sprite.addChild(this.heartParticle.getContent());
         }
     },
 	collide:function(arrayCollide){

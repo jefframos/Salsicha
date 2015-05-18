@@ -1,4 +1,4 @@
-/*! jefframos 16-05-2015 */
+/*! jefframos 18-05-2015 */
 function rgbToHsl(r, g, b) {
     r /= 255, g /= 255, b /= 255;
     var h, s, max = Math.max(r, g, b), min = Math.min(r, g, b), l = (max + min) / 2;
@@ -437,17 +437,20 @@ var Application = AbstractApplication.extend({
     },
     build: function() {
         this.color = 16777215, this.spriteBall = new PIXI.Graphics(), this.spriteBall.beginFill(this.color), 
-        this.maxSize = .02 * windowHeight, this.spriteBall.drawCircle(0, 0, this.maxSize), 
-        this.width = this.spriteBall.width, this.height = this.spriteBall.height, console.log(this.spriteBall.width), 
-        this.sprite = new PIXI.Sprite(), this.sprite.addChild(this.spriteBall), this.spriteBall.position.y = this.spriteBall.height / 2, 
+        this.maxSize = .04 * windowWidth, this.spriteBall.drawCircle(0, 0, this.maxSize), 
+        this.width = this.spriteBall.width, this.height = this.spriteBall.height, this.heart = new PIXI.Graphics(), 
+        this.heart.beginFill(16777215), this.heart.drawCircle(0, 0, 2), this.heart.alpha = .5, 
+        console.log(this.spriteBall.width), this.sprite = new PIXI.Sprite(), this.sprite.addChild(this.spriteBall), 
+        this.sprite.addChild(this.heart), this.spriteBall.position.y = this.spriteBall.height / 2, 
         this.range = this.spriteBall.height / 2, this.sprite.anchor.x = .5, this.sprite.anchor.y = .5, 
         this.updateable = !0, this.collidable = !0, this.getContent().alpha = .1, TweenLite.to(this.getContent(), .3, {
             alpha: 1
         }), this.collideArea = new PIXI.Rectangle(50, 50, windowWidth - 100, windowHeight - 100), 
-        this.particlesCounterMax = 2, this.particlesCounter = 1, this.floorPos = windowHeight, 
+        this.particlesCounterMax = 50, this.particlesCounter = 1, this.floorPos = windowHeight, 
         this.gravity = 0, this.gravityVal = .15, this.breakJump = !1, this.blockCollide = !1, 
         this.inError = !1, this.perfectShoot = 0, this.perfectShootAcum = 0, this.force = 0, 
-        this.inJump = !1, this.standardVelocity = 3, this.friction = .15, this.blockCollide2 = !1;
+        this.inJump = !1, this.standardVelocity = 3, this.friction = this.spriteBall.width / 3, 
+        this.blockCollide2 = !1;
     },
     returnCollide: function(half) {
         console.log("returnCollide"), this.blockMove = !0;
@@ -487,11 +490,12 @@ var Application = AbstractApplication.extend({
         console.log("moveBack"), this.currentSide = "", "UP" === side ? this.velocity.y = 3 * this.standardVelocity : "DOWN" === side ? this.velocity.y = 3 * -this.standardVelocity : "LEFT" === side ? this.velocity.x = 3 * this.standardVelocity : "RIGHT" === side && (this.velocity.x = 3 * -this.standardVelocity);
     },
     stretch: function(side) {
-        this.currentSide !== side && (this.currentSide = side, "UP" === this.currentSide ? (this.velocity.x = 0, 
-        this.velocity.y = 2 * -this.standardVelocity) : "DOWN" === this.currentSide ? (this.velocity.x = 0, 
-        this.velocity.y = 2 * this.standardVelocity) : "LEFT" === this.currentSide ? (this.velocity.x = 2 * -this.standardVelocity, 
-        this.velocity.y = 0) : (this.velocity.x = 2 * this.standardVelocity, this.velocity.y = 0), 
-        this.screen.addTrail());
+        if (this.currentSide !== side) {
+            var tempVel = this.spriteBall.width / 2;
+            this.currentSide = side, "UP" === this.currentSide ? (this.velocity.x = 0, this.velocity.y = -tempVel) : "DOWN" === this.currentSide ? (this.velocity.x = 0, 
+            this.velocity.y = tempVel) : "LEFT" === this.currentSide ? (this.velocity.x = -tempVel, 
+            this.velocity.y = 0) : (this.velocity.x = tempVel, this.velocity.y = 0), this.screen.addTrail();
+        }
     },
     stopReturn: function() {
         this.getPosition().x -= this.velocity.x, this.getPosition().x -= this.velocity.y;
@@ -500,29 +504,30 @@ var Application = AbstractApplication.extend({
         this.velocity = {
             x: 0,
             y: 0
-        };
+        }, this.currentSide = "";
     },
     applyFriction: function() {
-        this.velocity.x > this.standardVelocity + this.friction && (this.velocity.x -= this.friction), 
-        this.velocity.x < -(this.standardVelocity + this.friction) && (this.velocity.x += this.friction), 
-        this.velocity.y > this.standardVelocity + this.friction && (this.velocity.y -= this.friction), 
-        this.velocity.y < -(this.standardVelocity + this.friction) && (this.velocity.y += this.friction);
+        this.velocity.x > this.standardVelocity + this.friction ? (this.velocity.x -= this.friction, 
+        this.velocity.x > this.standardVelocity && (this.velocity.x = this.standardVelocity)) : this.velocity.x < -(this.standardVelocity + this.friction) ? (this.velocity.x += this.friction, 
+        this.velocity.x < this.standardVelocity && (this.velocity.x = -this.standardVelocity)) : this.velocity.y > this.standardVelocity + this.friction ? (this.velocity.y -= this.friction, 
+        this.velocity.y > this.standardVelocity && (this.velocity.y = this.standardVelocity)) : this.velocity.y < -(this.standardVelocity + this.friction) && (this.velocity.y += this.friction, 
+        this.velocity.y < this.standardVelocity && (this.velocity.y = -this.standardVelocity));
     },
     update: function() {
-        this.range = this.spriteBall.height / 2, this._super(), this.applyFriction(), this.layer.collideChilds(this);
+        this.updateableParticles(), this.range = this.spriteBall.height / 2, this._super(), 
+        this.applyFriction(), this.layer.collideChilds(this), this.heartParticle && (this.heartParticle.kill && this.heartParticle.getContent().parent ? this.heartParticle.getContent().parent.removeChild(this.heartParticle.getContent()) : this.heartParticle.update());
     },
     updateableParticles: function() {
         if (this.particlesCounter--, this.particlesCounter <= 0) {
             this.particlesCounter = this.particlesCounterMax;
             var tempPart = new PIXI.Graphics();
-            tempPart.beginFill(this.color), tempPart.drawCircle(0, 0, this.spriteBall.width);
-            var particle = new Particles({
-                x: 4 * Math.random() - 2,
-                y: Math.random()
-            }, 120, tempPart, .05 * Math.random());
-            particle.initScale = this.getContent().scale.x / 2, particle.build(), particle.gravity = 0, 
-            particle.alphadecress = .05, particle.scaledecress = -.05, particle.setPosition(this.getPosition().x - (Math.random() + .1 * this.getContent().width) / 2, this.getPosition().y - this.spriteBall.height / 2), 
-            this.layer.addChild(particle), particle.getContent().parent.setChildIndex(particle.getContent(), 0);
+            tempPart.beginFill(16777215), tempPart.drawCircle(0, 0, this.spriteBall.width), 
+            this.heartParticle = new Particles({
+                x: 0,
+                y: 0
+            }, 120, tempPart, .05 * Math.random()), this.heartParticle.initScale = 0, this.heartParticle.build(), 
+            this.heartParticle.getContent().alpha = .5, this.heartParticle.gravity = 0, this.heartParticle.alphadecress = .02, 
+            this.heartParticle.scaledecress = .02, this.heartParticle.setPosition(0, 0), this.sprite.addChild(this.heartParticle.getContent());
         }
     },
     collide: function(arrayCollide) {
@@ -1222,6 +1227,7 @@ var GameScreen = AbstractScreen.extend({
         }, function() {
             self.pauseModal.hide();
         }), this.gameContainer = new PIXI.DisplayObjectContainer(), this.addChild(this.gameContainer), 
+        this.trailContainer = new PIXI.DisplayObjectContainer(), this.gameContainer.addChild(this.trailContainer), 
         this.layerManager = new LayerManager(), this.layerManager.build("Main"), this.gameContainer.addChild(this.layerManager.getContent()), 
         this.layer = new Layer(), this.layer.build("EntityLayer"), this.layerManager.addLayer(this.layer), 
         this.coinsLabel = new PIXI.Text("0", {
@@ -1284,7 +1290,8 @@ var GameScreen = AbstractScreen.extend({
             trail: trail
         };
         if (0 === this.player.velocity.y) {
-            if (this.trails.length > 1 && "HORIZONTAL" === this.trails[this.trails.length - 1].type) return void (this.onBack = !0);
+            if (this.trails.length > 1 && "HORIZONTAL" === this.trails[this.trails.length - 1].type) return this.onBack = !0, 
+            void console.log("why here?");
             trail.drawRect(0, -this.player.height, 1, this.player.height), trail.position.x = this.player.getPosition().x, 
             trail.position.y = this.player.getPosition().y + this.player.height / 2, trailObj.type = "HORIZONTAL", 
             trailObj.side = this.player.velocity.x < 0 ? "LEFT" : "RIGHT";
@@ -1323,7 +1330,7 @@ var GameScreen = AbstractScreen.extend({
                         spl.length;
                         for (j = spl.length - 1; j >= 0; j--) spl[j].trail.parent && spl[j].trail.parent.removeChild(spl[j].trail);
                         for (j = this.trails.length - 1; j >= 0; j--) if ("JOINT" === this.trails[j].type) {
-                            this.player.moveBack(this.trails[j].side);
+                            console.log("WHY"), this.player.moveBack(this.trails[j].side);
                             break;
                         }
                     }
@@ -1355,18 +1362,20 @@ var GameScreen = AbstractScreen.extend({
     },
     trailCollide: function(justEnemies) {
         for (var i = 0; i < this.trails.length && !this.blockCollide; i++) if ("JOINT" !== this.trails[i].type) for (var rectTrail, tempEntity = null, tempTrail = this.trails[i], j = 0; j < this.layer.childs.length; j++) if (tempEntity = this.layer.childs[j], 
-        "enemy" === tempEntity.type || !justEnemies && "player" === tempEntity.type && i < this.trails.length - 4) {
+        "enemy" === tempEntity.type || !justEnemies && "player" === tempEntity.type && i < this.trails.length - 6) {
             var rectPlayer = new PIXI.Rectangle(tempEntity.getPosition().x - tempEntity.spriteBall.width / 2, tempEntity.getPosition().y - tempEntity.spriteBall.height / 2, tempEntity.spriteBall.width, tempEntity.spriteBall.height);
             rectTrail = "VERTICAL" === tempTrail.type ? "UP" === tempTrail.side ? new PIXI.Rectangle(tempTrail.trail.position.x - Math.abs(tempTrail.trail.width) / 2, tempTrail.trail.position.y - Math.abs(tempTrail.trail.height), Math.abs(tempTrail.trail.width), Math.abs(tempTrail.trail.height)) : new PIXI.Rectangle(tempTrail.trail.position.x - tempTrail.trail.width / 2, tempTrail.trail.position.y, Math.abs(tempTrail.trail.width), Math.abs(tempTrail.trail.height)) : "RIGHT" === tempTrail.side ? new PIXI.Rectangle(tempTrail.trail.position.x, tempTrail.trail.position.y - Math.abs(tempTrail.trail.height), Math.abs(tempTrail.trail.width), Math.abs(tempTrail.trail.height)) : new PIXI.Rectangle(tempTrail.trail.position.x - Math.abs(tempTrail.trail.width), tempTrail.trail.position.y - Math.abs(tempTrail.trail.height), Math.abs(tempTrail.trail.width), Math.abs(tempTrail.trail.height)), 
             rectPlayer.x + tempEntity.velocity.x < rectTrail.x + rectTrail.width && rectPlayer.x + rectPlayer.width + tempEntity.velocity.x > rectTrail.x && rectPlayer.y + tempEntity.velocity.y < rectTrail.y + rectTrail.height && rectPlayer.height + rectPlayer.y + tempEntity.velocity.y > rectTrail.y && ("enemy" === tempEntity.type ? (tempEntity.preKill(), 
             this.gameOver()) : this.player.blockCollide2 || (this.player.explode2(), this.player.stopReturn(), 
-            this.player.stop(), this.player.moveBack(this.trails[this.trails.length - 1].side), 
+            this.player.stop(), console.log("ESTRANHO"), this.player.moveBack(this.trails[this.trails.length - 1].side), 
             this.onBack = !0));
         }
     },
     updateMapPosition: function() {
-        this.gameContainer.position.x = windowWidth / 2 - this.player.getPosition().x * this.gameContainer.scale.x, 
-        this.gameContainer.position.y = windowHeight / 2 - this.player.getPosition().y * this.gameContainer.scale.y;
+        TweenLite.to(this.gameContainer.position, 1, {
+            x: windowWidth / 2 - this.player.getPosition().x * this.gameContainer.scale.x,
+            y: windowHeight / 2 - this.player.getPosition().y * this.gameContainer.scale.y
+        });
         var tempScale = 1;
         if (this.trailContainer.width / this.gameContainer.scale.x > windowWidth / 2 && (tempScale = windowWidth / 2 / this.trailContainer.width), 
         this.trailContainer.height / this.gameContainer.scale.y > windowHeight / 2) {
@@ -1379,9 +1388,7 @@ var GameScreen = AbstractScreen.extend({
         });
     },
     initLevel: function(whereInit) {
-        console.log("initLevel"), this.trails = [], this.trailContainer = new PIXI.DisplayObjectContainer(), 
-        this.gameContainer.addChild(this.trailContainer), this.recoil = !1, APP.points = 0, 
-        this.player = new Ball({
+        console.log("initLevel"), this.trails = [], this.recoil = !1, APP.points = 0, this.player = new Ball({
             x: 0,
             y: 0
         }, this), this.player.build(), this.layer.addChild(this.player), this.player.getContent().position.x = windowWidth / 2, 
@@ -1391,8 +1398,8 @@ var GameScreen = AbstractScreen.extend({
     },
     initEnvironment: function() {
         this.environment = [], this.tileSize = {
-            w: 50,
-            h: 50
+            w: .1 * windowWidth,
+            h: .1 * windowWidth
         }, this.mapSize = {
             i: LEVELS[0][0].length,
             j: LEVELS[0].length
