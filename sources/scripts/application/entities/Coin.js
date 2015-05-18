@@ -15,7 +15,7 @@ var Coin = Entity.extend({
 		// this.sprite = new PIXI.Sprite.fromFrame(this.imgSource);
 		this.spriteBall = new PIXI.Graphics();
 		this.spriteBall.beginFill(0xFFFFFF);
-		var size = windowHeight * 0.03;
+		var size = APP.tileSize.w * 0.4;
 		this.spriteBall.drawRect(-size/2,-size/2,size,size);
 		// this.spriteBall.drawCircle(0,0,windowHeight * 0.02);
 
@@ -30,7 +30,7 @@ var Coin = Entity.extend({
 
 		this.getContent().alpha = 0.5;
 		TweenLite.to(this.getContent(), 0.3, {alpha:1});
-		
+
 		this.collideArea = new PIXI.Rectangle(-50, -50, windowWidth + 100, windowHeight + 100);
 
 
@@ -45,7 +45,7 @@ var Coin = Entity.extend({
 	changeShape:function(){
 	},
 	explode:function(velX, velY){
-		
+
 		var particle = null;
 		var tempParticle = null;
 		this.size = 8;

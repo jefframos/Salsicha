@@ -28,7 +28,7 @@ var Enemy2 = Entity.extend({
 		this.spriteBall = new PIXI.Graphics();
 		// this.spriteBall.beginFill(0xFF8888);
 		this.spriteBall.lineStyle(1,0);
-		var size = windowHeight * 0.02;
+		var size = APP.tileSize.w * 0.4;
 		this.spriteBall.drawRect(-size/2,-size/2,size,size);
 		// this.spriteBall.drawCircle(0,0,windowHeight * 0.02);
 
@@ -43,7 +43,7 @@ var Enemy2 = Entity.extend({
 
 		this.getContent().alpha = 0.5;
 		TweenLite.to(this.getContent(), 0.3, {alpha:1});
-		
+
 		this.collideArea = new PIXI.Rectangle(-50, -50, windowWidth + 100, windowHeight + 100);
 
 
@@ -69,7 +69,7 @@ var Enemy2 = Entity.extend({
 		}
 	},
 	testVertical: function(){
-		
+
 		if(this.getPosition().y < this.wayPoints[this.targetWay].y){
 			this.velocity.y = this.standardVelocity;
 			this.velocity.x = 0;
@@ -118,7 +118,7 @@ var Enemy2 = Entity.extend({
 	changeShape:function(){
 	},
 	explode:function(velX, velY){
-		
+
 		var particle = null;
 		var tempParticle = null;
 		this.size = 8;

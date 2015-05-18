@@ -15,11 +15,6 @@ var Ball = Entity.extend({
 		this.velocity.x = vel.x;
 		this.velocity.y = vel.y;
 		this.power = 1;
-		this.defaultVelocity = 1;
-		
-		this.imgSource = 'bullet.png';
-		this.particleSource = 'bullet.png';//APP.appModel.currentBurguerlModel.imgSrc;
-		// this.defaultVelocity.y = vel.y;
 		//console.log(bulletSource);
 	},
 	startScaleTween: function(){
@@ -32,7 +27,8 @@ var Ball = Entity.extend({
 		this.color = 0xFFFFFF;
 		this.spriteBall = new PIXI.Graphics();
 		this.spriteBall.beginFill(this.color);
-		this.maxSize = windowWidth * 0.04;
+		this.maxSize = APP.tileSize.w * 0.4;
+		console.log(this.maxSize);
 		this.spriteBall.drawCircle(0,0,this.maxSize);
 
 		this.width = this.spriteBall.width;
@@ -41,7 +37,7 @@ var Ball = Entity.extend({
 
 		this.heart = new PIXI.Graphics();
 		this.heart.beginFill(0xFFFFFF);
-		this.heart.drawCircle(0,0,2);
+		this.heart.drawCircle(0,0,3);
 		this.heart.alpha = 0.5;
 
 		console.log(this.spriteBall.width);
@@ -54,7 +50,7 @@ var Ball = Entity.extend({
         this.range = this.spriteBall.height / 2;
 		this.sprite.anchor.x = 0.5;
 		this.sprite.anchor.y = 0.5;
-		
+
 		// console.log(this.range);
 		this.updateable = true;
 		this.collidable = true;
@@ -79,14 +75,18 @@ var Ball = Entity.extend({
         this.force = 0;
 		this.inJump = false;
 
-		this.standardVelocity = 3;
+		this.standardVelocity = APP.standerdVel;
+
+		console.log(this.standardVelocity, 'st');
 		this.friction = this.spriteBall.width / 3;
 
 		this.blockCollide2 = false;
 
+		this.moveAccum = 0;
+		this.moveAccumMax = 7;
+
 	},
 	returnCollide: function(half){
-		console.log('returnCollide');
 		this.blockMove = true;
 		var multiplyer = 1;
 		if(half){
@@ -140,10 +140,13 @@ var Ball = Entity.extend({
 		}
 	},
 	stretch: function(side){
+		this.moveAccum = this.moveAccumMax;
 		if(this.currentSide === side){
 			return;
 		}
-		var tempVel = this.spriteBall.width / 2;//this.standardVelocity * 2;
+		var tempVel = this.standardVelocity * 2;//this.spriteBall.width / 2;//this.standardVelocity * 2;
+
+		console.log(tempVel);
 		this.currentSide = side;
 		if(this.currentSide === 'UP'){
 			this.velocity.x = 0;
@@ -197,12 +200,15 @@ var Ball = Entity.extend({
 
 	},
 	update: function(){
+		if(this.moveAccum > 0){
+			this.moveAccum --;
+		}
 		// console.log(this.blockMove);
 		this.updateableParticles();
 		this.range = this.spriteBall.height / 2;
 		this._super();
-		this.applyFriction();
-		// console.log(this.velocity);
+		// this.applyFriction();
+		console.log(this.velocity);
 		this.layer.collideChilds(this);
 		if(this.heartParticle){
 			if(this.heartParticle.kill && this.heartParticle.getContent().parent){
@@ -322,7 +328,7 @@ var Ball = Entity.extend({
         this.layer.addChild(particle);
         particle.getContent().parent.setChildIndex(particle.getContent() , 0);
 
-        
+
 	},
 	explode:function(){
 		tempParticle = new PIXI.Graphics();
@@ -362,6 +368,7 @@ var Ball = Entity.extend({
 		if(this.invencible){
 			return;
 		}
+		this.spriteBall.alpha = 0;
 		APP.audioController.playSound('explode1');
 		this.collidable = false;
 		this.kill = true;
@@ -385,6 +392,6 @@ var Ball = Entity.extend({
 			this.layer.addChild(particle);
 		}
 		this.explode2();
-		
+
 	},
 });
