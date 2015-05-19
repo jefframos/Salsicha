@@ -500,12 +500,11 @@ var GameScreen = AbstractScreen.extend({
 	},
 	initLevel:function(whereInit){
 		if(windowWidth < windowHeight){
-			APP.tileSize = {w:windowWidth * 0.08,h:windowWidth * 0.08};
+			APP.tileSize = {w:windowWidth * 0.06,h:windowWidth * 0.06};
 		}else{
-			APP.tileSize = {w:windowHeight * 0.08,h:windowHeight * 0.08};
+			APP.tileSize = {w:windowHeight * 0.06,h:windowHeight * 0.06};
 		}
 		APP.standerdVel = APP.tileSize.w * 0.05;
-		console.log('initLevel');
 		this.trails = [];
 
 		this.recoil = false;
@@ -539,8 +538,6 @@ var GameScreen = AbstractScreen.extend({
 	},
 	initEnvironment: function(){
 		this.environment = [];
-		// APP.tileSize = {w:windowWidth / temp[0].length,		 h:windowHeight / temp.length};
-		// APP.tileSize = {w:Math.ceil(windowWidth * 0.1),h:Math.ceil(windowWidth * 0.1)};
 
 		this.mapSize = {i:LEVELS[0][0].length,j:LEVELS[0].length};
 		this.environment = LEVELS[APP.currentWorld][APP.currentLevel][0];
@@ -557,46 +554,11 @@ var GameScreen = AbstractScreen.extend({
 		if(this.vecTiles && this.vecTiles.length > 0){
 			for (var k = 0; k < this.vecTiles.length; k++) {
 				var tempTile = this.getTileByPos(this.vecTiles[k].x + 5,this.vecTiles[k].y + 5);
-				var tempColor = addBright(this.player.color,1.1);
 				var tileType = this.getTileType(tempTile.i, tempTile.j);
-				this.vecTiles[k].clear();
-				if(tileType === 2){
-					tempColor = addBright(this.player.color,0.5);
-					this.vecTiles[k].beginFill(tempColor);
-					var temp1 = -1;
-					var line = 6;
-					var sz = -3;
-					for (var ii = 0; ii <= line; ii++) {
-						if(ii === 0){
-							this.vecTiles[k].moveTo(APP.tileSize.w/line * ii, -(sz * temp1));
-						}else{
-							this.vecTiles[k].lineTo(APP.tileSize.w/line * ii, -(sz * temp1));
-						}
-						temp1 *= -1;
-					}
-
-					for (ii = 0; ii <= line; ii++) {
-						this.vecTiles[k].lineTo(APP.tileSize.w - (sz * temp1), APP.tileSize.h/line * ii);
-						temp1 *= -1;
-					}
-					temp1 = 1;
-					for (ii = 0; ii <= line; ii++) {
-						this.vecTiles[k].lineTo(APP.tileSize.w - (APP.tileSize.w/line * ii), APP.tileSize.h - (sz * temp1));
-						temp1 *= -1;
-					}
-
-					for (ii = 0; ii <= line; ii++) {
-						this.vecTiles[k].lineTo(-sz * temp1, APP.tileSize.h - (APP.tileSize.h/line * ii));
-						temp1 *= -1;
-					}
-				}else if(tileType === 3){
-					tempColor = addBright(this.player.color,0.8);
-					this.vecTiles[k].beginFill(tempColor);
-					this.vecTiles[k].drawRoundedRect(0,0,APP.tileSize.w, APP.tileSize.h, APP.tileSize.w*0.2);
-				}
-				else{
-					this.vecTiles[k].beginFill(tempColor);
-					this.vecTiles[k].drawRect(0,0,APP.tileSize.w, APP.tileSize.h);
+				try{
+					this.drawTile(tileType, tempTile.i, tempTile.j, this.vecTiles[k]);
+				}catch(error){
+					console.log(error);
 				}
 			}
 			return;
@@ -618,25 +580,23 @@ var GameScreen = AbstractScreen.extend({
 
 		this.hitTouch.hitArea = new PIXI.Rectangle(-100, -100, this.getContent().width, this.getContent().height);
 	},
-	drawTile: function(type, i,j){
-
+	drawTile: function(type, i,j, exists){
 		if(type >= 1 && type <= 3){
-			var tempColor = addBright(this.player.color,1.1);//this.player.color;//type === 1 ? this.player.color: 0xFF0000;
-			var tempGraphics = new PIXI.Graphics();
+			var tempColor = addBright(this.player.color,1 - (APP.currentWorld + 1) * 0.15);
+			var tempGraphics = exists?exists:new PIXI.Graphics();
+			tempGraphics.clear();
 			var isEnemy = false;
 			if(type === 1){
 				tempGraphics.beginFill(tempColor);
 				tempGraphics.drawRect(0,0,APP.tileSize.w, APP.tileSize.h);
 			}else if(type === 2){
-				tempColor = addBright(this.player.color,0.5);
+				tempColor = addBright(this.player.color,0.7 - (APP.currentWorld + 1) * 0.15);
 				tempGraphics.beginFill(tempColor);
-				// tempGraphics.drawRect(0,0,APP.tileSize.w, APP.tileSize.h);
 
 				var temp1 = -1;
 				var line = 6;
 				var sz = -3;
 				for (var ii = 0; ii <= line; ii++) {
-					console.log('ii',APP.tileSize.w/line * ii, line , ii);
 					if(ii === 0){
 						tempGraphics.moveTo(APP.tileSize.w/line * ii, -(sz * temp1));
 					}else{
@@ -659,10 +619,9 @@ var GameScreen = AbstractScreen.extend({
 					tempGraphics.lineTo(-sz * temp1, APP.tileSize.h - (APP.tileSize.h/line * ii));
 					temp1 *= -1;
 				}
-				// tempGraphics.lineTo(0,0);
 				isEnemy = true;
 			}else if(type === 3){
-				tempColor = addBright(this.player.color,0.8);
+				tempColor = addBright(this.player.color,0.8 - (APP.currentWorld + 1) * 0.15);
 				tempGraphics.beginFill(tempColor);
 				tempGraphics.drawRoundedRect(0,0,APP.tileSize.w, APP.tileSize.h, APP.tileSize.w*0.2);
 			}
@@ -670,8 +629,14 @@ var GameScreen = AbstractScreen.extend({
 			tempGraphics.position.x = i * APP.tileSize.w;
 			tempGraphics.position.y = j * APP.tileSize.h;
 			this.gameContainer.addChild(tempGraphics);
-			this.vecTiles.push(tempGraphics);
-		}else if(type === 4){
+			if(!exists){
+				this.vecTiles.push(tempGraphics);
+			}
+		}
+		if(exists){
+			return;
+		}
+		if(type === 4){
 			var coin = new Coin(this);
 			coin.build();
 			this.layer.addChild(coin);
@@ -1033,7 +998,7 @@ var GameScreen = AbstractScreen.extend({
 		if(!this.player){
 			return;
 		}
-		tempColor = addBright(temptempColor, 0.65);
+		tempColor = addBright(temptempColor, 0.9 - (APP.currentWorld + 1) * 0.15);
 		// this.player.spriteBall.tint = tempColor;
 		this.player.setColor(tempColor);
 

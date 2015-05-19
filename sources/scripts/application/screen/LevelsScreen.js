@@ -11,47 +11,103 @@ var LevelsScreen = AbstractScreen.extend({
     build: function () {
         this._super();
         console.log('this');
+        this.worldsTotalCoins = [];
+        this.worldsGotCoins = [];
         this.worlds = [];
         this.worldsContainer = null;
+        var i = 0;
+        var j = 0;
         var levelsContainer = null;
         var tempGraphicLevel = null;
         var tempColor = addBright(APP.vecColors[APP.currentColorID], 0.65);
         this.worldsContainer = new PIXI.DisplayObjectContainer();
-        for (var i = 0; i < LEVELS.length; i++) {
+        var iacumW = 0;
+        var jacumW = 0;
+        for (i = 0; i < LEVELS.length; i++) {
+            coinsAcum = 0;
+            for (j = 0; j < LEVELS[i].length; j++) {
+                if(LEVELS[i][j][1].coins){
+                    coinsAcum += LEVELS[i][j][1].coins;
+                }
+            }
+            this.worldsTotalCoins.push(coinsAcum);
+            this.worldsGotCoins.push(0);
+        }
+        for (i = 0; i < LEVELS.length; i++) {
             levelsContainer = new PIXI.DisplayObjectContainer();
-            var tempWorldGraphic = new PIXI.Graphics();
-            tempWorldGraphic.beginFill(tempColor);
-            tempWorldGraphic.drawRect(0,0,windowWidth * 0.2,windowWidth * 0.25);
-            tempWorldGraphic.position.x = (tempWorldGraphic.width * 1.5) * i;
+
+            if(i % 2 === 0 && i !== 0){
+                jacumW++;
+                iacumW = 0;
+            }
+            tempWorldContainer = new PIXI.DisplayObjectContainer();
+            tempWorldGraphic = new PIXI.Graphics();
+            tempWorldGraphic.beginFill(addBright(APP.vecColors[APP.currentColorID], 0.9 - 0.1 * i));
+            tempWorldGraphic.drawRect(0,0,windowHeight * 0.2,windowHeight * 0.2);
             tempWorldGraphic.interactive = true;
             tempWorldGraphic.buttonMode = true;
             tempWorldGraphic.touchstart = tempWorldGraphic.mousedown = this.selectWorld;
             tempWorldGraphic.id = i;
             tempWorldGraphic.scope = this;
 
-            this.worldsContainer.addChild(tempWorldGraphic);
+            coinGraph = new PIXI.Graphics();
+            coinGraph.beginFill(0xFFFFFF);
+            size = tempWorldGraphic.width * 0.2;
+            coinGraph.drawRect(-size/2,-size/2,size,size);
+            totalCoins = new PIXI.Text(this.worldsGotCoins[i]+'/'+this.worldsTotalCoins[i], {align:'center',font:'25px monospace', fill:'#FFFFFF'});
+            tempWorldContainer.addChild(tempWorldGraphic);
+
+            coinGraph.position.x = tempWorldContainer.width / 2;
+            coinGraph.position.y = tempWorldContainer.height / 2;
+
+            totalCoins.position.x = tempWorldContainer.width / 2 - totalCoins.width / 2;
+            totalCoins.position.y = tempWorldContainer.height - totalCoins.height ;
+
+            tempWorldContainer.position.x = (tempWorldContainer.width * 1.5) * iacumW;
+            tempWorldContainer.position.y = (tempWorldContainer.height * 1.5) * jacumW;
+
+            tempWorldContainer.addChild(totalCoins);
+            tempWorldContainer.addChild(coinGraph);
+            iacumW ++;
+
             var iacum = 0;
             var jacum = 0;
-            for (var j = 0; j < LEVELS[i].length; j++) {
+            for (j = 0; j < LEVELS[i].length; j++) {
                 if(j % 5 === 0 && j !== 0){
                     jacum++;
                     iacum = 0;
                 }
+                var tempCoins = LEVELS[i][j][1].coins;
                 tempContainer = new PIXI.DisplayObjectContainer();
                 tempGraphicLevel = new PIXI.Graphics();
                 tempGraphicLevel.beginFill(tempColor);
-                tempGraphicLevel.drawRect(0,0,windowWidth * 0.1,windowWidth * 0.05);
-                tempGraphicLevel.position.x = (tempGraphicLevel.width * 1.5) * iacum;
-                tempGraphicLevel.position.y = (tempGraphicLevel.height * 1.5) * jacum;
+                tempGraphicLevel.drawRect(0,0,windowHeight * 0.1,windowHeight * 0.1);
                 tempGraphicLevel.interactive = true;
                 tempGraphicLevel.buttonMode = true;
                 tempGraphicLevel.touchstart = tempGraphicLevel.mousedown = this.selectLevel;
                 tempGraphicLevel.id = j;
                 tempGraphicLevel.scope = this;
                 tempContainer.addChild(tempGraphicLevel);
+                tempContainer.position.x = (tempContainer.width * 1.5) * iacum;
+                tempContainer.position.y = (tempContainer.height * 1.5) * jacum;
+                levelNumber = new PIXI.Text(j+1, {align:'center',font:'25px monospace', fill:'#FFFFFF'});
+                levelNumber.position.x = tempContainer.width / 2 - levelNumber.width / 2;
+                levelNumber.position.y = tempGraphicLevel.height * 0.1;
+                tempContainer.addChild(levelNumber);
+                for (var k = 1; k < tempCoins + 1; k++) {
+                    coinGraph = new PIXI.Graphics();
+                    coinGraph.beginFill(addBright(APP.vecColors[APP.currentColorID], 0.4));
+                    size = tempGraphicLevel.width * 0.1;
+                    coinGraph.drawRect(-size/2,-size/2,size,size);
+                    coinGraph.position.x = (tempContainer.width / (tempCoins + 1)) * k;
+                    coinGraph.position.y = tempContainer.height - coinGraph.height * 2;
+                    tempContainer.addChild(coinGraph);
+                }
+
                 levelsContainer.addChild(tempContainer);
                 iacum ++;
             }
+            this.worldsContainer.addChild(tempWorldContainer);
             this.worlds.push([levelsContainer]);
         }
 
@@ -75,12 +131,12 @@ var LevelsScreen = AbstractScreen.extend({
         this.showWorlds();
     },
     hideWorlds:function(callback, scope){
-        TweenLite.to(this.worldsContainer.position, 1, {x:-windowWidth / 2, y:windowHeight, onComplete:function(){
+        TweenLite.to(this.worldsContainer.position, 0.8, {x:-windowWidth / 2, y:windowHeight, onComplete:function(){
             callback(scope);
         }});
     },
     hideLevels:function(callback, scope){
-        TweenLite.to(this.currentWorldGraphics.position, 1, {x:-windowWidth / 2, y:windowHeight, onComplete:function(){
+        TweenLite.to(this.currentWorldGraphics.position, 0.8, {x:-windowWidth / 2, y:windowHeight, onComplete:function(){
             callback(scope);
         }});
     },
