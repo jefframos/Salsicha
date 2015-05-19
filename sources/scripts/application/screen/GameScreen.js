@@ -11,22 +11,9 @@ var GameScreen = AbstractScreen.extend({
 			APP.cookieManager.setSafeCookie('highscore', 0);
 			APP.highscore = 0;
 		}
-
-
 		APP.audioController.playAmbientSound('loop');
-		// APP.vecColors = [0xD031F2,0xFF562D,0x9E1EE8,0x5AF271];
-  //       APP.vecColorsS = ['#D031F2','#FF562D','#9E1EE8','#5AF271'];
-  //       APP.vecPerfects = ['PERFECT!', 'AWESOME!', 'AMAZING!', 'GOD!!!'];
-  //       APP.vecGood = ['GOOD', 'COOL', 'YO', 'NOT BAD'];
-  //       APP.vecError = ['NOOOO!', 'BAD', '=(', 'NOT'];
-  //       APP.currentColorID = Math.floor(APP.vecColors.length * Math.random());
-
-  //       APP.backColor = APP.vecColors[APP.currentColorID];
-
 		APP.mute = true;
 		Howler.mute();
-
-		APP.currentLevel = 0;
 
 	},
 	destroy: function () {
@@ -38,15 +25,12 @@ var GameScreen = AbstractScreen.extend({
 	build: function () {
 		this._super();
 		var assetsToLoader = [];
-		// var assetsToLoader = ['dist/img/atlas.json'];
-		// this.loader = new PIXI.AssetLoader(assetsToLoader);
 		if(assetsToLoader !== undefined && assetsToLoader.length > 0 && !this.isLoaded){
 			this.initLoad();
 		}else{
 			this.onAssetsLoaded();
 		}
 		this.pinVel = {x:0, y:0};
-		// console.log('buid');
 		this.addSoundButton();
 	},
 	onProgress:function(){
@@ -61,25 +45,6 @@ var GameScreen = AbstractScreen.extend({
 
 		var self = this;
 
-
-		if(!this.background){
-			this.background = new PIXI.Graphics();
-			this.background.beginFill(APP.backColor);
-			this.background.drawRect(0,0,windowWidth, windowHeight);
-			this.addChild(this.background);
-		}else{
-			this.addChild(this.background);
-
-		}
-
-		if(!this.interactiveBackground){
-			this.interactiveBackground = new InteractiveBackground(this);
-			this.interactiveBackground.build();
-			this.addChild(this.interactiveBackground);
-		}else{
-			this.addChild(this.interactiveBackground);
-
-		}
 		this.hitTouch = new PIXI.Graphics();
 		this.hitTouch.interactive = true;
 		this.hitTouch.beginFill(0);
@@ -124,7 +89,6 @@ var GameScreen = AbstractScreen.extend({
 			this.hammer    = new Hammer.Manager(renderer.view);
 			this.hammer.add(swipe);
 
-			console.log(this.hammer);
 			this.hammer.on('swipeup', function() {
 				self.player.stretch('UP');
 			});
@@ -143,15 +107,13 @@ var GameScreen = AbstractScreen.extend({
 
 			this.updateable = true;
 		}
-		if(APP.withAPI){
-			GameAPI.GameBreak.request(function(){
-				self.pauseModal.show();
-			}, function(){
-				self.pauseModal.hide();
-			});
-		}
-
-
+		// if(APP.withAPI){
+		// 	GameAPI.GameBreak.request(function(){
+		// 		self.pauseModal.show();
+		// 	}, function(){
+		// 		self.pauseModal.hide();
+		// 	});
+		// }
 
 		this.gameContainer = new PIXI.DisplayObjectContainer();
 		this.addChild(this.gameContainer);
@@ -173,8 +135,7 @@ var GameScreen = AbstractScreen.extend({
 		this.HUDLayer.build('HUDLayer');
 		this.layerManager.addLayer(this.HUDLayer);
 
-		this.coinsLabel = new PIXI.Text('0', {align:'center',font:'72px Vagron', fill:'#FFFFFF', wordWrap:true, wordWrapWidth:500});
-		// scaleConverter(this.coinsLabel.height, windowHeight, 0.2, this.coinsLabel);
+		this.coinsLabel = new PIXI.Text('0', {align:'center',font:'48px Vagron', fill:'#FFFFFF', wordWrap:true, wordWrapWidth:500});
 		this.coinsLabel.resolution = retina;
 		this.coinsLabel.alpha = 0.5;
 		this.coinsLabel.position.x = 20;
@@ -184,22 +145,32 @@ var GameScreen = AbstractScreen.extend({
 		this.crazyContent = new PIXI.DisplayObjectContainer();
 		this.addChild(this.crazyContent);
 
-
-		this.loaderBar = new LifeBarHUD(windowWidth, 30, 0, 0xFFFFFF, 0xFFFFFF);
-		this.addChild(this.loaderBar.getContent());
-		this.loaderBar.getContent().position.x = 0;//windowWidth / 2 - this.loaderBar.getContent().width / 2;
-		this.loaderBar.getContent().position.y = 0;//windowHeight / 1.1;
-		this.loaderBar.updateBar(0, 100);
-		this.loaderBar.getContent().alpha = 0;
-
 		this.initLevel();
 		this.startLevel = false;
 		this.debugBall = new PIXI.Graphics();
 
 
 
+		this.backButtonContainer = new PIXI.DisplayObjectContainer();
+        this.backButton = new PIXI.Graphics();
+        this.backButton.beginFill(0xFFFFFF);
+        this.backButton.moveTo(30,0);
+        this.backButton.lineTo(30,30);
+        this.backButton.lineTo(0,15);
+        this.backButton.lineTo(30,0);
+        this.backButtonContainer.addChild(this.backButton);
+        this.backButtonContainer.scope = this;
+        this.backButtonContainer.interactive = true;
+        this.backButtonContainer.buttonMode = true;
+        this.backButtonContainer.touchstart = this.backButtonContainer.mousedown = this.backFunction;
+
+        this.addChild(this.backButtonContainer);
 	},
 
+	backFunction:function(event){
+		var scope = event.target.scope;
+		scope.screenManager.change('Levels');
+	},
 	collideWall:function(nonRecoil){
 		if(this.trails.length <= 0){
 			return;
@@ -572,7 +543,7 @@ var GameScreen = AbstractScreen.extend({
 		// APP.tileSize = {w:Math.ceil(windowWidth * 0.1),h:Math.ceil(windowWidth * 0.1)};
 
 		this.mapSize = {i:LEVELS[0][0].length,j:LEVELS[0].length};
-		this.environment = LEVELS[APP.currentLevel];
+		this.environment = LEVELS[APP.currentWorld][APP.currentLevel][0];
 
 		this.drawMap();
 		this.drawPlayer();
@@ -716,7 +687,6 @@ var GameScreen = AbstractScreen.extend({
 				for (var k = 0; k < this.vecMovEnemiesTemp.length; k++) {
 					if(this.vecMovEnemiesTemp[k].id === type[0]){
 						count ++;
-						// console.log(type[1]);
 						tempPositions.push({x:this.vecMovEnemiesTemp[k].x,y:this.vecMovEnemiesTemp[k].y, index: this.vecMovEnemiesTemp[k].index});
 					}
 				}
@@ -732,7 +702,6 @@ var GameScreen = AbstractScreen.extend({
 					enemyMov.setWaypoints(tempPositions);
 					this.vecMovEnemies.push(enemyMov);
 				}else if(count > 2){
-					// console.log(tempPositions);
 					tempPositions.sort(function(a, b){
 						return a.index-b.index;
 					});
@@ -742,7 +711,6 @@ var GameScreen = AbstractScreen.extend({
 						}
 					}
 				}
-				// this.player.setPosition(,);
 			}
 		}
 	},
@@ -779,7 +747,6 @@ var GameScreen = AbstractScreen.extend({
 			return 0;
 		}
 		try{
-			// console.log(i,j);
 			return this.environment[j][i];
 		}catch(err){
 			return 1;
@@ -959,8 +926,6 @@ var GameScreen = AbstractScreen.extend({
 		if(this.endGame){
 			return;
 		}
-
-
 		// if(window.navigator){
 		// 	// navigator.vibrate(200);
 		// }
@@ -1011,10 +976,6 @@ var GameScreen = AbstractScreen.extend({
 		perfect2.setPosition(this.player.getPosition().x - tempLabel.width / 2 + 2, initY?initY:this.player.getPosition().y + 50 + 2);
 		this.HUDLayer.addChild(perfect2);
 
-		// this.levelCounter += this.levelCounterMax * 0.02;
-		// if(this.levelCounter > this.levelCounterMax){
-		// 	this.levelCounter = this.levelCounterMax;
-		// }
 	},
 	getPerfect:function(){
 		//if(window.navigator){
@@ -1053,18 +1014,18 @@ var GameScreen = AbstractScreen.extend({
 		var temptempColor = APP.vecColors[APP.currentColorID];
 
 		if(force){
-			self.background.clear();
-			self.background.beginFill(temptempColor);
-			self.background.drawRect(-80,-80,windowWidth + 160, windowHeight + 160);
+			APP.background.clear();
+			APP.background.beginFill(temptempColor);
+			APP.background.drawRect(-80,-80,windowWidth + 160, windowHeight + 160);
 			// document.body.style.backgroundColor = APP.backColor;
 		}else{
 			if(forceColor){
 				APP.backColor = APP.vecColors[Math.floor(APP.vecColors.length * Math.random())];
 			}
 			TweenLite.to(APP, 0.3, {backColor:temptempColor, onUpdate:function(){
-				self.background.clear();
-				self.background.beginFill(APP.backColor);
-				self.background.drawRect(-80,-80,windowWidth + 160, windowHeight + 160);
+				APP.background.clear();
+				APP.background.beginFill(APP.backColor);
+				APP.background.drawRect(-80,-80,windowWidth + 160, windowHeight + 160);
 			}});
 		}
 		document.body.style.backgroundColor = APP.vecColorsS[APP.currentColorID];
@@ -1075,42 +1036,24 @@ var GameScreen = AbstractScreen.extend({
 		tempColor = addBright(temptempColor, 0.65);
 		// this.player.spriteBall.tint = tempColor;
 		this.player.setColor(tempColor);
-		this.loaderBar.setBackColor(tempColor);
+
 		this.drawMap();
 
 		if(this.trails && this.trails.length){
 			for (var i = 0; i < this.trails.length; i++) {
 				var tempTrail = this.trails[i].trail;
-				// console.log(this.getTileType(this.getTileByPos(tempTrail.x,tempTrail.y)));
-				// if(this.getTileType(this.getTileByPos(tempTrail.x,tempTrail.y)) === 1){
 				var tempRect = new PIXI.Rectangle(tempTrail.getLocalBounds().x,tempTrail.getLocalBounds().y,tempTrail.getLocalBounds().width,tempTrail.getLocalBounds().height);
-				// var tempH = tempTrail.height;
 				tempTrail.clear();
 				tempTrail.beginFill(tempColor);
 
 				if(this.trails[i].type !== 'JOINT'){
-					// if(type === 1){
-					// 	tempGraphics.beginFill(tempColor);
-					// 	tempGraphics.drawRect(0,0,APP.tileSize.w, APP.tileSize.h);
-					// }else if(type === 2){
-					// 	tempColor = addBright(this.player.color,0.5);
-					// 	tempGraphics.beginFill(tempColor);
-					// 	tempGraphics.drawRect(0,0,APP.tileSize.w, APP.tileSize.h);
-					// 	isEnemy = true;
-					// }else if(type === 3){
-					// 	tempColor = addBright(this.player.color,0.8);
-					// 	tempGraphics.beginFill(tempColor);
-					// 	tempGraphics.drawRoundedRect(0,0,APP.tileSize.w, APP.tileSize.h, 5);
-					// }
 					tempTrail.drawRect(tempRect.x,tempRect.y,tempRect.width,tempRect.height);
 				}else{
 					tempTrail.drawCircle(0,0,tempRect.width/2);
-					// console.log(tempTrail.getLocalBounds());
 				}
-				// }
 			}
 		}
-		// this.loaderBar.backBaseShape.tint = tempColor;//tempColor;
+
 	},
 	earthquake:function(force){
 		var earth = new TimelineLite();
@@ -1126,40 +1069,22 @@ var GameScreen = AbstractScreen.extend({
 		// this.coinsLabel.alpha = 0.5;
 		this.coinsLabel.position.x = 20;//windowWidth / 2 - this.coinsLabel.width / 2 / this.coinsLabel.resolution;
 		this.coinsLabel.position.y = 20;//windowHeight / 2 - this.coinsLabel.height / 2 / this.coinsLabel.resolution;
-		if(this.background.parent){
-			this.background.parent.setChildIndex(this.background, 0);
+		if(APP.background.parent){
+			APP.background.parent.setChildIndex(APP.background, 0);
 		}
 		this.coinsLabel.parent.setChildIndex(this.coinsLabel, 1);
 
 		if(this.coinsLabel.alpha < 0.5){
 			return;
 		}
-		// var tempCoins = new PIXI.Text(APP.points, {align:'center',font:'72px Vagron', fill:'#FFFFFF', wordWrap:true, wordWrapWidth:500});
-		// tempCoins.anchor = {x:0.5, y:0.5};
-		// tempCoins.resolution = retina;
-		// var particle = new Particles({x: 0, y:0}, 120, tempCoins,0);
-		// particle.maxScale = 5;
-		// particle.maxInitScale = 1;
-		// particle.build();
-		// particle.alphadecress = 0.02;
-		// particle.scaledecress = +0.02;
-		// particle.setPosition(this.coinsLabel.position.x + tempCoins.width / 2 / tempCoins.resolution, this.coinsLabel.position.y + tempCoins.height / 2 / tempCoins.resolution);
-		// this.layer.addChild(particle);
 
 	},
-
-
-
-
-
 	transitionIn:function()
 	{
 		this.build();
 	},
 	transitionOut:function(nextScreen, container)
 	{
-		// this._super();
-		console.log('out');
 		var self = this;
 		if(this.frontShape){
 			this.frontShape.parent.setChildIndex(this.frontShape, this.frontShape.parent.children.length - 1);

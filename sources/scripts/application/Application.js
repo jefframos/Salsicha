@@ -49,6 +49,9 @@ var Application = AbstractApplication.extend({
             return;
         }
         this._super();
+        if(this.interactiveBackground){
+            this.interactiveBackground.update();
+        }
         if(this.withAPI && this.apiLogo && this.apiLogo.getContent().height > 1 && this.apiLogo.getContent().position.x === 0){
             // this.apiLogo.getContent().position.y = windowHeight - this.apiLogo.getContent().height;
             scaleConverter(this.apiLogo.getContent().width, windowWidth, 0.5, this.apiLogo);
@@ -89,9 +92,9 @@ var Application = AbstractApplication.extend({
         this.buttonProperties = apiInstance.Branding.getLink('more_games');
 
         //call init application after splash screen
-        this.apiInstance.Branding.displaySplashScreen(function(){
-            APP.initApplication();
-        });
+        // this.apiInstance.Branding.displaySplashScreen(function(){
+        //     APP.initApplication();
+        // });
     },
     recursiveCounter:function(obj){
         var j = 0;
@@ -120,15 +123,36 @@ var Application = AbstractApplication.extend({
         // alert('build3');
     },
     initApplication:function(){
+        console.log(this.stage);
+        if(!this.background){
+            this.background = new PIXI.Graphics();
+            this.background.beginFill(APP.backColor);
+            this.background.drawRect(0,0,windowWidth, windowHeight);
+            this.stage.addChild(this.background);
+        }else{
+            this.stage.addChild(this.background);
+
+        }
+
+        if(!this.interactiveBackground){
+            this.interactiveBackground = new InteractiveBackground(this);
+            this.interactiveBackground.build();
+            this.stage.addChild(this.interactiveBackground.getContent());
+        }else{
+            this.stage.addChild(this.interactiveBackground.getContent());
+        }
+        this.stage.setChildIndex(this.background,0);
+        this.stage.setChildIndex(this.interactiveBackground.getContent(),1);
         // this.initScreen = new InitScreen('Init');
         // this.choiceScreen = new ChoiceScreen('Choice');
-        this.gameScreen = new GameScreen('Game');
         this.loadScreen = new LoadScreen('Loader');
+        this.levelsScreen = new LevelsScreen('Levels');
+        this.gameScreen = new GameScreen('Game');
         this.screenManager.addScreen(this.loadScreen);
-        // this.screenManager.addScreen(this.initScreen);
-        // this.screenManager.addScreen(this.choiceScreen);
+        this.screenManager.addScreen(this.levelsScreen);
         this.screenManager.addScreen(this.gameScreen);
-        this.screenManager.change('Loader');
+        // this.screenManager.change('Loader');
+        this.screenManager.change('Levels');
     },
     show:function(){
     },

@@ -22,8 +22,8 @@ var Coin = Entity.extend({
 		this.sprite = new PIXI.Sprite();
         this.sprite.addChild(this.spriteBall);
 
-		// this.sprite.anchor.x = 0.5;
-		// this.sprite.anchor.y = 0.5;
+		this.sprite.anchor.x = 0.5;
+		this.sprite.anchor.y = 0.5;
 
 		this.updateable = true;
 		this.collidable = true;
@@ -37,8 +37,10 @@ var Coin = Entity.extend({
         this.particlesCounterMax = 8;
         this.particlesCounter = 1;
 
+        this.sprite.rotation = Math.random();
 	},
 	update: function(){
+		this.sprite.rotation += 0.01;
 		this.range = this.spriteBall.width / 2;
 		this._super();
 	},
