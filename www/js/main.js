@@ -1,4 +1,4 @@
-/*! jefframos 18-05-2015 */
+/*! jefframos 19-05-2015 */
 function rgbToHsl(r, g, b) {
     r /= 255, g /= 255, b /= 255;
     var h, s, max = Math.max(r, g, b), min = Math.min(r, g, b), l = (max + min) / 2;
@@ -185,9 +185,9 @@ var Application = AbstractApplication.extend({
             self._super(windowWidth, windowHeight), self.stage.setBackgroundColor(self.backColor), 
             self.stage.removeChild(self.loadText), self.labelDebug = new PIXI.Text("", {
                 font: "15px Arial"
-            }), self.stage.addChild(self.labelDebug), self.labelDebug.position.y = windowHeight - 20, 
-            self.labelDebug.position.x = 20, self.initialized = !0, self.audioController = new AudioController(), 
-            self.withAPI = !1, "#withoutAPI" === window.location.hash && (self.withAPI = !1);
+            }), self.labelDebug.position.y = windowHeight - 20, self.labelDebug.position.x = 20, 
+            self.initialized = !0, self.audioController = new AudioController(), self.withAPI = !1, 
+            "#withoutAPI" === window.location.hash && (self.withAPI = !1);
         }
         var self = this;
         this.vecColors = [ 16743382, 16735338, 16746088, 16563797, 5563861, 2783487, 9586937, 14111213, 9682753 ], 
@@ -1443,7 +1443,7 @@ var GameScreen = AbstractScreen.extend({
     },
     drawMap: function() {
         if (this.environment) if (this.vecTiles && this.vecTiles.length > 0) for (var k = 0; k < this.vecTiles.length; k++) {
-            var tempTile = this.getTileByPos(this.vecTiles[k].x + 5, this.vecTiles[k].y + 5), tempColor = this.player.color, tileType = this.getTileType(tempTile.i, tempTile.j);
+            var tempTile = this.getTileByPos(this.vecTiles[k].x + 5, this.vecTiles[k].y + 5), tempColor = addBright(this.player.color, 1.1), tileType = this.getTileType(tempTile.i, tempTile.j);
             if (this.vecTiles[k].clear(), 2 === tileType) {
                 tempColor = addBright(this.player.color, .5), this.vecTiles[k].beginFill(tempColor);
                 for (var temp1 = -1, line = 6, sz = -3, ii = 0; line >= ii; ii++) 0 === ii ? this.vecTiles[k].moveTo(APP.tileSize.w / line * ii, -(sz * temp1)) : this.vecTiles[k].lineTo(APP.tileSize.w / line * ii, -(sz * temp1)), 
@@ -1465,7 +1465,7 @@ var GameScreen = AbstractScreen.extend({
     },
     drawTile: function(type, i, j) {
         if (type >= 1 && 3 >= type) {
-            var tempColor = this.player.color, tempGraphics = new PIXI.Graphics(), isEnemy = !1;
+            var tempColor = addBright(this.player.color, 1.1), tempGraphics = new PIXI.Graphics(), isEnemy = !1;
             if (1 === type) tempGraphics.beginFill(tempColor), tempGraphics.drawRect(0, 0, APP.tileSize.w, APP.tileSize.h); else if (2 === type) {
                 tempColor = addBright(this.player.color, .5), tempGraphics.beginFill(tempColor);
                 for (var temp1 = -1, line = 6, sz = -3, ii = 0; line >= ii; ii++) console.log("ii", APP.tileSize.w / line * ii, line, ii), 

@@ -586,7 +586,7 @@ var GameScreen = AbstractScreen.extend({
 		if(this.vecTiles && this.vecTiles.length > 0){
 			for (var k = 0; k < this.vecTiles.length; k++) {
 				var tempTile = this.getTileByPos(this.vecTiles[k].x + 5,this.vecTiles[k].y + 5);
-				var tempColor = this.player.color;
+				var tempColor = addBright(this.player.color,1.1);
 				var tileType = this.getTileType(tempTile.i, tempTile.j);
 				this.vecTiles[k].clear();
 				if(tileType === 2){
@@ -650,7 +650,7 @@ var GameScreen = AbstractScreen.extend({
 	drawTile: function(type, i,j){
 
 		if(type >= 1 && type <= 3){
-			var tempColor = this.player.color;//type === 1 ? this.player.color: 0xFF0000;
+			var tempColor = addBright(this.player.color,1.1);//this.player.color;//type === 1 ? this.player.color: 0xFF0000;
 			var tempGraphics = new PIXI.Graphics();
 			var isEnemy = false;
 			if(type === 1){
