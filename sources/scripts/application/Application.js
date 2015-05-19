@@ -42,7 +42,6 @@ var Application = AbstractApplication.extend({
 
         this.mute = false;
 
-
 	},
     update:function(){
         if(!this.initialized){
@@ -118,7 +117,7 @@ var Application = AbstractApplication.extend({
         // alert('build');
         this.cookieManager = new CookieManager();
         // alert('build2');
-        // this.appModel = new AppModel();
+        this.appModel = new AppModel();
         this.initApplication();
         // alert('build3');
     },

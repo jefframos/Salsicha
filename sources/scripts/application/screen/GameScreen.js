@@ -138,7 +138,7 @@ var GameScreen = AbstractScreen.extend({
 		this.coinsLabel = new PIXI.Text('0', {align:'center',font:'48px Vagron', fill:'#FFFFFF', wordWrap:true, wordWrapWidth:500});
 		this.coinsLabel.resolution = retina;
 		this.coinsLabel.alpha = 0.5;
-		this.coinsLabel.position.x = 20;
+		this.coinsLabel.position.x = 60;//windowWidth / 2 - this.coinsLabel.width / 2 / this.coinsLabel.resolution;
 		this.coinsLabel.position.y = 0;
 		this.addChild(this.coinsLabel);
 
@@ -154,15 +154,17 @@ var GameScreen = AbstractScreen.extend({
 		this.backButtonContainer = new PIXI.DisplayObjectContainer();
         this.backButton = new PIXI.Graphics();
         this.backButton.beginFill(0xFFFFFF);
-        this.backButton.moveTo(30,0);
-        this.backButton.lineTo(30,30);
-        this.backButton.lineTo(0,15);
-        this.backButton.lineTo(30,0);
+        this.backButton.moveTo(20,0);
+        this.backButton.lineTo(20,20);
+        this.backButton.lineTo(0,10);
+        this.backButton.lineTo(20,0);
         this.backButtonContainer.addChild(this.backButton);
         this.backButtonContainer.scope = this;
         this.backButtonContainer.interactive = true;
         this.backButtonContainer.buttonMode = true;
         this.backButtonContainer.touchstart = this.backButtonContainer.mousedown = this.backFunction;
+        this.backButtonContainer.position.x = 20;
+        this.backButtonContainer.position.y = 20;
 
         this.addChild(this.backButtonContainer);
 	},
@@ -535,6 +537,8 @@ var GameScreen = AbstractScreen.extend({
 
 		this.updateMapPosition();
 
+		TweenLite.from(this.getContent(), 0.5,{y:-50, alpha:0});
+
 	},
 	initEnvironment: function(){
 		this.environment = [];
@@ -587,11 +591,19 @@ var GameScreen = AbstractScreen.extend({
 			tempGraphics.clear();
 			var isEnemy = false;
 			if(type === 1){
-				tempGraphics.beginFill(tempColor);
+				if(APP.currentWorld >1){
+					tempGraphics.lineStyle(1,tempColor);
+				}else{
+					tempGraphics.beginFill(tempColor);
+				}
 				tempGraphics.drawRect(0,0,APP.tileSize.w, APP.tileSize.h);
 			}else if(type === 2){
 				tempColor = addBright(this.player.color,0.7 - (APP.currentWorld + 1) * 0.15);
-				tempGraphics.beginFill(tempColor);
+				if(APP.currentWorld >1){
+					tempGraphics.lineStyle(1,tempColor);
+				}else{
+					tempGraphics.beginFill(tempColor);
+				}
 
 				var temp1 = -1;
 				var line = 6;
@@ -622,7 +634,11 @@ var GameScreen = AbstractScreen.extend({
 				isEnemy = true;
 			}else if(type === 3){
 				tempColor = addBright(this.player.color,0.8 - (APP.currentWorld + 1) * 0.15);
-				tempGraphics.beginFill(tempColor);
+				if(APP.currentWorld >1){
+					tempGraphics.lineStyle(1,tempColor);
+				}else{
+					tempGraphics.beginFill(tempColor);
+				}
 				tempGraphics.drawRoundedRect(0,0,APP.tileSize.w, APP.tileSize.h, APP.tileSize.w*0.2);
 			}
 
@@ -740,9 +756,10 @@ var GameScreen = AbstractScreen.extend({
 
 		this.soundOff = new PIXI.Graphics();
 		this.soundOff.beginFill(0xFFFFFF);
-		this.soundOff.moveTo(15 + 5,10);
-		this.soundOff.lineTo(0 + 5,0);
-		this.soundOff.lineTo(0 + 5,20);
+
+		this.soundOff.moveTo(0,0);
+		this.soundOff.lineTo(20,10);
+		this.soundOff.lineTo(0,20);
 
 		if(APP.mute){
 			this.soundButtonContainer.addChild(this.soundOff);
@@ -751,8 +768,8 @@ var GameScreen = AbstractScreen.extend({
 		}
 
 		this.addChild(this.soundButtonContainer);
-		this.soundButtonContainer.position.x = windowWidth - this.soundButtonContainer.width *1.5;
-		this.soundButtonContainer.position.y = this.soundButtonContainer.width;
+		this.soundButtonContainer.position.x = windowWidth - 40;
+		this.soundButtonContainer.position.y = 20;
 		// alert(this.soundButtonContainer.width/2);
 		// this.soundButtonContainer = new PIXI.DisplayObjectContainer();
 		this.soundButtonContainer.hitArea = new PIXI.Rectangle(-5, -5, 35, 35);
@@ -994,12 +1011,10 @@ var GameScreen = AbstractScreen.extend({
 			}});
 		}
 		document.body.style.backgroundColor = APP.vecColorsS[APP.currentColorID];
-		// console.log(document.body.style.backgroundColor);
 		if(!this.player){
 			return;
 		}
 		tempColor = addBright(temptempColor, 0.9 - (APP.currentWorld + 1) * 0.15);
-		// this.player.spriteBall.tint = tempColor;
 		this.player.setColor(tempColor);
 
 		this.drawMap();
@@ -1028,12 +1043,9 @@ var GameScreen = AbstractScreen.extend({
 	},
 	updateCoins:function(){
 
-		// console.log(APP.points);
 		this.coinsLabel.setText(APP.points);
 		TweenLite.to(this.coinsLabel, 0.2, {alpha:0.5});
-		// this.coinsLabel.alpha = 0.5;
-		this.coinsLabel.position.x = 20;//windowWidth / 2 - this.coinsLabel.width / 2 / this.coinsLabel.resolution;
-		this.coinsLabel.position.y = 20;//windowHeight / 2 - this.coinsLabel.height / 2 / this.coinsLabel.resolution;
+		this.coinsLabel.position.x = 60;
 		if(APP.background.parent){
 			APP.background.parent.setChildIndex(APP.background, 0);
 		}

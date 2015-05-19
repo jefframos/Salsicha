@@ -31,7 +31,7 @@ var LevelsScreen = AbstractScreen.extend({
                 }
             }
             this.worldsTotalCoins.push(coinsAcum);
-            this.worldsGotCoins.push(0);
+            this.worldsGotCoins.push(1);
         }
         for (i = 0; i < LEVELS.length; i++) {
             levelsContainer = new PIXI.DisplayObjectContainer();
@@ -78,6 +78,7 @@ var LevelsScreen = AbstractScreen.extend({
                     iacum = 0;
                 }
                 var tempCoins = LEVELS[i][j][1].coins;
+                var high = LEVELS[i][j][1].highscore;
                 tempContainer = new PIXI.DisplayObjectContainer();
                 tempGraphicLevel = new PIXI.Graphics();
                 tempGraphicLevel.beginFill(tempColor);
@@ -96,7 +97,7 @@ var LevelsScreen = AbstractScreen.extend({
                 tempContainer.addChild(levelNumber);
                 for (var k = 1; k < tempCoins + 1; k++) {
                     coinGraph = new PIXI.Graphics();
-                    coinGraph.beginFill(addBright(APP.vecColors[APP.currentColorID], 0.4));
+                    coinGraph.beginFill(k <=high ? 0xFFFFFF : addBright(APP.vecColors[APP.currentColorID], 0.4));
                     size = tempGraphicLevel.width * 0.1;
                     coinGraph.drawRect(-size/2,-size/2,size,size);
                     coinGraph.position.x = (tempContainer.width / (tempCoins + 1)) * k;
@@ -116,26 +117,30 @@ var LevelsScreen = AbstractScreen.extend({
         this.backButtonContainer = new PIXI.DisplayObjectContainer();
         this.backButton = new PIXI.Graphics();
         this.backButton.beginFill(0xFFFFFF);
-        this.backButton.moveTo(30,0);
-        this.backButton.lineTo(30,30);
-        this.backButton.lineTo(0,15);
-        this.backButton.lineTo(30,0);
+        this.backButton.moveTo(20,0);
+        this.backButton.lineTo(20,20);
+        this.backButton.lineTo(0,10);
+        this.backButton.lineTo(20,0);
         this.backButtonContainer.addChild(this.backButton);
         this.backButtonContainer.scope = this;
         this.backButtonContainer.interactive = true;
         this.backButtonContainer.buttonMode = true;
         this.backButtonContainer.touchstart = this.backButtonContainer.mousedown = this.backFunction;
-
+        this.backButtonContainer.position.x = 20;
+        this.backButtonContainer.position.y = 20;
         this.addChild(this.backButtonContainer);
 
         this.showWorlds();
     },
     hideWorlds:function(callback, scope){
+        APP.interactiveBackground.accel = -2;
+
         TweenLite.to(this.worldsContainer.position, 0.8, {x:-windowWidth / 2, y:windowHeight, onComplete:function(){
             callback(scope);
         }});
     },
     hideLevels:function(callback, scope){
+        APP.interactiveBackground.accel = -2;
         TweenLite.to(this.currentWorldGraphics.position, 0.8, {x:-windowWidth / 2, y:windowHeight, onComplete:function(){
             callback(scope);
         }});
@@ -145,22 +150,22 @@ var LevelsScreen = AbstractScreen.extend({
         if(self.currentWorldGraphics && self.currentWorldGraphics.parent){
             self.currentWorldGraphics.parent.removeChild(self.currentWorldGraphics);
         }
-
         self.worldsContainer.position.x = windowWidth / 2 - self.worldsContainer.width / 2;
         self.worldsContainer.position.y = windowHeight / 2 - self.worldsContainer.height / 2;
         self.addChild(self.worldsContainer);
-        TweenLite.from(self.worldsContainer, 4, {x:windowWidth, y:-self.worldsContainer.height, ease:'easeOutElastic'});
+        TweenLite.from(self.worldsContainer, 0.8, {x:windowWidth, y:-self.worldsContainer.height});
+        TweenLite.to(APP.interactiveBackground, 1.5, {accel:0});
     },
     showLevels:function(scope){
         var self = scope?scope:this;
         if(self.worldsContainer && self.worldsContainer.parent){
             self.worldsContainer.parent.removeChild(self.worldsContainer);
         }
-
         self.currentWorldGraphics.position.x = windowWidth / 2 - self.currentWorldGraphics.width / 2;
         self.currentWorldGraphics.position.y = windowHeight / 2 - self.currentWorldGraphics.height / 2;
         self.addChild(self.currentWorldGraphics);
-        TweenLite.from(self.currentWorldGraphics.position, 4, {x:windowWidth, y:-self.currentWorldGraphics.height, ease:'easeOutElastic'});
+        TweenLite.from(self.currentWorldGraphics.position, 0.8, {x:windowWidth, y:-self.currentWorldGraphics.height});
+        TweenLite.to(APP.interactiveBackground, 1.5, {accel:0});
     },
     backFunction:function(event){
         var scope = event.target.scope;
