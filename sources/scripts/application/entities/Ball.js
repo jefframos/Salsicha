@@ -28,7 +28,7 @@ var Ball = Entity.extend({
 		this.spriteBall = new PIXI.Graphics();
 		this.spriteBall.beginFill(this.color);
 		this.maxSize = APP.tileSize.w * 0.4;
-		console.log(this.maxSize);
+		// console.log(this.maxSize);
 		this.spriteBall.drawCircle(0,0,this.maxSize);
 
 		this.width = this.spriteBall.width;
@@ -40,7 +40,7 @@ var Ball = Entity.extend({
 		this.heart.drawCircle(0,0,3);
 		this.heart.alpha = 0.5;
 
-		console.log(this.spriteBall.width);
+		// console.log(this.spriteBall.width);
 
 		this.sprite = new PIXI.Sprite();
         this.sprite.addChild(this.spriteBall);
@@ -77,7 +77,7 @@ var Ball = Entity.extend({
 
 		this.standardVelocity = APP.standerdVel;
 
-		console.log(this.standardVelocity, 'st');
+		// console.log(this.standardVelocity, 'st');
 		this.friction = this.spriteBall.width / 3;
 
 		this.blockCollide2 = false;
@@ -146,7 +146,7 @@ var Ball = Entity.extend({
 		}
 		var tempVel = this.standardVelocity * 2;//this.spriteBall.width / 2;//this.standardVelocity * 2;
 
-		console.log(tempVel);
+		// console.log(tempVel);
 		this.currentSide = side;
 		if(this.currentSide === 'UP'){
 			this.velocity.x = 0;

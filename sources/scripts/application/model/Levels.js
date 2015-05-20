@@ -33,7 +33,7 @@ var tempMap = [
 	[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
 ];
 
-world1.push([tempMap,{coins:2, highscore:1}]);
+world1.push([tempMap,{coins:2, highscore:0}]);
 
 tempMap = [
 	[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
@@ -63,7 +63,7 @@ tempMap = [
 	[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
 ];
 
-world1.push([tempMap,{coins:2, highscore:1}]);
+world1.push([tempMap,{coins:2, highscore:0}]);
 
 tempMap = [
 	[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
@@ -93,7 +93,7 @@ tempMap = [
 	[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
 ];
 
-world1.push([tempMap,{coins:2, highscore:1}]);
+world1.push([tempMap,{coins:2, highscore:0}]);
 
 tempMap = [
 	[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
@@ -124,7 +124,7 @@ tempMap = [
 ];
 
 
-world1.push([tempMap,{coins:2, highscore:1}]);
+world1.push([tempMap,{coins:2, highscore:0}]);
 
 tempMap = [
 	[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
@@ -155,7 +155,7 @@ tempMap = [
 ];
 
 
-world1.push([tempMap,{coins:2, highscore:1}]);
+world1.push([tempMap,{coins:2, highscore:0}]);
 
 tempMap = [
 	[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
@@ -186,7 +186,7 @@ tempMap = [
 ];
 
 
-world1.push([tempMap,{coins:2, highscore:1}]);
+world1.push([tempMap,{coins:2, highscore:0}]);
 
 tempMap = [
 	[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
@@ -217,7 +217,7 @@ tempMap = [
 ];
 
 
-world1.push([tempMap,{coins:2, highscore:1}]);
+world1.push([tempMap,{coins:2, highscore:0}]);
 
 tempMap = [
 	[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
@@ -248,7 +248,7 @@ tempMap = [
 ];
 
 
-world1.push([tempMap,{coins:2, highscore:1}]);
+world1.push([tempMap,{coins:2, highscore:0}]);
 
 tempMap = [
 	[ 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 ],
@@ -278,11 +278,15 @@ tempMap = [
 	[ 0, 0, 0, 0, 0, 1, 0, 0, 7, 0, 1, 0, 0, 1, 0, 0, 2, 0, 0, 0 ]
 ];
 
-world1.push([tempMap,{coins:2, highscore:1}]);
+world1.push([tempMap,{coins:2, highscore:0}]);
+
+world1.pop();
+world1.pop();
+world1.pop();
+world1.pop();
+world1.pop();
+
 LEVELS.push(world1);
-
-
-
 
 
 
@@ -321,7 +325,7 @@ tempMap = [
 	[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
 ];
 
-world2.push([tempMap,{coins:2, highscore:1}]);
+world2.push([tempMap,{coins:2, highscore:0}]);
 
 tempMap = [
 	[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
@@ -351,7 +355,7 @@ tempMap = [
 	[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
 ];
 
-world2.push([tempMap,{coins:2, highscore:1}]);
+world2.push([tempMap,{coins:2, highscore:0}]);
 
 tempMap = [
 	[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
@@ -382,7 +386,7 @@ tempMap = [
 ];
 
 
-world2.push([tempMap,{coins:2, highscore:1}]);
+world2.push([tempMap,{coins:2, highscore:0}]);
 
 tempMap = [
 	[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
@@ -413,7 +417,7 @@ tempMap = [
 ];
 
 
-world2.push([tempMap,{coins:2, highscore:1}]);
+world2.push([tempMap,{coins:2, highscore:0}]);
 
 tempMap = [
 	[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
@@ -444,7 +448,7 @@ tempMap = [
 ];
 
 
-world2.push([tempMap,{coins:2, highscore:1}]);
+world2.push([tempMap,{coins:2, highscore:0}]);
 
 tempMap = [
 	[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
@@ -475,7 +479,7 @@ tempMap = [
 ];
 
 
-world2.push([tempMap,{coins:2, highscore:1}]);
+world2.push([tempMap,{coins:2, highscore:0}]);
 
 tempMap = [
 	[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
@@ -506,7 +510,7 @@ tempMap = [
 ];
 
 
-world2.push([tempMap,{coins:2, highscore:1}]);
+world2.push([tempMap,{coins:2, highscore:0}]);
 LEVELS.push(world2);
 
 
@@ -548,7 +552,7 @@ tempMap = [
 	[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
 ];
 
-world3.push([tempMap,{coins:2, highscore:1}]);
+world3.push([tempMap,{coins:2, highscore:0}]);
 
 tempMap = [
 	[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
@@ -578,7 +582,7 @@ tempMap = [
 	[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
 ];
 
-world3.push([tempMap,{coins:2, highscore:1}]);
+world3.push([tempMap,{coins:2, highscore:0}]);
 
 tempMap = [
 	[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
@@ -609,7 +613,7 @@ tempMap = [
 ];
 
 
-world3.push([tempMap,{coins:2, highscore:1}]);
+world3.push([tempMap,{coins:2, highscore:0}]);
 
 tempMap = [
 	[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
@@ -640,7 +644,7 @@ tempMap = [
 ];
 
 
-world3.push([tempMap,{coins:2, highscore:1}]);
+world3.push([tempMap,{coins:2, highscore:0}]);
 
 tempMap = [
 	[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
@@ -671,7 +675,7 @@ tempMap = [
 ];
 
 
-world3.push([tempMap,{coins:2, highscore:1}]);
+world3.push([tempMap,{coins:2, highscore:0}]);
 
 tempMap = [
 	[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
@@ -702,7 +706,7 @@ tempMap = [
 ];
 
 
-world3.push([tempMap,{coins:2, highscore:1}]);
+world3.push([tempMap,{coins:2, highscore:0}]);
 
 tempMap = [
 	[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
@@ -733,7 +737,7 @@ tempMap = [
 ];
 
 
-world3.push([tempMap,{coins:2, highscore:1}]);
+world3.push([tempMap,{coins:2, highscore:0}]);
 LEVELS.push(world3);
 
 
@@ -774,7 +778,7 @@ tempMap = [
 	[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
 ];
 
-world4.push([tempMap,{coins:5, highscore:1}]);
+world4.push([tempMap,{coins:5, highscore:0}]);
 
 tempMap = [
 	[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
@@ -804,7 +808,7 @@ tempMap = [
 	[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
 ];
 
-world4.push([tempMap,{coins:4, highscore:1}]);
+world4.push([tempMap,{coins:4, highscore:0}]);
 
 tempMap = [
 	[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
@@ -835,7 +839,7 @@ tempMap = [
 ];
 
 
-world4.push([tempMap,{coins:3, highscore:1}]);
+world4.push([tempMap,{coins:3, highscore:0}]);
 
 tempMap = [
 	[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
@@ -866,7 +870,7 @@ tempMap = [
 ];
 
 
-world4.push([tempMap,{coins:2, highscore:1}]);
+world4.push([tempMap,{coins:2, highscore:0}]);
 
 tempMap = [
 	[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
@@ -897,7 +901,7 @@ tempMap = [
 ];
 
 
-world4.push([tempMap,{coins:1, highscore:1}]);
+world4.push([tempMap,{coins:1, highscore:0}]);
 
 tempMap = [
 	[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
@@ -928,7 +932,7 @@ tempMap = [
 ];
 
 
-world4.push([tempMap,{coins:2, highscore:1}]);
+world4.push([tempMap,{coins:2, highscore:0}]);
 
 tempMap = [
 	[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
@@ -959,5 +963,5 @@ tempMap = [
 ];
 
 
-world4.push([tempMap,{coins:2, highscore:1}]);
+world4.push([tempMap,{coins:2, highscore:0}]);
 LEVELS.push(world4);

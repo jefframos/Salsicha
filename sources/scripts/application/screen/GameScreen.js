@@ -562,7 +562,7 @@ var GameScreen = AbstractScreen.extend({
 				try{
 					this.drawTile(tileType, tempTile.i, tempTile.j, this.vecTiles[k]);
 				}catch(error){
-					console.log(error);
+					// console.log(error);
 				}
 			}
 			return;
@@ -599,17 +599,19 @@ var GameScreen = AbstractScreen.extend({
 				tempGraphics.drawRect(0,0,APP.tileSize.w, APP.tileSize.h);
 			}else if(type === 2){
 				tempColor = addBright(this.player.color,0.7 - (APP.currentWorld + 1) * 0.15);
-				if(APP.currentWorld >1){
-					tempGraphics.lineStyle(1,tempColor);
-				}else{
-					tempGraphics.beginFill(tempColor);
-				}
+				// if(APP.currentWorld >1){
+				// 	tempGraphics.lineStyle(1,tempColor);
+				// }else{
+				// }
+				tempGraphics.beginFill(tempColor);
 
-				var temp1 = -1;
-				var line = 6;
-				var sz = -3;
+				var temp1 = -2;
+				var line = 4;
+				var sz = -2;
+				var init = {};
 				for (var ii = 0; ii <= line; ii++) {
 					if(ii === 0){
+						init = {x:APP.tileSize.w/line * ii, y:-(sz * temp1)};
 						tempGraphics.moveTo(APP.tileSize.w/line * ii, -(sz * temp1));
 					}else{
 						tempGraphics.lineTo(APP.tileSize.w/line * ii, -(sz * temp1));
@@ -621,7 +623,7 @@ var GameScreen = AbstractScreen.extend({
 					tempGraphics.lineTo(APP.tileSize.w - (sz * temp1), APP.tileSize.h/line * ii);
 					temp1 *= -1;
 				}
-				temp1 = 1;
+				temp1 = 2;
 				for (ii = 0; ii <= line; ii++) {
 					tempGraphics.lineTo(APP.tileSize.w - (APP.tileSize.w/line * ii), APP.tileSize.h - (sz * temp1));
 					temp1 *= -1;
@@ -631,6 +633,7 @@ var GameScreen = AbstractScreen.extend({
 					tempGraphics.lineTo(-sz * temp1, APP.tileSize.h - (APP.tileSize.h/line * ii));
 					temp1 *= -1;
 				}
+				tempGraphics.lineTo(init.x,init.y);
 				isEnemy = true;
 			}else if(type === 3){
 				tempColor = addBright(this.player.color,0.8 - (APP.currentWorld + 1) * 0.15);
@@ -639,7 +642,7 @@ var GameScreen = AbstractScreen.extend({
 				}else{
 					tempGraphics.beginFill(tempColor);
 				}
-				tempGraphics.drawRoundedRect(0,0,APP.tileSize.w, APP.tileSize.h, APP.tileSize.w*0.2);
+				tempGraphics.drawRoundedRect(0,0,APP.tileSize.w, APP.tileSize.h, APP.tileSize.w*0.4);
 			}
 
 			tempGraphics.position.x = i * APP.tileSize.w;
@@ -887,16 +890,25 @@ var GameScreen = AbstractScreen.extend({
 	},
 
 	nextLevel:function(){
+		if(APP.currentLevel >= LEVELS[APP.currentWorld].length - 1){
+			APP.currentWorld ++;
+			APP.currentLevel = 0;
+		}
+		if(APP.currentWorld >= LEVELS.length - 1){
+			APP.currentWorld = LEVELS.length - 1;
+		}
+		APP.appModel.saveScore();
+		APP.currentLevel ++;
 		this.collideWall(true);
 		this.player.moveAccum = 50000;
 		this.player.stop();
-		APP.currentLevel ++;
-		this.addCrazyMessage('YOU"RE AWESOME', 1);
+		this.addCrazyMessage('AWESOME', 1);
 		var self = this;
 		TweenLite.to(this.gameContainer.scale, 0.5, {x:this.gameContainer.scale.x * 1.5, y:this.gameContainer.scale.y * 1.5});
 		TweenLite.to(this.gameContainer, 0.5, {alpha:0, delay:0.8, onComplete:function(){
 			self.reset();
 		}});
+		// console.log('current status', APP.currentWorld, APP.currentLevel);
 	},
 	reset:function(){
 		this.destroy();

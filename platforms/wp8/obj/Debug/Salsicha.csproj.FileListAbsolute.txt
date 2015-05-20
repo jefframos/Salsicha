@@ -1,0 +1,14 @@
+c:\xampp\htdocs\Salsicha\platforms\wp8\Bin\Debug\ApplicationIcon.png
+c:\xampp\htdocs\Salsicha\platforms\wp8\Bin\Debug\Background.png
+c:\xampp\htdocs\Salsicha\platforms\wp8\Bin\Debug\me.jefframos.salsicha.dll
+c:\xampp\htdocs\Salsicha\platforms\wp8\Bin\Debug\me.jefframos.salsicha.pdb
+c:\xampp\htdocs\Salsicha\platforms\wp8\Bin\Debug\AppManifest.xaml
+c:\xampp\htdocs\Salsicha\platforms\wp8\Bin\Debug\Properties\WMAppManifest.xml
+c:\xampp\htdocs\Salsicha\platforms\wp8\Bin\Debug\CordovaAppProj_Debug_AnyCPU.xap
+c:\xampp\htdocs\Salsicha\platforms\wp8\obj\Debug\App.g.cs
+c:\xampp\htdocs\Salsicha\platforms\wp8\obj\Debug\cordovalib\CordovaView.g.cs
+c:\xampp\htdocs\Salsicha\platforms\wp8\obj\Debug\MainPage.g.cs
+c:\xampp\htdocs\Salsicha\platforms\wp8\obj\Debug\me.jefframos.salsicha.g.resources
+c:\xampp\htdocs\Salsicha\platforms\wp8\obj\Debug\me.jefframos.salsicha.dll
+c:\xampp\htdocs\Salsicha\platforms\wp8\obj\Debug\me.jefframos.salsicha.pdb
+c:\xampp\htdocs\Salsicha\platforms\wp8\obj\Debug\XapCacheFile.xml

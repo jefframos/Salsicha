@@ -40,41 +40,59 @@ var AppModel = Class.extend({
 		// 		}
 		// 	}
 		// }
+		tempWorld = APP.cookieManager.getSafeCookie('maxworld');
+		tempLevel = APP.cookieManager.getSafeCookie('maxlevel');
 
+		APP.maxWorld = (!tempWorld || tempWorld !== 'undefined' )?tempWorld:0;
+		APP.maxLevel = (!tempLevel || tempLevel !== 'undefined' )?tempLevel:1;
 
-	},
-	saveScore:function(){
-
-		APP.cookieManager.setSafeCookie('coins', APP.totalCoins);
-		APP.cookieManager.setSafeCookie('highScore', APP.highScore);
-		APP.cookieManager.setSafeCookie('plays', APP.plays);
-		var i = 0;
-
-		this.updateTowels();
-		this.updateBurguers();
-
-		var enableds = '1';
-		for (i = 1; i < this.playerModels.length; i++) {
-			if(this.playerModels[i].enabled){
-				enableds+=',1';
-			}else{
-				enableds+=',0';
+		console.log(APP.maxWorld, APP.maxLevel, APP.cookieManager.getSafeCookie('maxworld'));
+		var allHighscores = [];
+		for (var i = 0; i < LEVELS.length; i++) {
+			tempHigh = APP.cookieManager.getSafeCookie('highscores'+i);
+			if(tempHigh){
+				tempHigh = tempHigh.split(',');
+				for (var j = 0; j < tempHigh.length; j++) {
+					if(LEVELS[i][j]){
+						LEVELS[i][j][1].highscore = parseInt(tempHigh[j]);
+					}
+				}
 			}
 		}
-		console.log(enableds);
-		APP.cookieManager.setSafeCookie('enableds', enableds);
-
-		console.log(APP.cookieManager.getSafeCookie('enableds'));
+	},
+	saveScore:function(){
+		if(APP.currentWorld > APP.maxWorld){
+			APP.maxWorld = APP.currentWorld;
+			APP.maxLevel = 1;
+		}else{
+			APP.maxWorld = APP.maxWorld;
+			APP.maxLevel = parseInt((APP.currentLevel+1) > APP.maxLevel ? (APP.currentLevel+1) : APP.maxLevel);
+		}
+		APP.cookieManager.setSafeCookie('maxworld', APP.maxWorld);
+		APP.cookieManager.setSafeCookie('maxlevel', APP.maxLevel);
+		var tempHigh = LEVELS[APP.currentWorld][APP.currentLevel].highscore;
+		LEVELS[APP.currentWorld][APP.currentLevel][1].highscore = APP.points > tempHigh ? APP.points : APP.points;
+		var allHighscores = [];
+		for (var i = 0; i < LEVELS.length; i++) {
+			tempLevelHigh = [];
+			for (var j = 0; j < LEVELS[i].length; j++) {
+				tempLevelHigh.push(LEVELS[i][j][1].highscore);
+			}
+			APP.cookieManager.setSafeCookie('highscores'+i, tempLevelHigh.toString());
+		}
+		console.log('salvou isso', APP.maxWorld,APP.maxLevel);
 	},
 
 	zerarTudo:function(){
-		APP.totalCoins = 0;
-		APP.highScore = 0;
-		APP.plays = 0;
-		APP.cookieManager.setSafeCookie('enableds', '0');
-		APP.cookieManager.setSafeCookie('coins', APP.totalCoins);
-		APP.cookieManager.setSafeCookie('highScore', APP.highScore);
-		APP.cookieManager.setSafeCookie('plays', APP.plays);
+		APP.cookieManager.setSafeCookie('maxworld', 0);
+		APP.cookieManager.setSafeCookie('maxlevel', 0);
+		for (var i = 0; i < LEVELS.length; i++) {
+			tempLevelHigh = [];
+			for (var j = 0; j < LEVELS[i].length; j++) {
+				tempLevelHigh.push(0);
+			}
+			APP.cookieManager.setSafeCookie('highscores'+i, tempLevelHigh.toString());
+		}
 
 	},
 	maxPoints:function(){
