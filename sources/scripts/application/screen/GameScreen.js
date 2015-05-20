@@ -890,15 +890,17 @@ var GameScreen = AbstractScreen.extend({
 	},
 
 	nextLevel:function(){
+
 		if(APP.currentLevel >= LEVELS[APP.currentWorld].length - 1){
+			APP.appModel.saveScore();
 			APP.currentWorld ++;
+			APP.appModel.saveWorld();
 			APP.currentLevel = 0;
+		}else{
+			APP.appModel.saveScore();
+			APP.currentLevel ++;
 		}
-		if(APP.currentWorld >= LEVELS.length - 1){
-			APP.currentWorld = LEVELS.length - 1;
-		}
-		APP.appModel.saveScore();
-		APP.currentLevel ++;
+
 		this.collideWall(true);
 		this.player.moveAccum = 50000;
 		this.player.stop();
@@ -908,7 +910,7 @@ var GameScreen = AbstractScreen.extend({
 		TweenLite.to(this.gameContainer, 0.5, {alpha:0, delay:0.8, onComplete:function(){
 			self.reset();
 		}});
-		// console.log('current status', APP.currentWorld, APP.currentLevel);
+		console.log('current status', APP.currentWorld, APP.currentLevel);
 	},
 	reset:function(){
 		this.destroy();

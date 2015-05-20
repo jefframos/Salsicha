@@ -60,15 +60,17 @@ var AppModel = Class.extend({
 			}
 		}
 	},
-	saveScore:function(){
-		if(APP.currentWorld > APP.maxWorld){
-			APP.maxWorld = APP.currentWorld;
-			APP.maxLevel = 1;
-		}else{
-			APP.maxWorld = APP.maxWorld;
-			APP.maxLevel = parseInt((APP.currentLevel+1) > APP.maxLevel ? (APP.currentLevel+1) : APP.maxLevel);
-		}
+	saveWorld:function(){
+		APP.maxWorld = parseInt((APP.currentWorld) > APP.maxWorld ? (APP.currentWorld) : APP.maxWorld);
 		APP.cookieManager.setSafeCookie('maxworld', APP.maxWorld);
+		APP.cookieManager.setSafeCookie('maxlevel', 0);
+	},
+	saveScore:function(){
+		APP.maxLevel = parseInt((APP.currentLevel) > APP.maxLevel ? (APP.currentLevel) : APP.maxLevel);
+		if(APP.currentLevel < 0){
+			APP.currentLevel = 0;
+		}
+
 		APP.cookieManager.setSafeCookie('maxlevel', APP.maxLevel);
 		var tempHigh = LEVELS[APP.currentWorld][APP.currentLevel].highscore;
 		LEVELS[APP.currentWorld][APP.currentLevel][1].highscore = APP.points > tempHigh ? APP.points : APP.points;
