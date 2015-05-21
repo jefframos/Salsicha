@@ -661,6 +661,12 @@ var GameScreen = AbstractScreen.extend({
 			this.layer.addChild(coin);
 			coin.getContent().position.x = i * APP.tileSize.w + APP.tileSize.w/2;
 			coin.getContent().position.y = j * APP.tileSize.h + APP.tileSize.h/2;
+		}else if(type > 10){
+			enemyStatic = new Enemy1(this);
+			enemyStatic.build();
+			this.layer.addChild(enemyStatic);
+			enemyStatic.getContent().position.x = i * APP.tileSize.w + APP.tileSize.w/2;
+			enemyStatic.getContent().position.y = j * APP.tileSize.h + APP.tileSize.h/2;
 		}
 		if(type instanceof Array){
 			if(type[0] > 10){
@@ -678,7 +684,7 @@ var GameScreen = AbstractScreen.extend({
 				if(count === 2){
 					var tempVel = type.length > 2?type[2]:2;
 					enemyMov = new Enemy2(this, type[0], type.length >= 4 && type[3]);
-					enemyMov.standardVelocity = tempVel;
+					enemyMov.standardVelocity = tempVel * APP.tileSize.w * 0.05;
 					enemyMov.build();
 					this.layer.addChild(enemyMov);
 					enemyMov.getContent().position.x = i * APP.tileSize.w + APP.tileSize.w/2;

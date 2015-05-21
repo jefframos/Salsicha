@@ -61,11 +61,11 @@ var LevelsScreen = AbstractScreen.extend({
                 coinGraph.drawRect(-size/2,-size/2,size,size);
                 totalCoins = new PIXI.Text(this.worldsGotCoins[i]+'/'+this.worldsTotalCoins[i], {align:'center',font:'25px monospace', fill:'#FFFFFF'});
                 totalCoins.resolution = 2;
-                coinGraph.position.x = tempWorldContainer.width / 2;
-                coinGraph.position.y = tempWorldContainer.height / 2;
+                coinGraph.position.x = tempWorldGraphic.width / 2;
+                coinGraph.position.y = tempWorldGraphic.height / 2;
 
-                totalCoins.position.x = tempWorldContainer.width / 2 - totalCoins.width / 2 / totalCoins.resolution;
-                totalCoins.position.y = tempWorldContainer.height - totalCoins.height  / totalCoins.resolution;
+                totalCoins.position.x = tempWorldGraphic.width / 2 - totalCoins.width / 2 / totalCoins.resolution;
+                totalCoins.position.y = tempWorldGraphic.height - totalCoins.height  / totalCoins.resolution;
 
                 tempWorldContainer.addChild(totalCoins);
                 tempWorldContainer.addChild(coinGraph);
@@ -94,14 +94,14 @@ var LevelsScreen = AbstractScreen.extend({
                 tempGraphicLevel.id = j;
                 tempGraphicLevel.scope = this;
                 tempContainer.addChild(tempGraphicLevel);
-                tempContainer.position.x = (tempContainer.width * 1.5) * iacum;
-                tempContainer.position.y = (tempContainer.height * 1.5) * jacum;
+                tempContainer.position.x = (tempGraphicLevel.width * 1.5) * iacum;
+                tempContainer.position.y = (tempGraphicLevel.height * 1.5) * jacum;
 
                 if(j <= APP.maxLevel || i < APP.maxWorld){
                     tempGraphicLevel.touchstart = tempGraphicLevel.mousedown = this.selectLevel;
                     levelNumber = new PIXI.Text(j+1, {align:'center',font:'25px monospace', fill:'#FFFFFF'});
                     levelNumber.resolution = 2;
-                    levelNumber.position.x = tempContainer.width / 2 - levelNumber.width / 2 / levelNumber.resolution;
+                    levelNumber.position.x = tempGraphicLevel.width / 2 - levelNumber.width / 2 / levelNumber.resolution;
                     levelNumber.position.y = tempGraphicLevel.height * 0.1 / levelNumber.resolution;
                     tempContainer.addChild(levelNumber);
                     for (var k = 1; k < tempCoins + 1; k++) {
@@ -109,7 +109,7 @@ var LevelsScreen = AbstractScreen.extend({
                         coinGraph.beginFill(k <=high ? 0xFFFFFF : addBright(APP.vecColors[APP.currentColorID], 0.4));
                         size = tempGraphicLevel.width * 0.1;
                         coinGraph.drawRect(-size/2,-size/2,size,size);
-                        coinGraph.position.x = (tempContainer.width / (tempCoins + 1)) * k;
+                        coinGraph.position.x = (tempGraphicLevel.width / (tempCoins + 1)) * k;
                         coinGraph.position.y = tempGraphicLevel.height - coinGraph.height * 2;
                         tempContainer.addChild(coinGraph);
                     }
