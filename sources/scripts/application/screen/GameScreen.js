@@ -114,7 +114,7 @@ var GameScreen = AbstractScreen.extend({
 		function clickController(event){
 			event.target.scope.player.stretch(event.target.side);
 		}
-		if(isCordova){
+		if(isCordova || testMobile()){
 
 			var controllerContainer = new PIXI.DisplayObjectContainer();
 			var btnSize = windowWidth*0.2;

@@ -1233,7 +1233,7 @@ var GameScreen = AbstractScreen.extend({
             wordWrap: !0,
             wordWrapWidth: 500
         }), this.coinsLabel.resolution = retina, this.coinsLabel.alpha = .5, this.coinsLabel.position.x = 60, 
-        this.coinsLabel.position.y = 0, this.addChild(this.coinsLabel), isCordova) {
+        this.coinsLabel.position.y = 0, this.addChild(this.coinsLabel), isCordova || testMobile()) {
             var controllerContainer = new PIXI.DisplayObjectContainer(), btnSize = .2 * windowWidth, upGr = new PIXI.Graphics();
             upGr.beginFill(16777215), upGr.drawRect(0, 0, btnSize, btnSize), upGr.position.x = 1.1 * btnSize, 
             upGr.interactive = !0, upGr.scope = this, upGr.side = "UP", upGr.touchstart = upGr.mousedown = clickController;
