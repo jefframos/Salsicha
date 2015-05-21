@@ -44,8 +44,8 @@ var AppModel = Class.extend({
 		tempWorld = APP.cookieManager.getSafeCookie('maxworld');
 		tempLevel = APP.cookieManager.getSafeCookie('maxlevel');
 
-		APP.maxWorld = (!tempWorld || tempWorld !== 'undefined' )?tempWorld:0;
-		APP.maxLevel = (!tempLevel || tempLevel !== 'undefined' )?tempLevel:0;
+		APP.maxWorld = (!tempWorld || tempWorld !== 'undefined' || tempWorld !== 'NaN')?tempWorld:0;
+		APP.maxLevel = (!tempLevel || tempLevel !== 'undefined' || tempLevel !== 'NaN')?tempLevel:0;
 
 		if(!APP.maxWorld){
 			APP.maxWorld = 0;
