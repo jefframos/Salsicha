@@ -23,6 +23,7 @@ var LevelsScreen = AbstractScreen.extend({
         this.worldsContainer = new PIXI.DisplayObjectContainer();
         var iacumW = 0;
         var jacumW = 0;
+        // alert(APP.maxLevel+' - '+ APP.maxWorld);
         for (i = 0; i < LEVELS.length; i++) {
             coinsAcum = 0;
             levelCoinsAcum = 0;
@@ -78,13 +79,13 @@ var LevelsScreen = AbstractScreen.extend({
             var iacum = 0;
             var jacum = 0;
             for (j = 0; j < LEVELS[i].length; j++) {
-                if(j % 5 === 0 && j !== 0){
+                if(j % 3 === 0 && j !== 0){
                     jacum++;
                     iacum = 0;
                 }
                 var tempCoins = LEVELS[i][j][1].coins;
                 var high = LEVELS[i][j][1].highscore;
-                console.log(high);
+                console.log('highs', high);
                 tempContainer = new PIXI.DisplayObjectContainer();
                 tempGraphicLevel = new PIXI.Graphics();
                 tempGraphicLevel.beginFill(tempColor);
@@ -204,5 +205,27 @@ var LevelsScreen = AbstractScreen.extend({
         var worlds = scope.worlds[event.target.id][0];
         scope.currentWorldGraphics = worlds;
         scope.hideWorlds(scope.showLevels, scope);
-    }
+    },
+    transitionIn:function()
+    {
+        this.build();
+    },
+    transitionOut:function(nextScreen, container)
+    {
+        var self = this;
+        if(this.frontShape){
+            this.frontShape.parent.setChildIndex(this.frontShape, this.frontShape.parent.children.length - 1);
+            TweenLite.to(this.frontShape, 0.3, {alpha:1, onComplete:function(){
+                self.destroy();
+                container.removeChild(self.getContent());
+                nextScreen.transitionIn();
+            }});
+        }else{
+            self.destroy();
+            container.removeChild(self.getContent());
+            nextScreen.transitionIn();
+        }
+
+
+    },
 });

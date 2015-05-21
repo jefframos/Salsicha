@@ -1,44 +1,45 @@
-﻿<xapCache source="c:\xampp\htdocs\Salsicha\platforms\wp8\Bin\Debug\CordovaAppProj_Debug_AnyCPU.xap" wasSigned="False" wasTritonized="False" certificateThumbprint="" TimeStampUrl="" signKeyFile="" signKeyPassword="" lastWriteTime="20/05/2015 10:24:38">
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\obj\Debug\me.jefframos.salsicha.dll" archivePath="me.jefframos.salsicha.dll" lastWriteTime="20/05/2015 10:24:37" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\config.xml" archivePath="config.xml" lastWriteTime="20/05/2015 10:24:35" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\audio\alarm1.mp3" archivePath="www\audio\alarm1.mp3" lastWriteTime="20/05/2015 10:24:35" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\audio\error.mp3" archivePath="www\audio\error.mp3" lastWriteTime="20/05/2015 10:24:35" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\audio\explode1.mp3" archivePath="www\audio\explode1.mp3" lastWriteTime="20/05/2015 10:24:35" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\audio\fall.mp3" archivePath="www\audio\fall.mp3" lastWriteTime="20/05/2015 10:24:35" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\audio\laser1.mp3" archivePath="www\audio\laser1.mp3" lastWriteTime="20/05/2015 10:24:35" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\audio\laser2.mp3" archivePath="www\audio\laser2.mp3" lastWriteTime="20/05/2015 10:24:35" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\audio\laser3.mp3" archivePath="www\audio\laser3.mp3" lastWriteTime="20/05/2015 10:24:35" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\audio\laser4.mp3" archivePath="www\audio\laser4.mp3" lastWriteTime="20/05/2015 10:24:35" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\audio\loop.mp3" archivePath="www\audio\loop.mp3" lastWriteTime="20/05/2015 10:24:35" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\audio\loop.wav" archivePath="www\audio\loop.wav" lastWriteTime="20/05/2015 10:24:35" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\audio\perfect.mp3" archivePath="www\audio\perfect.mp3" lastWriteTime="20/05/2015 10:24:35" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\audio\play.mp3" archivePath="www\audio\play.mp3" lastWriteTime="20/05/2015 10:24:35" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\audio\play2.mp3" archivePath="www\audio\play2.mp3" lastWriteTime="20/05/2015 10:24:35" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\audio\wub.mp3" archivePath="www\audio\wub.mp3" lastWriteTime="20/05/2015 10:24:35" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\cordova.js" archivePath="www\cordova.js" lastWriteTime="20/05/2015 10:24:35" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\cordova_plugins.js" archivePath="www\cordova_plugins.js" lastWriteTime="20/05/2015 10:24:35" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\css\fonts\luckiestguy-webfont.eot" archivePath="www\css\fonts\luckiestguy-webfont.eot" lastWriteTime="20/05/2015 10:24:35" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\css\fonts\luckiestguy-webfont.svg" archivePath="www\css\fonts\luckiestguy-webfont.svg" lastWriteTime="20/05/2015 10:24:35" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\css\fonts\luckiestguy-webfont.ttf" archivePath="www\css\fonts\luckiestguy-webfont.ttf" lastWriteTime="20/05/2015 10:24:35" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\css\fonts\luckiestguy-webfont.woff" archivePath="www\css\fonts\luckiestguy-webfont.woff" lastWriteTime="20/05/2015 10:24:35" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\css\fonts\luckiestguy-webfont.woff2" archivePath="www\css\fonts\luckiestguy-webfont.woff2" lastWriteTime="20/05/2015 10:24:35" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\css\fonts\roboto-regular-webfont.eot" archivePath="www\css\fonts\roboto-regular-webfont.eot" lastWriteTime="20/05/2015 10:24:35" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\css\fonts\roboto-regular-webfont.svg" archivePath="www\css\fonts\roboto-regular-webfont.svg" lastWriteTime="20/05/2015 10:24:35" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\css\fonts\roboto-regular-webfont.ttf" archivePath="www\css\fonts\roboto-regular-webfont.ttf" lastWriteTime="20/05/2015 10:24:35" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\css\fonts\roboto-regular-webfont.woff" archivePath="www\css\fonts\roboto-regular-webfont.woff" lastWriteTime="20/05/2015 10:24:35" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\css\fonts\roboto-regular-webfont.woff2" archivePath="www\css\fonts\roboto-regular-webfont.woff2" lastWriteTime="20/05/2015 10:24:35" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\css\fonts\vagron-webfont.eot" archivePath="www\css\fonts\vagron-webfont.eot" lastWriteTime="20/05/2015 10:24:35" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\css\fonts\vagron-webfont.svg" archivePath="www\css\fonts\vagron-webfont.svg" lastWriteTime="20/05/2015 10:24:35" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\css\fonts\vagron-webfont.ttf" archivePath="www\css\fonts\vagron-webfont.ttf" lastWriteTime="20/05/2015 10:24:35" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\css\fonts\vagron-webfont.woff" archivePath="www\css\fonts\vagron-webfont.woff" lastWriteTime="20/05/2015 10:24:35" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\css\fonts\vagron-webfont.woff2" archivePath="www\css\fonts\vagron-webfont.woff2" lastWriteTime="20/05/2015 10:24:35" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\css\index.css" archivePath="www\css\index.css" lastWriteTime="20/05/2015 10:24:35" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\css\main.css" archivePath="www\css\main.css" lastWriteTime="20/05/2015 10:24:35" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\img\logo.png" archivePath="www\img\logo.png" lastWriteTime="20/05/2015 10:24:35" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\index.html" archivePath="www\index.html" lastWriteTime="20/05/2015 10:24:35" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\js\index.js" archivePath="www\js\index.js" lastWriteTime="20/05/2015 10:24:35" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\js\lib\plugins.js" archivePath="www\js\lib\plugins.js" lastWriteTime="20/05/2015 10:24:35" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\js\main.js" archivePath="www\js\main.js" lastWriteTime="20/05/2015 10:24:35" />
+﻿<xapCache source="c:\xampp\htdocs\Salsicha\platforms\wp8\Bin\Debug\CordovaAppProj_Debug_AnyCPU.xap" wasSigned="False" wasTritonized="False" certificateThumbprint="" TimeStampUrl="" signKeyFile="" signKeyPassword="" lastWriteTime="21/05/2015 19:15:23">
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\obj\Debug\me.jefframos.salsicha.dll" archivePath="me.jefframos.salsicha.dll" lastWriteTime="21/05/2015 19:15:22" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\config.xml" archivePath="config.xml" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\audio\alarm1.mp3" archivePath="www\audio\alarm1.mp3" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\audio\error.mp3" archivePath="www\audio\error.mp3" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\audio\explode1.mp3" archivePath="www\audio\explode1.mp3" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\audio\fall.mp3" archivePath="www\audio\fall.mp3" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\audio\laser1.mp3" archivePath="www\audio\laser1.mp3" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\audio\laser2.mp3" archivePath="www\audio\laser2.mp3" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\audio\laser3.mp3" archivePath="www\audio\laser3.mp3" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\audio\laser4.mp3" archivePath="www\audio\laser4.mp3" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\audio\loop.mp3" archivePath="www\audio\loop.mp3" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\audio\loop.wav" archivePath="www\audio\loop.wav" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\audio\perfect.mp3" archivePath="www\audio\perfect.mp3" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\audio\play.mp3" archivePath="www\audio\play.mp3" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\audio\play2.mp3" archivePath="www\audio\play2.mp3" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\audio\wub.mp3" archivePath="www\audio\wub.mp3" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\cordova.js" archivePath="www\cordova.js" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\cordova_plugins.js" archivePath="www\cordova_plugins.js" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\css\fonts\luckiestguy-webfont.eot" archivePath="www\css\fonts\luckiestguy-webfont.eot" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\css\fonts\luckiestguy-webfont.svg" archivePath="www\css\fonts\luckiestguy-webfont.svg" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\css\fonts\luckiestguy-webfont.ttf" archivePath="www\css\fonts\luckiestguy-webfont.ttf" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\css\fonts\luckiestguy-webfont.woff" archivePath="www\css\fonts\luckiestguy-webfont.woff" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\css\fonts\luckiestguy-webfont.woff2" archivePath="www\css\fonts\luckiestguy-webfont.woff2" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\css\fonts\roboto-regular-webfont.eot" archivePath="www\css\fonts\roboto-regular-webfont.eot" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\css\fonts\roboto-regular-webfont.svg" archivePath="www\css\fonts\roboto-regular-webfont.svg" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\css\fonts\roboto-regular-webfont.ttf" archivePath="www\css\fonts\roboto-regular-webfont.ttf" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\css\fonts\roboto-regular-webfont.woff" archivePath="www\css\fonts\roboto-regular-webfont.woff" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\css\fonts\roboto-regular-webfont.woff2" archivePath="www\css\fonts\roboto-regular-webfont.woff2" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\css\fonts\vagron-webfont.eot" archivePath="www\css\fonts\vagron-webfont.eot" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\css\fonts\vagron-webfont.svg" archivePath="www\css\fonts\vagron-webfont.svg" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\css\fonts\vagron-webfont.ttf" archivePath="www\css\fonts\vagron-webfont.ttf" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\css\fonts\vagron-webfont.woff" archivePath="www\css\fonts\vagron-webfont.woff" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\css\fonts\vagron-webfont.woff2" archivePath="www\css\fonts\vagron-webfont.woff2" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\css\index.css" archivePath="www\css\index.css" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\css\main.css" archivePath="www\css\main.css" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\img\logo.png" archivePath="www\img\logo.png" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\index.html" archivePath="www\index.html" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\js\index.js" archivePath="www\js\index.js" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\js\lib\plugins.js" archivePath="www\js\lib\plugins.js" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\js\main.js" archivePath="www\js\main.js" lastWriteTime="21/05/2015 19:15:20" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\www\plugins\org.apache.cordova.device\www\device.js" archivePath="www\plugins\org.apache.cordova.device\www\device.js" lastWriteTime="21/05/2015 19:15:20" />
   <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\Images\appbar.back.rest.png" archivePath="Images\appbar.back.rest.png" lastWriteTime="20/05/2015 10:23:10" />
   <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\Images\appbar.close.rest.png" archivePath="Images\appbar.close.rest.png" lastWriteTime="20/05/2015 10:23:10" />
   <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\Images\appbar.feature.video.rest.png" archivePath="Images\appbar.feature.video.rest.png" lastWriteTime="20/05/2015 10:23:10" />
@@ -50,5 +51,5 @@
   <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\Bin\Debug\AppManifest.xaml" archivePath="AppManifest.xaml" lastWriteTime="20/05/2015 10:23:49" />
   <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\Bin\Debug\ApplicationIcon.png" archivePath="ApplicationIcon.png" lastWriteTime="20/05/2015 10:23:09" />
   <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\Bin\Debug\Background.png" archivePath="Background.png" lastWriteTime="20/05/2015 10:23:09" />
-  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\Bin\Debug\Properties\WMAppManifest.xml" archivePath="WMAppManifest.xml" lastWriteTime="20/05/2015 10:23:49" />
+  <file source="c:\xampp\htdocs\Salsicha\platforms\wp8\Bin\Debug\Properties\WMAppManifest.xml" archivePath="WMAppManifest.xml" lastWriteTime="21/05/2015 18:04:45" />
 </xapCache>

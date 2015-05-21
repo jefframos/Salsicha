@@ -75,7 +75,7 @@ var Ball = Entity.extend({
         this.force = 0;
 		this.inJump = false;
 
-		this.standardVelocity = APP.standerdVel;
+		this.standardVelocity = APP.standardVel;
 
 		// console.log(this.standardVelocity, 'st');
 		this.friction = this.spriteBall.width / 3;
@@ -140,6 +140,9 @@ var Ball = Entity.extend({
 		}
 	},
 	stretch: function(side){
+		if(this.kill){
+			return;
+		}
 		this.moveAccum = this.moveAccumMax;
 		if(this.currentSide === side){
 			return;
@@ -273,7 +276,7 @@ var Ball = Entity.extend({
 					labelCoin.alphadecress = 0.01;
 					labelCoin.scaledecress = +0.05;
 					labelCoin.setPosition(this.getPosition().x - tempLabel.width / 2, this.getPosition().y);
-					this.screen.layer.addChild(labelCoin);
+					this.screen.HUDLayer.addChild(labelCoin);
 
 					var labelCoin2 = new Particles({x: 0, y:0}, 120, new PIXI.Text('+'+value, {font:'50px Vagron', fill:'#9d47e0'}),-rot);
 					// var labelCoin2 = new Particles({x: 0, y:0}, 120, new PIXI.Text('+'+value, {font:'50px Vagron', fill:'#13c2b6'}),-rot);
@@ -284,7 +287,7 @@ var Ball = Entity.extend({
 					labelCoin2.alphadecress = 0.01;
 					labelCoin2.scaledecress = +0.05;
 					labelCoin2.setPosition(this.getPosition().x - tempLabel.width / 2+2, this.getPosition().y+2);
-					this.screen.layer.addChild(labelCoin2);
+					this.screen.HUDLayer.addChild(labelCoin2);
 					this.screen.getCoin();
 				}
 			}
@@ -373,7 +376,7 @@ var Ball = Entity.extend({
 		APP.audioController.playSound('explode1');
 		this.collidable = false;
 		this.kill = true;
-		for (var i = 10; i >= 0; i--) {
+		for (var i = 6; i >= 0; i--) {
 
 			tempParticle = new PIXI.Graphics();
 			tempParticle.beginFill(this.color);

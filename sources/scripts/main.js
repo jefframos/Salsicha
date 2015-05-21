@@ -57,7 +57,7 @@ function updateResolution(orientation, scale){
 		if(screen.height > screen.width){
 			windowWidth = screen.width * scale;
 			windowWidthVar = screen.width;
-			
+
 
 			windowHeight =  screen.height * scale;
 			windowHeightVar =  screen.height;
@@ -76,14 +76,14 @@ function updateResolution(orientation, scale){
 			// if(true){//possibleFullscreen()){
 			// 	windowHeight =  screen.height * scale;
 			// 	windowHeightVar =  screen.height;
-				
+
 			// }else{
 			// 	windowHeight =  window.devicePixelRatio >= 2 ? window.innerHeight * scale : window.outerHeight * scale;//window.outerHeight * scale;
-				
+
 			// 	// windowHeight =  window.outerHeight * scale;
 			// 	windowHeightVar =  window.outerHeight* scale;
 			// }
-			
+
 
 		}else{
 			windowWidth = screen.height * scale;
@@ -110,10 +110,15 @@ function updateResolution(orientation, scale){
 	realWindowWidth = windowWidth;
 	realWindowHeight = windowHeight;
 }
+var isCordova = document.URL.indexOf( 'http://' ) === -1 && document.URL.indexOf( 'https://' ) === -1;
 function update() {
 	requestAnimFrame(update );
 	if(!init){
-		var gambs = 0;//50;
+
+		var gambs = 0;
+		if(isCordova){
+			gambs = device.platform.toLowerCase().indexOf('win') > -1 ? 50 :0;//50;
+		}
 
 		windowWidth = res.x;
 		windowHeight = res.y - gambs;
@@ -140,7 +145,7 @@ function update() {
 		init = true;
 		// alert(windowWidthVar+' - '+windowHeightVar);
 	}
-	
+
 	// meter.tickStart();
 	// var tempRation =  (window.innerHeight/windowHeight);
 	// var ratioRez = resizeProportional ? tempRation < (window.innerWidth/realWindowWidth)?tempRation:(window.innerWidth/realWindowWidth) : 1;
@@ -163,7 +168,7 @@ function update() {
 //		renderer.view.style.height = window.innerHeight+'px';
 //		renderer.view.style.width = window.innerWidth+'px';
 
-		
+
 		APP.update();
 		renderer.render(APP.stage);
 	}

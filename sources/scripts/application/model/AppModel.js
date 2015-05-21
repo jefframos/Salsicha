@@ -40,11 +40,19 @@ var AppModel = Class.extend({
 		// 		}
 		// 	}
 		// }
+		// alert(device.platform.toLowerCase().indexOf('win'));
 		tempWorld = APP.cookieManager.getSafeCookie('maxworld');
 		tempLevel = APP.cookieManager.getSafeCookie('maxlevel');
 
 		APP.maxWorld = (!tempWorld || tempWorld !== 'undefined' )?tempWorld:0;
-		APP.maxLevel = (!tempLevel || tempLevel !== 'undefined' )?tempLevel:1;
+		APP.maxLevel = (!tempLevel || tempLevel !== 'undefined' )?tempLevel:0;
+
+		if(!APP.maxWorld){
+			APP.maxWorld = 0;
+		}
+		if(!APP.maxLevel){
+			APP.maxLevel = 0;
+		}
 
 		console.log(APP.maxWorld, APP.maxLevel, APP.cookieManager.getSafeCookie('maxworld'));
 		var allHighscores = [];
