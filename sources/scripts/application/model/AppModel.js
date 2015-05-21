@@ -44,8 +44,8 @@ var AppModel = Class.extend({
 		tempWorld = APP.cookieManager.getSafeCookie('maxworld');
 		tempLevel = APP.cookieManager.getSafeCookie('maxlevel');
 
-		APP.maxWorld = (!tempWorld || tempWorld !== 'undefined' || tempWorld !== 'NaN')?tempWorld:0;
-		APP.maxLevel = (!tempLevel || tempLevel !== 'undefined' || tempLevel !== 'NaN')?tempLevel:0;
+		APP.maxWorld = (!tempWorld || tempWorld === 'undefined' || tempWorld === 'NaN')?0:tempWorld;
+		APP.maxLevel = (!tempLevel || tempLevel === 'undefined' || tempLevel === 'NaN')?0:tempLevel;
 
 		if(!APP.maxWorld){
 			APP.maxWorld = 0;
@@ -54,7 +54,7 @@ var AppModel = Class.extend({
 			APP.maxLevel = 0;
 		}
 
-		console.log(APP.maxWorld, APP.maxLevel, APP.cookieManager.getSafeCookie('maxworld'));
+		console.log(' - ', APP.maxWorld, APP.maxLevel, APP.cookieManager.getSafeCookie('maxworld'));
 		var allHighscores = [];
 		for (var i = 0; i < LEVELS.length; i++) {
 			tempHigh = APP.cookieManager.getSafeCookie('highscores'+i);

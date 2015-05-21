@@ -1001,9 +1001,9 @@ var Application = AbstractApplication.extend({
 }), AppModel = Class.extend({
     init: function() {
         tempWorld = APP.cookieManager.getSafeCookie("maxworld"), tempLevel = APP.cookieManager.getSafeCookie("maxlevel"), 
-        APP.maxWorld = tempWorld && "undefined" === tempWorld && "NaN" === tempWorld ? 0 : tempWorld, 
-        APP.maxLevel = tempLevel && "undefined" === tempLevel && "NaN" === tempLevel ? 0 : tempLevel, 
-        APP.maxWorld || (APP.maxWorld = 0), APP.maxLevel || (APP.maxLevel = 0), console.log(APP.maxWorld, APP.maxLevel, APP.cookieManager.getSafeCookie("maxworld"));
+        APP.maxWorld = tempWorld && "undefined" !== tempWorld && "NaN" !== tempWorld ? tempWorld : 0, 
+        APP.maxLevel = tempLevel && "undefined" !== tempLevel && "NaN" !== tempLevel ? tempLevel : 0, 
+        APP.maxWorld || (APP.maxWorld = 0), APP.maxLevel || (APP.maxLevel = 0), console.log(" - ", APP.maxWorld, APP.maxLevel, APP.cookieManager.getSafeCookie("maxworld"));
         for (var i = 0; i < LEVELS.length; i++) if (tempHigh = APP.cookieManager.getSafeCookie("highscores" + i), 
         tempHigh) {
             tempHigh = tempHigh.split(",");
