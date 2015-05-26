@@ -60,7 +60,7 @@ var LevelsScreen = AbstractScreen.extend({
                 coinGraph.beginFill(0xFFFFFF);
                 size = tempWorldGraphic.width * 0.2;
                 coinGraph.drawRect(-size/2,-size/2,size,size);
-                totalCoins = new PIXI.Text(this.worldsGotCoins[i]+'/'+this.worldsTotalCoins[i], {align:'center',font:'25px monospace', fill:'#FFFFFF'});
+                totalCoins = new PIXI.Text(this.worldsGotCoins[i]+'/'+this.worldsTotalCoins[i], {align:'center',font:'25px Vagron', fill:'#FFFFFF'});
                 totalCoins.resolution = 2;
                 coinGraph.position.x = tempWorldGraphic.width / 2;
                 coinGraph.position.y = tempWorldGraphic.height / 2;
@@ -100,7 +100,7 @@ var LevelsScreen = AbstractScreen.extend({
 
                 if(j <= APP.maxLevel || i < APP.maxWorld){
                     tempGraphicLevel.touchstart = tempGraphicLevel.mousedown = this.selectLevel;
-                    levelNumber = new PIXI.Text(j+1, {align:'center',font:'25px monospace', fill:'#FFFFFF'});
+                    levelNumber = new PIXI.Text(j+1, {align:'center',font:'25px Vagron', fill:'#FFFFFF'});
                     levelNumber.resolution = 2;
                     levelNumber.position.x = tempGraphicLevel.width / 2 - levelNumber.width / 2 / levelNumber.resolution;
                     levelNumber.position.y = tempGraphicLevel.height * 0.1 / levelNumber.resolution;

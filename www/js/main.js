@@ -1,4 +1,4 @@
-/*! jefframos 21-05-2015 */
+/*! jefframos 26-05-2015 */
 function rgbToHsl(r, g, b) {
     r /= 255, g /= 255, b /= 255;
     var h, s, max = Math.max(r, g, b), min = Math.min(r, g, b), l = (max + min) / 2;
@@ -1232,8 +1232,8 @@ var GameScreen = AbstractScreen.extend({
             fill: "#FFFFFF",
             wordWrap: !0,
             wordWrapWidth: 500
-        }), this.coinsLabel.resolution = retina, this.coinsLabel.alpha = .5, this.coinsLabel.position.x = 60, 
-        this.coinsLabel.position.y = 0, this.addChild(this.coinsLabel), isCordova || testMobile()) {
+        }), this.coinsLabel.resolution = retina, this.coinsLabel.alpha = .6, this.addChild(this.coinsLabel), 
+        this.updateCoins(), isCordova || testMobile()) {
             var controllerContainer = new PIXI.DisplayObjectContainer(), btnSize = .2 * windowWidth, upGr = new PIXI.Graphics();
             upGr.beginFill(16777215), upGr.drawRect(0, 0, btnSize, btnSize), upGr.position.x = 1.1 * btnSize, 
             upGr.interactive = !0, upGr.scope = this, upGr.side = "UP", upGr.touchstart = upGr.mousedown = clickController;
@@ -1404,9 +1404,9 @@ var GameScreen = AbstractScreen.extend({
         this.player.getContent().position.y = windowHeight / 1.2, this.portal = new EndPortal(this), 
         this.portal.build(), this.layer.addChild(this.portal);
         this.force = 0, this.levelCounter = 800, this.levelCounterMax = 800, this.changeColor(!0, !0), 
-        this.endGame = !1, this.initEnvironment(), this.updateMapPosition(), TweenLite.from(this.getContent(), .5, {
-            y: -50,
-            alpha: 0
+        this.endGame = !1, this.initEnvironment(), this.updateMapPosition(), TweenLite.from(this.getContent().scale, .5, {
+            y: .5,
+            x: .5
         });
     },
     initEnvironment: function() {
@@ -1419,9 +1419,7 @@ var GameScreen = AbstractScreen.extend({
     drawMap: function() {
         if (this.environment) if (this.vecTiles && this.vecTiles.length > 0) for (var k = 0; k < this.vecTiles.length; k++) {
             var tempTile = this.getTileByPos(this.vecTiles[k].x + 5, this.vecTiles[k].y + 5), tileType = this.getTileType(tempTile.i, tempTile.j);
-            try {
-                this.drawTile(tileType, tempTile.i, tempTile.j, this.vecTiles[k]);
-            } catch (error) {}
+            this.drawTile(tileType, tempTile.i, tempTile.j, this.vecTiles[k]);
         } else {
             this.vecTiles = [], this.vecMovEnemiesTemp = [], this.vecMovEnemies = [];
             for (var i = 0; i < this.environment.length; i++) for (var j = 0; j < this.environment[i].length; j++) if (this.environment[i][j] instanceof Array) for (var l = 0; l < this.environment[i][j].length; l++) this.drawTile(this.environment[i][j][l], j, i); else this.drawTile(this.environment[i][j], j, i);
@@ -1616,7 +1614,7 @@ var GameScreen = AbstractScreen.extend({
         }), console.log("current status", APP.currentWorld, APP.currentLevel);
     },
     reset: function() {
-        this.destroy(), this.build();
+        this.destroy(), this.updateable = !1, this.build();
     },
     gameOver: function() {
         if (!this.endGame) {
@@ -1693,7 +1691,7 @@ var GameScreen = AbstractScreen.extend({
     updateCoins: function() {
         this.coinsLabel.setText(APP.points), TweenLite.to(this.coinsLabel, .2, {
             alpha: .5
-        }), this.coinsLabel.position.x = 60, APP.background.parent && APP.background.parent.setChildIndex(APP.background, 0), 
+        }), this.coinsLabel.position.x = 60, this.coinsLabel.position.y = 20, APP.background.parent && APP.background.parent.setChildIndex(APP.background, 0), 
         this.coinsLabel.parent.setChildIndex(this.coinsLabel, 1), this.coinsLabel.alpha < .5;
     },
     transitionIn: function() {
@@ -1747,7 +1745,7 @@ var GameScreen = AbstractScreen.extend({
             coinGraph = new PIXI.Graphics(), coinGraph.beginFill(16777215), size = .2 * tempWorldGraphic.width, 
             coinGraph.drawRect(-size / 2, -size / 2, size, size), totalCoins = new PIXI.Text(this.worldsGotCoins[i] + "/" + this.worldsTotalCoins[i], {
                 align: "center",
-                font: "25px monospace",
+                font: "25px Vagron",
                 fill: "#FFFFFF"
             }), totalCoins.resolution = 2, coinGraph.position.x = tempWorldGraphic.width / 2, 
             coinGraph.position.y = tempWorldGraphic.height / 2, totalCoins.position.x = tempWorldGraphic.width / 2 - totalCoins.width / 2 / totalCoins.resolution, 
@@ -1766,7 +1764,7 @@ var GameScreen = AbstractScreen.extend({
                 tempContainer.position.y = 1.5 * tempGraphicLevel.height * jacum, j <= APP.maxLevel || i < APP.maxWorld) {
                     tempGraphicLevel.touchstart = tempGraphicLevel.mousedown = this.selectLevel, levelNumber = new PIXI.Text(j + 1, {
                         align: "center",
-                        font: "25px monospace",
+                        font: "25px Vagron",
                         fill: "#FFFFFF"
                     }), levelNumber.resolution = 2, levelNumber.position.x = tempGraphicLevel.width / 2 - levelNumber.width / 2 / levelNumber.resolution, 
                     levelNumber.position.y = .1 * tempGraphicLevel.height / levelNumber.resolution, 

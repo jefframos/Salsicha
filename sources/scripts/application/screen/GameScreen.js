@@ -103,12 +103,9 @@ var GameScreen = AbstractScreen.extend({
 
 		this.coinsLabel = new PIXI.Text('0', {align:'center',font:'48px Vagron', fill:'#FFFFFF', wordWrap:true, wordWrapWidth:500});
 		this.coinsLabel.resolution = retina;
-		this.coinsLabel.alpha = 0.5;
-		this.coinsLabel.position.x = 60;//windowWidth / 2 - this.coinsLabel.width / 2 / this.coinsLabel.resolution;
-		this.coinsLabel.position.y = 0;
+		this.coinsLabel.alpha = 0.6;
 		this.addChild(this.coinsLabel);
-
-
+		this.updateCoins();
 
 
 		function clickController(event){
@@ -569,7 +566,7 @@ var GameScreen = AbstractScreen.extend({
 
 		this.updateMapPosition();
 
-		TweenLite.from(this.getContent(), 0.5,{y:-50, alpha:0});
+		TweenLite.from(this.getContent().scale, 0.5,{y:0.5, x:0.5});
 
 	},
 	initEnvironment: function(){
@@ -591,11 +588,11 @@ var GameScreen = AbstractScreen.extend({
 			for (var k = 0; k < this.vecTiles.length; k++) {
 				var tempTile = this.getTileByPos(this.vecTiles[k].x + 5,this.vecTiles[k].y + 5);
 				var tileType = this.getTileType(tempTile.i, tempTile.j);
-				try{
-					this.drawTile(tileType, tempTile.i, tempTile.j, this.vecTiles[k]);
-				}catch(error){
-					// console.log(error);
-				}
+				// try{
+				this.drawTile(tileType, tempTile.i, tempTile.j, this.vecTiles[k]);
+				// }catch(error){
+				// 	// console.log(error);
+				// }
 			}
 			return;
 		}
@@ -964,8 +961,11 @@ var GameScreen = AbstractScreen.extend({
 	},
 	reset:function(){
 		this.destroy();
+		this.updateable = false;
 		this.build();
 	},
+
+
 
 
 	gameOver:function(){
@@ -988,6 +988,7 @@ var GameScreen = AbstractScreen.extend({
 		// this.crazyContent.alpha = 0;
 		this.coinsLabel.alpha = 0;
 		var self = this;
+		// TweenLite.to(this.getContent().scale, 0.5,{y:0.5, x:0.5});
 		setTimeout(function(){
 			self.endGame = false;
 			APP.audioController.playSound('wub');
@@ -1110,6 +1111,7 @@ var GameScreen = AbstractScreen.extend({
 		this.coinsLabel.setText(APP.points);
 		TweenLite.to(this.coinsLabel, 0.2, {alpha:0.5});
 		this.coinsLabel.position.x = 60;
+		this.coinsLabel.position.y = 20;//this.coinsLabel.height / 2;
 		if(APP.background.parent){
 			APP.background.parent.setChildIndex(APP.background, 0);
 		}
