@@ -101,12 +101,27 @@ var GameScreen = AbstractScreen.extend({
 
 
 
-		this.coinsLabel = new PIXI.Text('0', {align:'center',font:'48px Vagron', fill:'#FFFFFF', wordWrap:true, wordWrapWidth:500});
-		this.coinsLabel.resolution = retina;
-		this.coinsLabel.alpha = 0.6;
-		this.addChild(this.coinsLabel);
-		this.updateCoins();
+		// this.coinsLabel = new PIXI.Text('0', {align:'center',font:'30px Vagron', fill:'#FFFFFF', wordWrap:true, wordWrapWidth:500});
+		// this.coinsLabel.resolution = retina;
+		// this.coinsLabel.alpha = 0.6;
+		// this.addChild(this.coinsLabel);
 
+		this.coinsContainer = new PIXI.DisplayObjectContainer();
+		this.addChild(this.coinsContainer);
+		this.maxCoins = LEVELS[APP.currentWorld][APP.currentLevel][1].coins;
+		this.vecCoins = [];
+
+
+		for (i = 0; i < this.maxCoins; i++) {
+			var tempGraphic = new PIXI.Graphics();
+			tempGraphic.beginFill(0x000000);
+			tempGraphic.drawRect(0,0,20,20);
+			tempGraphic.position.x = tempGraphic.width * 1.5 * i;
+			this.coinsContainer.addChild(tempGraphic);
+			this.vecCoins.push(tempGraphic);
+		}
+
+		this.updateCoins();
 
 		function clickController(event){
 			event.target.scope.player.stretch(event.target.side);
@@ -342,7 +357,7 @@ var GameScreen = AbstractScreen.extend({
 			return;
 		}
 
-		this.coinsLabel.parent.setChildIndex(this.coinsLabel, this.coinsLabel.parent.children.length - 1);
+		// this.coinsLabel.parent.setChildIndex(this.coinsLabel, this.coinsLabel.parent.children.length - 1);
 
 
 
@@ -567,6 +582,7 @@ var GameScreen = AbstractScreen.extend({
 		this.updateMapPosition();
 
 		TweenLite.from(this.getContent().scale, 0.5,{y:0.5, x:0.5});
+		this.updateCoins();
 
 	},
 	initEnvironment: function(){
@@ -620,11 +636,7 @@ var GameScreen = AbstractScreen.extend({
 			tempGraphics.clear();
 			var isEnemy = false;
 			if(type === 1){
-				if(APP.currentWorld >1){
-					tempGraphics.lineStyle(1,tempColor);
-				}else{
-					tempGraphics.beginFill(tempColor);
-				}
+				tempGraphics.beginFill(tempColor);
 				if(isCordova){
 					tempGraphics.drawRect(0,0,Math.ceil(APP.tileSize.w), Math.ceil(APP.tileSize.h));
 				}else{
@@ -639,31 +651,32 @@ var GameScreen = AbstractScreen.extend({
 				tempGraphics.beginFill(tempColor);
 
 				var temp1 = -2;
-				var line = 4;
+				var aux = 2;
+				var line = 5;
 				var sz = -APP.tileSize.w * 0.05;
 				var init = {};
 				for (var ii = 0; ii <= line; ii++) {
 					if(ii === 0){
-						init = {x:APP.tileSize.w/line * ii, y:-(sz * temp1)};
-						tempGraphics.moveTo(APP.tileSize.w/line * ii, -(sz * temp1));
+						init = {x:APP.tileSize.w/line * ii, y:-(sz * temp1)+aux};
+						tempGraphics.moveTo(init.x,init.y);
 					}else{
-						tempGraphics.lineTo(APP.tileSize.w/line * ii, -(sz * temp1));
+						tempGraphics.lineTo(APP.tileSize.w/line * ii, -(sz * temp1)+aux);
 					}
 					temp1 *= -1;
 				}
 
 				for (ii = 0; ii <= line; ii++) {
-					tempGraphics.lineTo(APP.tileSize.w - (sz * temp1), APP.tileSize.h/line * ii);
+					tempGraphics.lineTo(APP.tileSize.w-aux - (sz * temp1), APP.tileSize.h/line * ii);
 					temp1 *= -1;
 				}
 				temp1 = 2;
 				for (ii = 0; ii <= line; ii++) {
-					tempGraphics.lineTo(APP.tileSize.w - (APP.tileSize.w/line * ii), APP.tileSize.h - (sz * temp1));
+					tempGraphics.lineTo(APP.tileSize.w - (APP.tileSize.w/line * ii), APP.tileSize.h - (sz * temp1)-aux);
 					temp1 *= -1;
 				}
 
 				for (ii = 0; ii <= line; ii++) {
-					tempGraphics.lineTo(-sz * temp1, APP.tileSize.h - (APP.tileSize.h/line * ii));
+					tempGraphics.lineTo(-sz * temp1+aux, APP.tileSize.h - (APP.tileSize.h/line * ii));
 					temp1 *= -1;
 				}
 				tempGraphics.lineTo(init.x,init.y);
@@ -938,6 +951,11 @@ var GameScreen = AbstractScreen.extend({
 
 		this.changeColor();
 
+		for (var i = 0; i < this.layer.childs.length; i++) {
+			if(this.layer.childs[i].type === 'enemy'){
+				this.layer.childs[i].preKill();
+			}
+		}
 		if(APP.currentLevel >= LEVELS[APP.currentWorld].length - 1){
 			APP.appModel.saveScore();
 			APP.currentWorld ++;
@@ -986,7 +1004,7 @@ var GameScreen = AbstractScreen.extend({
 		this.earthquake(40);
 		this.endGame = true;
 		// this.crazyContent.alpha = 0;
-		this.coinsLabel.alpha = 0;
+		// this.coinsLabel.alpha = 0;
 		var self = this;
 		// TweenLite.to(this.getContent().scale, 0.5,{y:0.5, x:0.5});
 		setTimeout(function(){
@@ -1098,6 +1116,7 @@ var GameScreen = AbstractScreen.extend({
 				}
 			}
 		}
+		this.updateCoins();
 
 	},
 	earthquake:function(force){
@@ -1108,18 +1127,31 @@ var GameScreen = AbstractScreen.extend({
 	},
 	updateCoins:function(){
 
-		this.coinsLabel.setText(APP.points);
-		TweenLite.to(this.coinsLabel, 0.2, {alpha:0.5});
-		this.coinsLabel.position.x = 60;
-		this.coinsLabel.position.y = 20;//this.coinsLabel.height / 2;
+		// this.coinsLabel.setText(APP.points);
+
+		this.coinsContainer.position.x = 60;
+		this.coinsContainer.position.y = 20;
+		for (var i = 0; i < this.vecCoins.length; i++) {
+			var tempRect = this.vecCoins[i].getLocalBounds();
+			this.vecCoins[i].clear();
+			if(i < APP.points){
+				this.vecCoins[i].beginFill(0xFFFFFF);
+			}else{
+				this.vecCoins[i].beginFill(addBright(APP.vecColors[APP.currentColorID], 0.4));
+			}
+			this.vecCoins[i].drawRect(tempRect.x,tempRect.y,tempRect.width,tempRect.height);
+		}
+		// TweenLite.to(this.coinsLabel, 0.2, {alpha:0.5});
+		// this.coinsLabel.position.x = 60;
+		// this.coinsLabel.position.y = 20;//this.coinsLabel.height / 2;
 		if(APP.background.parent){
 			APP.background.parent.setChildIndex(APP.background, 0);
 		}
-		this.coinsLabel.parent.setChildIndex(this.coinsLabel, 1);
+		// this.coinsLabel.parent.setChildIndex(this.coinsLabel, 1);
 
-		if(this.coinsLabel.alpha < 0.5){
-			return;
-		}
+		// if(this.coinsLabel.alpha < 0.5){
+			// return;
+		// }
 
 	},
 	transitionIn:function()

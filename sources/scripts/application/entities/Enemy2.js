@@ -26,11 +26,21 @@ var Enemy2 = Entity.extend({
 
 		// this.sprite = new PIXI.Sprite.fromFrame(this.imgSource);
 		this.spriteBall = new PIXI.Graphics();
-		// this.spriteBall.beginFill(0xFF8888);
-		this.spriteBall.lineStyle(1,0);
+		this.spriteBall.beginFill(addBright(APP.vecColors[APP.currentColorID], 0.5));
+		// this.spriteBall.lineStyle(1,0);
 		var size = APP.tileSize.w * 0.4;
-		this.spriteBall.drawRect(-size/2,-size/2,size,size);
-		// this.spriteBall.drawCircle(0,0,windowHeight * 0.02);
+		// this.spriteBall.drawRect(-size/2,-size/2,size,size);
+		this.spriteBall.moveTo(0,0);
+		var sides = 14;
+		for (var i = 0; i <= sides; i++) {
+			angle = degreesToRadians((360 / sides) * i);
+			var tempSize = i%2===0?size:size/2.5;
+			if(i<=0){
+				this.spriteBall.moveTo(Math.sin(angle) * tempSize, Math.cos(angle) * tempSize);
+			}else{
+				this.spriteBall.lineTo(Math.sin(angle) * tempSize, Math.cos(angle) * tempSize);
+			}
+		}
 
 		this.sprite = new PIXI.Sprite();
         this.sprite.addChild(this.spriteBall);
@@ -162,7 +172,7 @@ var Enemy2 = Entity.extend({
 		if(this.invencible){
 			return;
 		}
-		this.explode(-2, 2);
+		this.explode(0, 0);
 		this.collidable = false;
 		this.kill = true;
 	},
