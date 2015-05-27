@@ -49,7 +49,7 @@ var LevelsScreen = AbstractScreen.extend({
             tempWorldGraphic = new PIXI.Graphics();
             tempWorldGraphic.lineStyle(1,addBright(APP.vecColors[APP.currentColorID], 0.8));
             tempWorldGraphic.beginFill(addBright(APP.vecColors[APP.currentColorID], 0.9));
-            tempWorldGraphic.drawRect(0,0,windowHeight * 0.2,windowHeight * 0.2);
+            tempWorldGraphic.drawRect(0,0,windowHeight * 0.18,windowHeight * 0.18);
             tempWorldGraphic.interactive = true;
             tempWorldGraphic.buttonMode = true;
             tempWorldGraphic.id = i;
@@ -81,7 +81,7 @@ var LevelsScreen = AbstractScreen.extend({
             }else{
                 tempWorldGraphic.clear();
                 tempWorldGraphic.beginFill(addBright(APP.vecColors[APP.currentColorID], 0.7));
-                tempWorldGraphic.drawRect(0,0,windowHeight * 0.2,windowHeight * 0.2);
+                tempWorldGraphic.drawRect(0,0,windowHeight * 0.18,windowHeight * 0.18);
             }
 
             tempWorldContainer.position.x = (tempWorldGraphic.width * 1.5) * iacumW;
@@ -184,7 +184,7 @@ var LevelsScreen = AbstractScreen.extend({
             console.log('removeLevelss');
             self.currentWorldGraphics.parent.removeChild(self.currentWorldGraphics);
         }
-        self.worldsContainer.position.x = windowWidth / 2 - ((windowHeight * 0.2 * 1.5) + (windowHeight * 0.2)) / 2;//self.worldsContainer.width / 2;
+        self.worldsContainer.position.x = windowWidth / 2 - ((windowHeight * 0.18 * 1.5) + (windowHeight * 0.18)) / 2;//self.worldsContainer.width / 2;
         self.worldsContainer.position.y = windowHeight / 2 - self.worldsContainer.height / 2;
         self.addChild(self.worldsContainer);
         TweenLite.from(self.worldsContainer, 0.8, {x:windowWidth, y:-self.worldsContainer.height});
