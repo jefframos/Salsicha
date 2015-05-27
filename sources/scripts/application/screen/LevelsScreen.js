@@ -19,7 +19,7 @@ var LevelsScreen = AbstractScreen.extend({
         var j = 0;
         var levelsContainer = null;
         var tempGraphicLevel = null;
-        var tempColor = addBright(APP.vecColors[APP.currentColorID], 0.65);
+        var tempColor = addBright(APP.vecColors[APP.currentColorID], 0.9);
         this.worldsContainer = new PIXI.DisplayObjectContainer();
         var iacumW = 0;
         var jacumW = 0;
@@ -47,7 +47,8 @@ var LevelsScreen = AbstractScreen.extend({
             }
             tempWorldContainer = new PIXI.DisplayObjectContainer();
             tempWorldGraphic = new PIXI.Graphics();
-            tempWorldGraphic.beginFill(addBright(APP.vecColors[APP.currentColorID], 0.9 - 0.1 * i));
+            tempWorldGraphic.lineStyle(1,addBright(APP.vecColors[APP.currentColorID], 0.8));
+            tempWorldGraphic.beginFill(addBright(APP.vecColors[APP.currentColorID], 0.9));
             tempWorldGraphic.drawRect(0,0,windowHeight * 0.2,windowHeight * 0.2);
             tempWorldGraphic.interactive = true;
             tempWorldGraphic.buttonMode = true;
@@ -60,6 +61,12 @@ var LevelsScreen = AbstractScreen.extend({
                 coinGraph.beginFill(0xFFFFFF);
                 size = tempWorldGraphic.width * 0.2;
                 coinGraph.drawRect(-size/2,-size/2,size,size);
+
+                worldLabel = new PIXI.Text('WORLD '+(i + 1), {align:'left',font:'20px Vagron', fill:'#FFFFFF'});
+                worldLabel.resolution = 2;
+                worldLabel.position.x = tempWorldGraphic.width / 2 - worldLabel.width / 2 / worldLabel.resolution;
+                worldLabel.position.y = 5;
+
                 totalCoins = new PIXI.Text(this.worldsGotCoins[i]+'/'+this.worldsTotalCoins[i], {align:'center',font:'25px Vagron', fill:'#FFFFFF'});
                 totalCoins.resolution = 2;
                 coinGraph.position.x = tempWorldGraphic.width / 2;
@@ -70,6 +77,11 @@ var LevelsScreen = AbstractScreen.extend({
 
                 tempWorldContainer.addChild(totalCoins);
                 tempWorldContainer.addChild(coinGraph);
+                tempWorldContainer.addChild(worldLabel);
+            }else{
+                tempWorldGraphic.clear();
+                tempWorldGraphic.beginFill(addBright(APP.vecColors[APP.currentColorID], 0.7));
+                tempWorldGraphic.drawRect(0,0,windowHeight * 0.2,windowHeight * 0.2);
             }
 
             tempWorldContainer.position.x = (tempWorldGraphic.width * 1.5) * iacumW;
@@ -85,9 +97,10 @@ var LevelsScreen = AbstractScreen.extend({
                 }
                 var tempCoins = LEVELS[i][j][1].coins;
                 var high = LEVELS[i][j][1].highscore;
-                console.log('highs', high);
+
                 tempContainer = new PIXI.DisplayObjectContainer();
                 tempGraphicLevel = new PIXI.Graphics();
+                tempGraphicLevel.lineStyle(1,addBright(APP.vecColors[APP.currentColorID], 0.8));
                 tempGraphicLevel.beginFill(tempColor);
                 tempGraphicLevel.drawRect(0,0,windowHeight * 0.1,windowHeight * 0.1);
                 tempGraphicLevel.interactive = true;
@@ -97,14 +110,14 @@ var LevelsScreen = AbstractScreen.extend({
                 tempContainer.addChild(tempGraphicLevel);
                 tempContainer.position.x = (tempGraphicLevel.width * 1.5) * iacum;
                 tempContainer.position.y = (tempGraphicLevel.height * 1.5) * jacum;
+                levelNumber = new PIXI.Text(j+1, {align:'center',font:'25px Vagron', fill:'#FFFFFF'});
+                levelNumber.resolution = 2;
+                levelNumber.position.x = tempGraphicLevel.width / 2 - levelNumber.width / 2 / levelNumber.resolution;
+                levelNumber.position.y = tempGraphicLevel.height * 0.1 / levelNumber.resolution;
+                tempContainer.addChild(levelNumber);
 
                 if(j <= APP.maxLevel || i < APP.maxWorld){
                     tempGraphicLevel.touchstart = tempGraphicLevel.mousedown = this.selectLevel;
-                    levelNumber = new PIXI.Text(j+1, {align:'center',font:'25px Vagron', fill:'#FFFFFF'});
-                    levelNumber.resolution = 2;
-                    levelNumber.position.x = tempGraphicLevel.width / 2 - levelNumber.width / 2 / levelNumber.resolution;
-                    levelNumber.position.y = tempGraphicLevel.height * 0.1 / levelNumber.resolution;
-                    tempContainer.addChild(levelNumber);
                     for (var k = 1; k < tempCoins + 1; k++) {
                         coinGraph = new PIXI.Graphics();
                         coinGraph.beginFill(k <=high ? 0xFFFFFF : addBright(APP.vecColors[APP.currentColorID], 0.4));
@@ -114,11 +127,20 @@ var LevelsScreen = AbstractScreen.extend({
                         coinGraph.position.y = tempGraphicLevel.height - coinGraph.height * 2;
                         tempContainer.addChild(coinGraph);
                     }
+                }else{
+                    tempGraphicLevel.clear();
+                    tempGraphicLevel.beginFill(addBright(APP.vecColors[APP.currentColorID], 0.7));
+                    tempGraphicLevel.drawRect(0,0,windowHeight * 0.1,windowHeight * 0.1);
                 }
 
                 levelsContainer.addChild(tempContainer);
                 iacum ++;
             }
+            worldLabel2 = new PIXI.Text('WORLD '+(i + 1), {align:'left',font:'48px Vagron', fill:'#FFFFFF'});
+            worldLabel2.resolution = 2;
+            worldLabel2.position.x = levelsContainer.width / 2 - worldLabel2.width / 2 / worldLabel2.resolution;
+            worldLabel2.position.y = -worldLabel2.height/1.5;
+            levelsContainer.addChild(worldLabel2);
             this.worldsContainer.addChild(tempWorldContainer);
             this.worlds.push([levelsContainer]);
         }
@@ -152,7 +174,7 @@ var LevelsScreen = AbstractScreen.extend({
     },
     hideLevels:function(callback, scope){
         APP.interactiveBackground.accel = -2;
-        TweenLite.to(this.currentWorldGraphics.position, 0.8, {x:-windowWidth / 2, y:windowHeight, onComplete:function(){
+        TweenLite.to(this.currentWorldGraphics.position, 0.8, {x:-windowWidth / 2.2, y:windowHeight * 1.2, onComplete:function(){
             callback(scope);
         }});
     },
@@ -162,7 +184,7 @@ var LevelsScreen = AbstractScreen.extend({
             console.log('removeLevelss');
             self.currentWorldGraphics.parent.removeChild(self.currentWorldGraphics);
         }
-        self.worldsContainer.position.x = windowWidth / 2 - self.worldsContainer.width / 2;
+        self.worldsContainer.position.x = windowWidth / 2 - ((windowHeight * 0.2 * 1.5) + (windowHeight * 0.2)) / 2;//self.worldsContainer.width / 2;
         self.worldsContainer.position.y = windowHeight / 2 - self.worldsContainer.height / 2;
         self.addChild(self.worldsContainer);
         TweenLite.from(self.worldsContainer, 0.8, {x:windowWidth, y:-self.worldsContainer.height});
@@ -174,8 +196,10 @@ var LevelsScreen = AbstractScreen.extend({
             console.log('removeWorlds');
             self.worldsContainer.parent.removeChild(self.worldsContainer);
         }
-        self.currentWorldGraphics.position.x = windowWidth / 2 - self.currentWorldGraphics.width / 2;
-        self.currentWorldGraphics.position.y = windowHeight / 2 - self.currentWorldGraphics.height / 2;
+        self.currentWorldGraphics.position.x = windowWidth / 2 - ((windowHeight * 0.1 * 1.5 * 2) + (windowHeight * 0.1)) / 2;
+        // self.currentWorldGraphics.position.x = windowWidth / 2 - self.currentWorldGraphics.width / 2;
+        self.currentWorldGraphics.position.y = windowHeight / 2 - ((windowHeight * 0.1 * 1.5 * 3) + (windowHeight * 0.1)) / 2;
+        // self.currentWorldGraphics.position.y = windowHeight / 2 - self.currentWorldGraphics.height / 3;
         self.addChild(self.currentWorldGraphics);
         TweenLite.from(self.currentWorldGraphics.position, 0.8, {x:windowWidth, y:-self.currentWorldGraphics.height});
         TweenLite.to(APP.interactiveBackground, 1.5, {accel:0});

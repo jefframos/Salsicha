@@ -7,8 +7,8 @@ var Application = AbstractApplication.extend({
         // this.vecColors = [0x219A33,0xD61767,0x63C2C8,0x5AF271,0xB24191,0xFFE40E,0xE84E0E,0x5C79BB];
         // this.vecColorsS = ['#219A33','#D61767','#63C2C8','#5AF271','#B24191','#FFE40E','#E84E0E','#5C79BB'];
 
-        this.vecColors = [0xFF7BD6,0xFF5C6A,0xFF8668,0xFCBE55,0x54E5D5,0x2A78FF,0x9248F9,0xD751ED, 0x93BF41];
-        this.vecColorsS = ['#FF7BD6','#FF5C6A','#FF8668','#FCBE55','#54E5D5','#2A78FF','#9248F9','#D751ED', '#93BF41'];
+        this.vecColors = [0xFF7BD6,0xFF5C6A,0xFF8668,0xFCBE55,0x2A78FF,0x9248F9,0xD751ED, 0x93BF41];
+        this.vecColorsS = ['#FF7BD6','#FF5C6A','#FF8668','#FCBE55','#2A78FF','#9248F9','#D751ED', '#93BF41'];
         this.vecPerfects = ['PERFECT!', 'AWESOME!', 'AMAZING!', 'GOD!!!', 'WOWOWOW', 'YEAH!'];
         this.vecGood = ['GOOD', 'COOL', 'YEP', 'NOT BAD'];
         this.vecError = ['NOOOO!', 'BAD', 'MISS!', 'NOT', 'AHHHH'];

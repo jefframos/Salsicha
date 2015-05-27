@@ -191,8 +191,8 @@ var Application = AbstractApplication.extend({
             "#withoutAPI" === window.location.hash && (self.withAPI = !1);
         }
         var self = this;
-        this.vecColors = [ 16743382, 16735338, 16746088, 16563797, 5563861, 2783487, 9586937, 14111213, 9682753 ], 
-        this.vecColorsS = [ "#FF7BD6", "#FF5C6A", "#FF8668", "#FCBE55", "#54E5D5", "#2A78FF", "#9248F9", "#D751ED", "#93BF41" ], 
+        this.vecColors = [ 16743382, 16735338, 16746088, 16563797, 2783487, 9586937, 14111213, 9682753 ], 
+        this.vecColorsS = [ "#FF7BD6", "#FF5C6A", "#FF8668", "#FCBE55", "#2A78FF", "#9248F9", "#D751ED", "#93BF41" ], 
         this.vecPerfects = [ "PERFECT!", "AWESOME!", "AMAZING!", "GOD!!!", "WOWOWOW", "YEAH!" ], 
         this.vecGood = [ "GOOD", "COOL", "YEP", "NOT BAD" ], this.vecError = [ "NOOOO!", "BAD", "MISS!", "NOT", "AHHHH" ], 
         this.currentColorID = Math.floor(this.vecColors.length * Math.random()), this.backColor = this.vecColors[this.currentColorID], 
@@ -1777,7 +1777,7 @@ var GameScreen = AbstractScreen.extend({
     build: function() {
         this._super(), console.log("this"), this.worldsTotalCoins = [], this.worldsGotCoins = [], 
         this.worlds = [], this.worldsContainer = null;
-        var i = 0, j = 0, levelsContainer = null, tempGraphicLevel = null, tempColor = addBright(APP.vecColors[APP.currentColorID], .65);
+        var i = 0, j = 0, levelsContainer = null, tempGraphicLevel = null, tempColor = addBright(APP.vecColors[APP.currentColorID], .9);
         this.worldsContainer = new PIXI.DisplayObjectContainer();
         var iacumW = 0, jacumW = 0;
         for (i = 0; i < LEVELS.length; i++) {
@@ -1788,44 +1788,58 @@ var GameScreen = AbstractScreen.extend({
         for (i = 0; i < LEVELS.length; i++) {
             levelsContainer = new PIXI.DisplayObjectContainer(), i % 2 === 0 && 0 !== i && (jacumW++, 
             iacumW = 0), tempWorldContainer = new PIXI.DisplayObjectContainer(), tempWorldGraphic = new PIXI.Graphics(), 
-            tempWorldGraphic.beginFill(addBright(APP.vecColors[APP.currentColorID], .9 - .1 * i)), 
-            tempWorldGraphic.drawRect(0, 0, .2 * windowHeight, .2 * windowHeight), tempWorldGraphic.interactive = !0, 
-            tempWorldGraphic.buttonMode = !0, tempWorldGraphic.id = i, tempWorldGraphic.scope = this, 
-            tempWorldContainer.addChild(tempWorldGraphic), i <= APP.maxWorld && (tempWorldGraphic.touchstart = tempWorldGraphic.mousedown = this.selectWorld, 
+            tempWorldGraphic.lineStyle(1, addBright(APP.vecColors[APP.currentColorID], .8)), 
+            tempWorldGraphic.beginFill(addBright(APP.vecColors[APP.currentColorID], .9)), tempWorldGraphic.drawRect(0, 0, .2 * windowHeight, .2 * windowHeight), 
+            tempWorldGraphic.interactive = !0, tempWorldGraphic.buttonMode = !0, tempWorldGraphic.id = i, 
+            tempWorldGraphic.scope = this, tempWorldContainer.addChild(tempWorldGraphic), i <= APP.maxWorld ? (tempWorldGraphic.touchstart = tempWorldGraphic.mousedown = this.selectWorld, 
             coinGraph = new PIXI.Graphics(), coinGraph.beginFill(16777215), size = .2 * tempWorldGraphic.width, 
-            coinGraph.drawRect(-size / 2, -size / 2, size, size), totalCoins = new PIXI.Text(this.worldsGotCoins[i] + "/" + this.worldsTotalCoins[i], {
+            coinGraph.drawRect(-size / 2, -size / 2, size, size), worldLabel = new PIXI.Text("WORLD " + (i + 1), {
+                align: "left",
+                font: "20px Vagron",
+                fill: "#FFFFFF"
+            }), worldLabel.resolution = 2, worldLabel.position.x = tempWorldGraphic.width / 2 - worldLabel.width / 2 / worldLabel.resolution, 
+            worldLabel.position.y = 5, totalCoins = new PIXI.Text(this.worldsGotCoins[i] + "/" + this.worldsTotalCoins[i], {
                 align: "center",
                 font: "25px Vagron",
                 fill: "#FFFFFF"
             }), totalCoins.resolution = 2, coinGraph.position.x = tempWorldGraphic.width / 2, 
             coinGraph.position.y = tempWorldGraphic.height / 2, totalCoins.position.x = tempWorldGraphic.width / 2 - totalCoins.width / 2 / totalCoins.resolution, 
             totalCoins.position.y = tempWorldGraphic.height - totalCoins.height / totalCoins.resolution, 
-            tempWorldContainer.addChild(totalCoins), tempWorldContainer.addChild(coinGraph)), 
-            tempWorldContainer.position.x = 1.5 * tempWorldGraphic.width * iacumW, tempWorldContainer.position.y = 1.5 * tempWorldGraphic.height * jacumW, 
-            iacumW++;
+            tempWorldContainer.addChild(totalCoins), tempWorldContainer.addChild(coinGraph), 
+            tempWorldContainer.addChild(worldLabel)) : (tempWorldGraphic.clear(), tempWorldGraphic.beginFill(addBright(APP.vecColors[APP.currentColorID], .7)), 
+            tempWorldGraphic.drawRect(0, 0, .2 * windowHeight, .2 * windowHeight)), tempWorldContainer.position.x = 1.5 * tempWorldGraphic.width * iacumW, 
+            tempWorldContainer.position.y = 1.5 * tempWorldGraphic.height * jacumW, iacumW++;
             var iacum = 0, jacum = 0;
             for (j = 0; j < LEVELS[i].length; j++) {
                 j % 3 === 0 && 0 !== j && (jacum++, iacum = 0);
                 var tempCoins = LEVELS[i][j][1].coins, high = LEVELS[i][j][1].highscore;
-                if (console.log("highs", high), tempContainer = new PIXI.DisplayObjectContainer(), 
-                tempGraphicLevel = new PIXI.Graphics(), tempGraphicLevel.beginFill(tempColor), tempGraphicLevel.drawRect(0, 0, .1 * windowHeight, .1 * windowHeight), 
+                if (tempContainer = new PIXI.DisplayObjectContainer(), tempGraphicLevel = new PIXI.Graphics(), 
+                tempGraphicLevel.lineStyle(1, addBright(APP.vecColors[APP.currentColorID], .8)), 
+                tempGraphicLevel.beginFill(tempColor), tempGraphicLevel.drawRect(0, 0, .1 * windowHeight, .1 * windowHeight), 
                 tempGraphicLevel.interactive = !0, tempGraphicLevel.buttonMode = !0, tempGraphicLevel.id = j, 
                 tempGraphicLevel.scope = this, tempContainer.addChild(tempGraphicLevel), tempContainer.position.x = 1.5 * tempGraphicLevel.width * iacum, 
-                tempContainer.position.y = 1.5 * tempGraphicLevel.height * jacum, j <= APP.maxLevel || i < APP.maxWorld) {
-                    tempGraphicLevel.touchstart = tempGraphicLevel.mousedown = this.selectLevel, levelNumber = new PIXI.Text(j + 1, {
-                        align: "center",
-                        font: "25px Vagron",
-                        fill: "#FFFFFF"
-                    }), levelNumber.resolution = 2, levelNumber.position.x = tempGraphicLevel.width / 2 - levelNumber.width / 2 / levelNumber.resolution, 
-                    levelNumber.position.y = .1 * tempGraphicLevel.height / levelNumber.resolution, 
-                    tempContainer.addChild(levelNumber);
+                tempContainer.position.y = 1.5 * tempGraphicLevel.height * jacum, levelNumber = new PIXI.Text(j + 1, {
+                    align: "center",
+                    font: "25px Vagron",
+                    fill: "#FFFFFF"
+                }), levelNumber.resolution = 2, levelNumber.position.x = tempGraphicLevel.width / 2 - levelNumber.width / 2 / levelNumber.resolution, 
+                levelNumber.position.y = .1 * tempGraphicLevel.height / levelNumber.resolution, 
+                tempContainer.addChild(levelNumber), j <= APP.maxLevel || i < APP.maxWorld) {
+                    tempGraphicLevel.touchstart = tempGraphicLevel.mousedown = this.selectLevel;
                     for (var k = 1; tempCoins + 1 > k; k++) coinGraph = new PIXI.Graphics(), coinGraph.beginFill(high >= k ? 16777215 : addBright(APP.vecColors[APP.currentColorID], .4)), 
                     size = .1 * tempGraphicLevel.width, coinGraph.drawRect(-size / 2, -size / 2, size, size), 
                     coinGraph.position.x = tempGraphicLevel.width / (tempCoins + 1) * k, coinGraph.position.y = tempGraphicLevel.height - 2 * coinGraph.height, 
                     tempContainer.addChild(coinGraph);
-                }
+                } else tempGraphicLevel.clear(), tempGraphicLevel.beginFill(addBright(APP.vecColors[APP.currentColorID], .7)), 
+                tempGraphicLevel.drawRect(0, 0, .1 * windowHeight, .1 * windowHeight);
                 levelsContainer.addChild(tempContainer), iacum++;
             }
+            worldLabel2 = new PIXI.Text("WORLD " + (i + 1), {
+                align: "left",
+                font: "48px Vagron",
+                fill: "#FFFFFF"
+            }), worldLabel2.resolution = 2, worldLabel2.position.x = levelsContainer.width / 2 - worldLabel2.width / 2 / worldLabel2.resolution, 
+            worldLabel2.position.y = -worldLabel2.height / 1.5, levelsContainer.addChild(worldLabel2), 
             this.worldsContainer.addChild(tempWorldContainer), this.worlds.push([ levelsContainer ]);
         }
         this.backButtonContainer = new PIXI.DisplayObjectContainer(), this.backButton = new PIXI.Graphics(), 
@@ -1847,8 +1861,8 @@ var GameScreen = AbstractScreen.extend({
     },
     hideLevels: function(callback, scope) {
         APP.interactiveBackground.accel = -2, TweenLite.to(this.currentWorldGraphics.position, .8, {
-            x: -windowWidth / 2,
-            y: windowHeight,
+            x: -windowWidth / 2.2,
+            y: 1.2 * windowHeight,
             onComplete: function() {
                 callback(scope);
             }
@@ -1857,7 +1871,7 @@ var GameScreen = AbstractScreen.extend({
     showWorlds: function(scope) {
         var self = scope ? scope : this;
         self.currentWorldGraphics && self.currentWorldGraphics.parent && (console.log("removeLevelss"), 
-        self.currentWorldGraphics.parent.removeChild(self.currentWorldGraphics)), self.worldsContainer.position.x = windowWidth / 2 - self.worldsContainer.width / 2, 
+        self.currentWorldGraphics.parent.removeChild(self.currentWorldGraphics)), self.worldsContainer.position.x = windowWidth / 2 - (.2 * windowHeight * 1.5 + .2 * windowHeight) / 2, 
         self.worldsContainer.position.y = windowHeight / 2 - self.worldsContainer.height / 2, 
         self.addChild(self.worldsContainer), TweenLite.from(self.worldsContainer, .8, {
             x: windowWidth,
@@ -1869,8 +1883,8 @@ var GameScreen = AbstractScreen.extend({
     showLevels: function(scope) {
         var self = scope ? scope : this;
         self.worldsContainer && self.worldsContainer.parent && (console.log("removeWorlds"), 
-        self.worldsContainer.parent.removeChild(self.worldsContainer)), self.currentWorldGraphics.position.x = windowWidth / 2 - self.currentWorldGraphics.width / 2, 
-        self.currentWorldGraphics.position.y = windowHeight / 2 - self.currentWorldGraphics.height / 2, 
+        self.worldsContainer.parent.removeChild(self.worldsContainer)), self.currentWorldGraphics.position.x = windowWidth / 2 - (.1 * windowHeight * 1.5 * 2 + .1 * windowHeight) / 2, 
+        self.currentWorldGraphics.position.y = windowHeight / 2 - (.1 * windowHeight * 1.5 * 3 + .1 * windowHeight) / 2, 
         self.addChild(self.currentWorldGraphics), TweenLite.from(self.currentWorldGraphics.position, .8, {
             x: windowWidth,
             y: -self.currentWorldGraphics.height
