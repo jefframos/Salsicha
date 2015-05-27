@@ -234,7 +234,7 @@ var GameScreen = AbstractScreen.extend({
         this.backButtonContainer.scope = this;
         this.backButtonContainer.interactive = true;
         this.backButtonContainer.buttonMode = true;
-        this.backButton.touchstart = this.backButtonContainer.mousedown = this.backFunction;
+        this.backButtonContainer.touchstart = this.backButtonContainer.mousedown = this.backFunction;
         this.backButtonContainer.position.x = 20;
         this.backButtonContainer.position.y = 20;
 

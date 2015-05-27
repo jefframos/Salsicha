@@ -1275,7 +1275,7 @@ var GameScreen = AbstractScreen.extend({
         this.backButton.lineTo(20, 20), this.backButton.lineTo(0, 10), this.backButton.lineTo(20, 0), 
         this.backButtonContainer.addChild(this.backButton), this.backButtonContainer.scope = this, 
         this.backButtonContainer.interactive = !0, this.backButtonContainer.buttonMode = !0, 
-        this.backButton.touchstart = this.backButtonContainer.mousedown = this.backFunction, 
+        this.backButtonContainer.touchstart = this.backButtonContainer.mousedown = this.backFunction, 
         this.backButtonContainer.position.x = 20, this.backButtonContainer.position.y = 20, 
         this.addChild(this.backButtonContainer), this.crazyContent = new PIXI.DisplayObjectContainer(), 
         this.addChild(this.crazyContent), this.layerManagerHUD = new LayerManager(), this.layerManagerHUD.build("HUD"), 
