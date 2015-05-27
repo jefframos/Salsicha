@@ -2,13 +2,13 @@
 var RankinkgModal = Class.extend({
 	init:function(screen){
 		this.screen = screen;
-		
-		this.container = new PIXI.DisplayObjectContainer();
-		
-		// this.labelsContainer = new PIXI.DisplayObjectContainer();
-		// this.labelsContainerRight = new PIXI.DisplayObjectContainer();
-		// this.footer = new PIXI.DisplayObjectContainer();
-		// this.header = new PIXI.DisplayObjectContainer();
+
+		this.container = new PIXI.Container();
+
+		// this.labelsContainer = new PIXI.Container();
+		// this.labelsContainerRight = new PIXI.Container();
+		// this.footer = new PIXI.Container();
+		// this.header = new PIXI.Container();
 		// this.bg = new PIXI.Graphics();
 		// this.bg.beginFill(0x012223);
 		// this.bg.drawRect(0,0,windowWidth, windowHeight);
@@ -28,9 +28,9 @@ var RankinkgModal = Class.extend({
 		};
 
 		// this.img = new SimpleSprite('dist/img/UI/creditos.png');
-		
-		
-		
+
+
+
 		var credits = new SimpleSprite('dist/img/UI/creditos.jpg');
 		this.container.addChild(credits.getContent());
 		scaleConverter(credits.getContent().height, windowHeight, 1, credits);
@@ -44,7 +44,7 @@ var RankinkgModal = Class.extend({
 		// var positions = [[windowWidth * 0.2,windowHeight * 0.6], [windowWidth * 0.35,windowHeight * 0.1], [windowWidth * 0.6,windowHeight * 0.08], [windowWidth * 0.8,windowHeight * 0.7]];
 		// var labels = ['Franer Rodrigues\nProdutor\nfraner@chilimonk.com', 'Raviel Carvalho\nProdutor\nraviel@chilimonk.com', 'Jeff Ramos\nProgramador\njeffs.ramos@gmail.com', 'Dani Romanenco\nDesigner\nromanenco7@gmail.com'];
 		// for (var i = positions.length - 1; i >= 0; i--) {
-		// 	tempLabelContainer = new PIXI.DisplayObjectContainer();
+		// 	tempLabelContainer = new PIXI.Container();
 		// 	tempLabel = new PIXI.Text(labels[i], { align:'center',font:'30px Luckiest Guy', fill:'#FFFFFF', strokeThickness:5, stroke:'#000000', wordWrap:true, wordWrapWidth:600});
 		// 	tempLabelContainer.addChild(tempLabel);
 		// 	scaleConverter(tempLabel.height, windowHeight, 0.15, tempLabel);
@@ -107,7 +107,7 @@ var RankinkgModal = Class.extend({
 		// // tempText.position.y = this.labelsContainerRight.height;
 		// // this.labelsContainerRight.addChild(tempText);
 
-		
+
 		// tempText = new PIXI.Text('PRODUÇÃO', { align:'center',font:'30px Roboto', fill:'#EFD952', strokeThickness:1, stroke:'#000000', wordWrap:true, wordWrapWidth:600});
 		// tempText.position.x = - tempText.width / 2;
 		// tempText.position.y = this.labelsContainerRight.height + windowHeight * 0.01;
@@ -154,31 +154,31 @@ var RankinkgModal = Class.extend({
 		// this.footer.position.x = windowWidth/2 - this.footer.width / 2;
 		// this.footer.position.y = windowHeight - this.footer.height - windowHeight * 0.03;
 
-		
+
 		// cast = 'CRÉDITOS';
 		// tempText = new PIXI.Text(cast, { align:'center',font:'50px Roboto', fill:'#EFD952', strokeThickness:1, stroke:'#000000', wordWrap:true, wordWrapWidth:1000});
 		// this.header.addChild(tempText);
 		// scaleConverter(this.header.height, windowHeight, 0.1, this.header);
 		// this.header.position.x = windowWidth/2 - this.header.width / 2;
 		// this.header.position.y = windowHeight * 0.03;
-		
+
 	},
 	show:function(points){
 		this.screen.addChild(this);
 		this.container.parent.setChildIndex(this.container,this.container.parent.children.length -1);
 		var self = this;
 
-		
+
 		this.screen.updateable = false;
 		this.container.alpha = 0;
 		TweenLite.to(this.container, 0.5, {alpha:1, onComplete:function(){
 			self.container.buttonMode = true;
 			self.container.interactive = true;
 		}});
-		
 
-		
-		
+
+
+
 
 		this.container.buttonMode = false;
 		this.container.interactive = false;
@@ -201,8 +201,8 @@ var RankinkgModal = Class.extend({
 				}
 			}
 		}});
-		
-		
+
+
 		// TweenLite.to(this.labelsContainer, 0.2, {alpha:0});
 		// TweenLite.to(this.labelsContainerRight, 0.2, {alpha:0});
 		// TweenLite.to(this.footer, 0.2, {alpha:0});

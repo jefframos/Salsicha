@@ -4,7 +4,7 @@ var Environment =  Class.extend({
 		this.velocity = { x:0, y:0 };
 		this.texture = '';
 		this.sprite = '';
-		this.container = new PIXI.DisplayObjectContainer();
+		this.container = new PIXI.Container();
 		this.updateable = true;
 		this.arraySprt = [];
 		this.maxWidth = maxWidth;
@@ -41,7 +41,7 @@ var Environment =  Class.extend({
 		if(last){
 			this.sprite.position.x = last.position.x + last.width - 2;
 		}
-		
+
 		this.sprite.position.y = this.maxHeight - this.sprite.height;
 		this.container.addChild(this.sprite);
 	},

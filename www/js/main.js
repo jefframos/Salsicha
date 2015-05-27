@@ -130,15 +130,11 @@ function updateResolution(orientation, scale) {
 }
 
 function update() {
-    if (requestAnimFrame(update), !init) {
+    if (requestAnimationFrame(update), !init) {
         var gambs = 0;
         isCordova && (gambs = device.platform.toLowerCase().indexOf("win") > -1 ? 50 : 0), 
         windowWidth = res.x, windowHeight = res.y - gambs, realWindowWidth = res.x, realWindowHeight = res.y, 
-        renderer = testMobile() ? PIXI.autoDetectRecommendedRenderer(realWindowWidth, realWindowHeight, {
-            antialias: !0,
-            resolution: retina,
-            view: gameView
-        }) : PIXI.autoDetectRenderer(realWindowWidth, realWindowHeight, {
+        renderer = PIXI.autoDetectRenderer(realWindowWidth, realWindowHeight, {
             antialias: !0,
             resolution: retina,
             view: gameView
@@ -183,8 +179,7 @@ function deviceReady() {
 var Application = AbstractApplication.extend({
     init: function() {
         function initialize() {
-            self._super(windowWidth, windowHeight), self.stage.setBackgroundColor(self.backColor), 
-            self.stage.removeChild(self.loadText), self.labelDebug = new PIXI.Text("", {
+            self._super(windowWidth, windowHeight), self.stage.removeChild(self.loadText), self.labelDebug = new PIXI.Text("", {
                 font: "15px Arial"
             }), self.labelDebug.position.y = windowHeight - 20, self.labelDebug.position.x = 20, 
             self.initialized = !0, self.audioController = new AudioController(), self.withAPI = !1, 
@@ -228,7 +223,7 @@ var Application = AbstractApplication.extend({
         this.initApplication();
     },
     initApplication: function() {
-        console.log(this.stage), this.background ? this.stage.addChild(this.background) : (this.background = new PIXI.Graphics(), 
+        this.background ? this.stage.addChild(this.background) : (this.background = new PIXI.Graphics(), 
         this.background.beginFill(APP.backColor), this.background.drawRect(0, 0, windowWidth, windowHeight), 
         this.stage.addChild(this.background)), this.interactiveBackground ? this.stage.addChild(this.interactiveBackground.getContent()) : (this.interactiveBackground = new InteractiveBackground(this), 
         this.interactiveBackground.build(), this.stage.addChild(this.interactiveBackground.getContent())), 
@@ -244,7 +239,7 @@ var Application = AbstractApplication.extend({
 }), BarView = Class.extend({
     init: function(width, height, maxValue, currentValue) {
         this.maxValue = maxValue, this.text = "default", this.currentValue = currentValue, 
-        this.container = new PIXI.DisplayObjectContainer(), this.width = width, this.height = height, 
+        this.container = new PIXI.Container(), this.width = width, this.height = height, 
         this.backShape = new PIXI.Graphics(), this.backShape.beginFill(16711680), this.backShape.drawRect(0, 0, width, height), 
         this.container.addChild(this.backShape), this.frontShape = new PIXI.Graphics(), 
         this.frontShape.beginFill(65280), this.frontShape.drawRect(0, 0, width, height), 
@@ -284,7 +279,7 @@ var Application = AbstractApplication.extend({
     }
 }), LifeBarHUD = Class.extend({
     init: function(width, height, incX, frontColor, baseColor) {
-        this.text = "default", this.container = new PIXI.DisplayObjectContainer(), this.width = width, 
+        this.text = "default", this.container = new PIXI.Container(), this.width = width, 
         this.height = height, this.incX = incX, this.backShape = new PIXI.Graphics();
         var w = width, xAcc = 0;
         this.rect = [ [ 0, 0 ], [ w, 0 ], [ w + xAcc, 0 ], [ xAcc, 0 ] ], this.frontRect = [ [ 0, 0 ], [ w, 0 ], [ w + xAcc, 0 ], [ xAcc, 0 ] ];
@@ -658,9 +653,8 @@ var Application = AbstractApplication.extend({
     }
 }), CrazyLogo = Entity.extend({
     init: function(screen) {
-        this._super(!0), this.screen = screen, this.container = new PIXI.DisplayObjectContainer(), 
-        this.title = "XPLODE", this.vecLetters = [], this.tempCounter = 0, this.colorsCounter = 300, 
-        this.interval = 0;
+        this._super(!0), this.screen = screen, this.container = new PIXI.Container(), this.title = "XPLODE", 
+        this.vecLetters = [], this.tempCounter = 0, this.colorsCounter = 300, this.interval = 0;
     },
     build: function() {
         this.updateable = !0;
@@ -934,8 +928,8 @@ var Application = AbstractApplication.extend({
     }
 }), InteractiveBackground = Entity.extend({
     init: function(screen) {
-        this._super(!0), this.screen = screen, this.container = new PIXI.DisplayObjectContainer(), 
-        this.vecDots = [], this.gravity = 0, this.accel = 0;
+        this._super(!0), this.screen = screen, this.container = new PIXI.Container(), this.vecDots = [], 
+        this.gravity = 0, this.accel = 0;
     },
     build: function() {
         this.dist = 60;
@@ -1236,7 +1230,7 @@ var GameScreen = AbstractScreen.extend({
     },
     initApplication: function() {
         function clickController(event) {
-            event.target.scope.player.stretch(event.target.side);
+            alert("click"), event.target.scope.player.stretch(event.target.side);
         }
         retina = 2;
         var self = this;
@@ -1246,12 +1240,11 @@ var GameScreen = AbstractScreen.extend({
         testMobile() || document.body.addEventListener("keydown", function(e) {
             self.player.moveAccum > 0 || self.player && !self.player.blockMove && (87 === e.keyCode || 38 === e.keyCode ? self.player.stretch("UP") : 83 === e.keyCode || 40 === e.keyCode ? self.player.stretch("DOWN") : 65 === e.keyCode || 37 === e.keyCode ? self.player.stretch("LEFT") : (68 === e.keyCode || 39 === e.keyCode) && self.player.stretch("RIGHT"), 
             self.onWall = !1);
-        }), this.updateable = !0, this.gameContainer = new PIXI.DisplayObjectContainer(), 
-        this.addChild(this.gameContainer), this.trailContainer = new PIXI.DisplayObjectContainer(), 
-        this.gameContainer.addChild(this.trailContainer), this.layerManager = new LayerManager(), 
-        this.layerManager.build("Main"), this.gameContainer.addChild(this.layerManager.getContent()), 
+        }), this.updateable = !0, this.gameContainer = new PIXI.Container(), this.addChild(this.gameContainer), 
+        this.trailContainer = new PIXI.Container(), this.gameContainer.addChild(this.trailContainer), 
+        this.layerManager = new LayerManager(), this.layerManager.build("Main"), this.gameContainer.addChild(this.layerManager.getContent()), 
         this.layer = new Layer(), this.layer.build("EntityLayer"), this.layerManager.addLayer(this.layer), 
-        this.coinsContainer = new PIXI.DisplayObjectContainer(), this.addChild(this.coinsContainer), 
+        this.coinsContainer = new PIXI.Container(), this.addChild(this.coinsContainer), 
         this.maxCoins = LEVELS[APP.currentWorld][APP.currentLevel][1].coins, this.vecCoins = [], 
         i = 0; i < this.maxCoins; i++) {
             var tempGraphic = new PIXI.Graphics();
@@ -1259,37 +1252,40 @@ var GameScreen = AbstractScreen.extend({
             this.coinsContainer.addChild(tempGraphic), this.vecCoins.push(tempGraphic);
         }
         if (this.updateCoins(), isCordova || testMobile()) {
-            var controllerContainer = new PIXI.DisplayObjectContainer(), btnSize = .15 * windowWidth, distanceMulti = 3, distanceX = 2, upGr = new PIXI.Graphics();
+            var controllerContainer = new PIXI.Container(), btnSize = .15 * windowWidth, distanceMulti = 3, distanceX = 2, upGr = new PIXI.Graphics();
             upGr.beginFill(16777215), upGr.drawCircle(btnSize / 2, btnSize / 2, btnSize), upGr.moveTo(0, btnSize), 
             upGr.lineTo(btnSize, btnSize), upGr.lineTo(btnSize / 2, 0), upGr.position.x = btnSize * distanceX, 
-            upGr.interactive = !0, upGr.scope = this, upGr.side = "UP", upGr.touchstart = upGr.mousedown = clickController;
+            upGr.interactive = !0, upGr.scope = this, upGr.side = "UP", upGr.on("mousedown", function() {
+                alert("clic");
+            }), upGr.on("touchstart", clickController);
             var dwGr = new PIXI.Graphics();
             dwGr.beginFill(16777215), dwGr.drawCircle(btnSize / 2, btnSize / 2, btnSize), dwGr.moveTo(0, 0), 
             dwGr.lineTo(btnSize, 0), dwGr.lineTo(btnSize / 2, btnSize), dwGr.position.x = btnSize * distanceX, 
             dwGr.position.y = btnSize * distanceMulti, dwGr.interactive = !0, dwGr.scope = this, 
-            dwGr.side = "DOWN", dwGr.touchstart = dwGr.mousedown = clickController;
+            dwGr.side = "DOWN", dwGr.on("mousedown", clickController), dwGr.on("touchstart", clickController);
             var lfGr = new PIXI.Graphics();
             lfGr.beginFill(16777215), lfGr.drawCircle(btnSize / 2, btnSize / 2, btnSize), lfGr.moveTo(btnSize, 0), 
             lfGr.lineTo(btnSize, btnSize), lfGr.lineTo(0, btnSize / 2), lfGr.position.x = 0, 
             lfGr.position.y = btnSize * distanceMulti / 2, lfGr.interactive = !0, lfGr.scope = this, 
-            lfGr.side = "LEFT", lfGr.touchstart = lfGr.mousedown = clickController;
+            lfGr.side = "LEFT", lfGr.on("mousedown", clickController), lfGr.on("touchstart", clickController);
             var rgGr = new PIXI.Graphics();
             rgGr.beginFill(16777215), rgGr.drawCircle(btnSize / 2, btnSize / 2, btnSize), rgGr.moveTo(0, 0), 
             rgGr.lineTo(0, btnSize), rgGr.lineTo(btnSize, btnSize / 2), rgGr.position.x = btnSize * distanceX * 2, 
             rgGr.position.y = btnSize * distanceMulti / 2, rgGr.interactive = !0, rgGr.scope = this, 
-            rgGr.side = "RIGHT", rgGr.touchstart = rgGr.mousedown = clickController, controllerContainer.addChild(upGr), 
-            controllerContainer.addChild(dwGr), controllerContainer.addChild(lfGr), controllerContainer.addChild(rgGr), 
-            this.addChild(controllerContainer), controllerContainer.alpha = .2, controllerContainer.position.x = windowWidth / 2 - controllerContainer.width / 2 + btnSize / 2, 
+            rgGr.side = "RIGHT", rgGr.on("mousedown", clickController), rgGr.on("touchstart", clickController), 
+            controllerContainer.addChild(upGr), controllerContainer.addChild(dwGr), controllerContainer.addChild(lfGr), 
+            controllerContainer.addChild(rgGr), this.addChild(controllerContainer), controllerContainer.alpha = .2, 
+            controllerContainer.position.x = windowWidth / 2 - controllerContainer.width / 2 + btnSize / 2, 
             controllerContainer.position.y = windowHeight - 1.1 * controllerContainer.height;
         }
-        this.initLevel(), this.startLevel = !1, this.debugBall = new PIXI.Graphics(), this.backButtonContainer = new PIXI.DisplayObjectContainer(), 
+        this.initLevel(), this.startLevel = !1, this.debugBall = new PIXI.Graphics(), this.backButtonContainer = new PIXI.Container(), 
         this.backButton = new PIXI.Graphics(), this.backButton.beginFill(16777215), this.backButton.moveTo(20, 0), 
         this.backButton.lineTo(20, 20), this.backButton.lineTo(0, 10), this.backButton.lineTo(20, 0), 
         this.backButtonContainer.addChild(this.backButton), this.backButtonContainer.scope = this, 
         this.backButtonContainer.interactive = !0, this.backButtonContainer.buttonMode = !0, 
         this.backButtonContainer.touchstart = this.backButtonContainer.mousedown = this.backFunction, 
         this.backButtonContainer.position.x = 20, this.backButtonContainer.position.y = 20, 
-        this.addChild(this.backButtonContainer), this.crazyContent = new PIXI.DisplayObjectContainer(), 
+        this.addChild(this.backButtonContainer), this.crazyContent = new PIXI.Container(), 
         this.addChild(this.crazyContent), this.layerManagerHUD = new LayerManager(), this.layerManagerHUD.build("HUD"), 
         this.gameContainer.addChild(this.layerManagerHUD.getContent()), this.HUDLayer = new Layer(), 
         this.HUDLayer.build("HUDLayer"), this.layerManagerHUD.addLayer(this.HUDLayer);
@@ -1538,7 +1534,7 @@ var GameScreen = AbstractScreen.extend({
         }
     },
     addSoundButton: function() {
-        this.soundButtonContainer = new PIXI.DisplayObjectContainer(), this.soundOn = new PIXI.Graphics(), 
+        this.soundButtonContainer = new PIXI.Container(), this.soundOn = new PIXI.Graphics(), 
         this.soundOn.beginFill(16777215), this.soundOn.moveTo(10, 0), this.soundOn.lineTo(0, 0), 
         this.soundOn.lineTo(0, 20), this.soundOn.lineTo(10, 20), this.soundOn.moveTo(15, 20), 
         this.soundOn.lineTo(25, 20), this.soundOn.lineTo(25, 0), this.soundOn.lineTo(15, 0), 
@@ -1730,7 +1726,7 @@ var GameScreen = AbstractScreen.extend({
         APP.background.parent && APP.background.parent.setChildIndex(APP.background, 0);
     },
     showWLLabel: function() {
-        this.levelWorldLabel.setText(APP.currentWorld + 1 + "-" + (APP.currentLevel + 1)), 
+        this.levelWorldLabel.text = APP.currentWorld + 1 + "-" + (APP.currentLevel + 1), 
         this.levelWorldLabel.position.x = windowWidth - 40 - this.levelWorldLabel.width / 2 - 20, 
         this.levelWorldLabel.position.y = 10, TweenLite.to(this.levelWorldLabel, .5, {
             alpha: .5
@@ -1776,7 +1772,7 @@ var GameScreen = AbstractScreen.extend({
         this._super(), console.log("this"), this.worldsTotalCoins = [], this.worldsGotCoins = [], 
         this.worlds = [], this.worldsContainer = null;
         var i = 0, j = 0, levelsContainer = null, tempGraphicLevel = null, tempColor = addBright(APP.vecColors[APP.currentColorID], .65);
-        this.worldsContainer = new PIXI.DisplayObjectContainer();
+        this.worldsContainer = new PIXI.Container();
         var iacumW = 0, jacumW = 0;
         for (i = 0; i < LEVELS.length; i++) {
             for (coinsAcum = 0, levelCoinsAcum = 0, j = 0; j < LEVELS[i].length; j++) LEVELS[i][j][1].coins && (coinsAcum += LEVELS[i][j][1].coins), 
@@ -1784,8 +1780,8 @@ var GameScreen = AbstractScreen.extend({
             this.worldsTotalCoins.push(coinsAcum), this.worldsGotCoins.push(levelCoinsAcum);
         }
         for (i = 0; i < LEVELS.length; i++) {
-            levelsContainer = new PIXI.DisplayObjectContainer(), i % 2 === 0 && 0 !== i && (jacumW++, 
-            iacumW = 0), tempWorldContainer = new PIXI.DisplayObjectContainer(), tempWorldGraphic = new PIXI.Graphics(), 
+            levelsContainer = new PIXI.Container(), i % 2 === 0 && 0 !== i && (jacumW++, iacumW = 0), 
+            tempWorldContainer = new PIXI.Container(), tempWorldGraphic = new PIXI.Graphics(), 
             tempWorldGraphic.beginFill(addBright(APP.vecColors[APP.currentColorID], .9 - .1 * i)), 
             tempWorldGraphic.drawRect(0, 0, .2 * windowHeight, .2 * windowHeight), tempWorldGraphic.interactive = !0, 
             tempWorldGraphic.buttonMode = !0, tempWorldGraphic.id = i, tempWorldGraphic.scope = this, 
@@ -1805,8 +1801,8 @@ var GameScreen = AbstractScreen.extend({
             for (j = 0; j < LEVELS[i].length; j++) {
                 j % 3 === 0 && 0 !== j && (jacum++, iacum = 0);
                 var tempCoins = LEVELS[i][j][1].coins, high = LEVELS[i][j][1].highscore;
-                if (console.log("highs", high), tempContainer = new PIXI.DisplayObjectContainer(), 
-                tempGraphicLevel = new PIXI.Graphics(), tempGraphicLevel.beginFill(tempColor), tempGraphicLevel.drawRect(0, 0, .1 * windowHeight, .1 * windowHeight), 
+                if (console.log("highs", high), tempContainer = new PIXI.Container(), tempGraphicLevel = new PIXI.Graphics(), 
+                tempGraphicLevel.beginFill(tempColor), tempGraphicLevel.drawRect(0, 0, .1 * windowHeight, .1 * windowHeight), 
                 tempGraphicLevel.interactive = !0, tempGraphicLevel.buttonMode = !0, tempGraphicLevel.id = j, 
                 tempGraphicLevel.scope = this, tempContainer.addChild(tempGraphicLevel), tempContainer.position.x = 1.5 * tempGraphicLevel.width * iacum, 
                 tempContainer.position.y = 1.5 * tempGraphicLevel.height * jacum, j <= APP.maxLevel || i < APP.maxWorld) {
@@ -1826,7 +1822,7 @@ var GameScreen = AbstractScreen.extend({
             }
             this.worldsContainer.addChild(tempWorldContainer), this.worlds.push([ levelsContainer ]);
         }
-        this.backButtonContainer = new PIXI.DisplayObjectContainer(), this.backButton = new PIXI.Graphics(), 
+        this.backButtonContainer = new PIXI.Container(), this.backButton = new PIXI.Graphics(), 
         this.backButton.beginFill(16777215), this.backButton.moveTo(20, 0), this.backButton.lineTo(20, 20), 
         this.backButton.lineTo(0, 10), this.backButton.lineTo(20, 0), this.backButtonContainer.addChild(this.backButton), 
         this.backButtonContainer.scope = this, this.backButtonContainer.interactive = !0, 
@@ -1933,7 +1929,7 @@ var GameScreen = AbstractScreen.extend({
     },
     initLoad: function() {
         var barHeight = 20;
-        this.loaderContainer = new PIXI.DisplayObjectContainer(), this.addChild(this.loaderContainer), 
+        this.loaderContainer = new PIXI.Container(), this.addChild(this.loaderContainer), 
         this.loaderBar = new LifeBarHUD(.6 * windowWidth, barHeight, 0, 16777215, addBright(APP.vecColors[APP.currentColorID], .65)), 
         this.loaderContainer.addChild(this.loaderBar.getContent()), this.loaderBar.getContent().position.x = windowWidth / 2 - this.loaderBar.getContent().width / 2, 
         this.loaderBar.getContent().position.y = windowHeight - this.loaderBar.getContent().height - .1 * windowHeight, 
@@ -1987,7 +1983,7 @@ var GameScreen = AbstractScreen.extend({
     }
 }), CreditsModal = Class.extend({
     init: function(screen) {
-        this.screen = screen, this.container = new PIXI.DisplayObjectContainer();
+        this.screen = screen, this.container = new PIXI.Container();
         var self = this;
         this.container.buttonMode = !0, this.container.interactive = !0, this.container.mousedown = this.container.touchstart = function(data) {
             self.hide();
@@ -2021,7 +2017,7 @@ var GameScreen = AbstractScreen.extend({
     }
 }), EndModal = Class.extend({
     init: function(screen) {
-        this.screen = screen, this.container = new PIXI.DisplayObjectContainer(), this.boxContainer = new PIXI.DisplayObjectContainer(), 
+        this.screen = screen, this.container = new PIXI.Container(), this.boxContainer = new PIXI.Container(), 
         this.bg = new PIXI.Graphics(), this.bg.beginFill(14370108), this.bg.drawRect(0, 0, windowWidth, windowHeight), 
         this.bg.alpha = .8, this.container.addChild(this.boxContainer);
         var self = this;
@@ -2144,7 +2140,7 @@ var GameScreen = AbstractScreen.extend({
     }
 }), NewBirdModal = Class.extend({
     init: function(screen) {
-        this.screen = screen, this.container = new PIXI.DisplayObjectContainer(), this.boxContainer = new PIXI.DisplayObjectContainer(), 
+        this.screen = screen, this.container = new PIXI.Container(), this.boxContainer = new PIXI.Container(), 
         this.bg = new PIXI.Graphics(), this.bg.beginFill(74275), this.bg.drawRect(0, 0, windowWidth, windowHeight), 
         this.bg.alpha = 0, this.container.addChild(this.bg), this.container.addChild(this.boxContainer);
         this.feito = new SimpleSprite("feitoo.png"), this.container.addChild(this.feito.getContent()), 
@@ -2156,7 +2152,7 @@ var GameScreen = AbstractScreen.extend({
         if (bird || (bird = [ APP.getGameModel().birdModels[Math.floor(Math.random() * APP.getGameModel().birdModels.length)] ]), 
         bird && bird.length > 0) {
             var self = this;
-            this.newCharContainer = new PIXI.DisplayObjectContainer();
+            this.newCharContainer = new PIXI.Container();
             var pista = new SimpleSprite("pista.png"), holofote = new SimpleSprite("holofote.png"), novo = new SimpleSprite("nova_ave.png"), ovoquebrado = new SimpleSprite("ovoquebrado.png"), penas1 = new SimpleSprite("penasfundo1.png"), penas2 = new SimpleSprite("penasfundo2.png");
             this.playerImage = null, this.playerImage = new SimpleSprite(bird[0].cover);
             var degrade = new SimpleSprite("dist/img/UI/fundo_degrade.png");
@@ -2224,7 +2220,7 @@ var GameScreen = AbstractScreen.extend({
     }
 }), PauseModal = Class.extend({
     init: function(screen) {
-        this.screen = screen, this.container = new PIXI.DisplayObjectContainer(), this.boxContainer = new PIXI.DisplayObjectContainer(), 
+        this.screen = screen, this.container = new PIXI.Container(), this.boxContainer = new PIXI.Container(), 
         this.bg = new PIXI.Graphics(), this.bg.beginFill(1383495), this.bg.drawRect(0, 0, windowWidth, windowHeight), 
         this.bg.alpha = .8, this.container.addChild(this.bg), this.container.addChild(this.boxContainer);
         var self = this;
@@ -2283,7 +2279,7 @@ var GameScreen = AbstractScreen.extend({
     }
 }), RankinkgModal = Class.extend({
     init: function(screen) {
-        this.screen = screen, this.container = new PIXI.DisplayObjectContainer();
+        this.screen = screen, this.container = new PIXI.Container();
         var self = this;
         this.container.buttonMode = !0, this.container.interactive = !0, this.container.mousedown = this.container.touchstart = function(data) {
             self.hide();
@@ -2378,9 +2374,9 @@ var GameScreen = AbstractScreen.extend({
         this.velocity = {
             x: 0,
             y: 0
-        }, this.texture = "", this.sprite = "", this.container = new PIXI.DisplayObjectContainer(), 
-        this.updateable = !0, this.arraySprt = [], this.maxWidth = maxWidth, this.maxHeight = maxHeight, 
-        this.texWidth = 0, this.spacing = 0, this.totTiles = 0, this.currentSprId = 0;
+        }, this.texture = "", this.sprite = "", this.container = new PIXI.Container(), this.updateable = !0, 
+        this.arraySprt = [], this.maxWidth = maxWidth, this.maxHeight = maxHeight, this.texWidth = 0, 
+        this.spacing = 0, this.totTiles = 0, this.currentSprId = 0;
     },
     build: function(imgs, spacing) {
         this.arraySprt = imgs, spacing && (this.spacing = spacing);
@@ -2411,9 +2407,9 @@ var GameScreen = AbstractScreen.extend({
         this.velocity = {
             x: 0,
             y: 0
-        }, this.texture = "", this.sprite = "", this.container = new PIXI.DisplayObjectContainer(), 
-        this.updateable = !0, this.arraySprt = [], this.maxWidth = maxWidth, this.texWidth = 0, 
-        this.spacing = 0, this.totTiles = 0;
+        }, this.texture = "", this.sprite = "", this.container = new PIXI.Container(), this.updateable = !0, 
+        this.arraySprt = [], this.maxWidth = maxWidth, this.texWidth = 0, this.spacing = 0, 
+        this.totTiles = 0;
     },
     build: function(img, spacing) {
         spacing && (this.spacing = spacing), this.texture = PIXI.Texture.fromFrame(img), 
@@ -2469,7 +2465,7 @@ var resizeProportional = !0, windowWidth = res.x, windowHeight = res.y, realWind
 testMobile() || (document.body.className = "");
 
 var ratio = 1, init = !1, renderer, APP, retina = window.devicePixelRatio >= 2 ? 2 : 1, isCordova = -1 === document.URL.indexOf("http://") && -1 === document.URL.indexOf("https://"), initialize = function() {
-    PIXI.BaseTexture.SCALE_MODE = PIXI.scaleModes.NEAREST, requestAnimFrame(update);
+    requestAnimationFrame(update);
 }, isfull = !1, apps = -1 === document.URL.indexOf("http://") && -1 === document.URL.indexOf("https://");
 
 apps ? document.addEventListener("deviceready", deviceReady) : setTimeout(deviceReady, 500);

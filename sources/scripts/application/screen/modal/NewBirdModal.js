@@ -2,9 +2,9 @@
 var NewBirdModal = Class.extend({
 	init:function(screen){
 		this.screen = screen;
-		
-		this.container = new PIXI.DisplayObjectContainer();
-		this.boxContainer = new PIXI.DisplayObjectContainer();
+
+		this.container = new PIXI.Container();
+		this.boxContainer = new PIXI.Container();
 		this.bg = new PIXI.Graphics();
 		this.bg.beginFill(0x012223);
 		this.bg.drawRect(0,0,windowWidth, windowHeight);
@@ -36,7 +36,7 @@ var NewBirdModal = Class.extend({
 		}
 		if(bird && bird.length > 0){
 			var self = this;
-			this.newCharContainer = new PIXI.DisplayObjectContainer();
+			this.newCharContainer = new PIXI.Container();
 			// APP.getGameModel().ableNewBird();
 
 
@@ -56,7 +56,7 @@ var NewBirdModal = Class.extend({
 			var degrade = new SimpleSprite('dist/img/UI/fundo_degrade.png');
 			this.container.addChild(degrade.getContent());
 			degrade.getContent().width = windowWidth / 1.5;
-			
+
 			var sH = scaleConverter(degrade.getContent().height, windowHeight, 1);
 			// console.log(sH);
 			degrade.getContent().scale.y = sH;
@@ -95,9 +95,9 @@ var NewBirdModal = Class.extend({
 			scaleConverter(penas2.getContent().height, this.newCharContainer.height, 0.2, penas2);
 			penas1.setPosition(pista.getContent().width / 2 - penas1.getContent().width * 2, holofote.getContent().height - penas1.getContent().height);
 			penas2.setPosition(pista.getContent().width / 2 + penas1.getContent().width, holofote.getContent().height - penas2.getContent().height);
-			
+
 			ovoquebrado.setPosition(pista.getContent().width / 2 - ovoquebrado.getContent().width/2, holofote.getContent().height - ovoquebrado.getContent().height);
-			
+
 			scaleConverter(this.newCharContainer.height, windowHeight, 1, this.newCharContainer);
 			// scaleConverter(this.playerImage.getContent().height, this.newCharContainer.height, -this.newCharContainer.scale.x - 1, this.playerImage);
 			this.playerImage.setPosition(windowWidth / 2 - this.playerImage.getContent().width/2, windowHeight / 2 - this.playerImage.getContent().height / 2 - 20);
@@ -106,7 +106,7 @@ var NewBirdModal = Class.extend({
 			this.newCharContainer.position.x = windowWidth / 2 - this.newCharContainer.width / 2;
 
 			this.feito.getContent().parent.setChildIndex(this.feito.getContent(), this.feito.getContent().parent.children.length - 1);
-			
+
 			setTimeout(function(){
 					self.container.buttonMode = true;
 					self.container.interactive = true;
@@ -116,7 +116,7 @@ var NewBirdModal = Class.extend({
 						});
 					};
 				}, 2000);
-			
+
 
 		}
 		this.screen.addChild(this);

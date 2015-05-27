@@ -3,7 +3,7 @@ var CrazyLogo = Entity.extend({
 	init:function(screen){
 		this._super( true );
 		this.screen = screen;
-		this.container = new PIXI.DisplayObjectContainer();
+		this.container = new PIXI.Container();
 		this.title = 'XPLODE';
 		this.vecLetters = [];
 		this.tempCounter = 0;

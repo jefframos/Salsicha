@@ -2,9 +2,9 @@
 var EndModal = Class.extend({
 	init:function(screen){
 		this.screen = screen;
-		
-		this.container = new PIXI.DisplayObjectContainer();
-		this.boxContainer = new PIXI.DisplayObjectContainer();
+
+		this.container = new PIXI.Container();
+		this.boxContainer = new PIXI.Container();
 		this.bg = new PIXI.Graphics();
 		this.bg.beginFill(0xdb453c);
 		this.bg.drawRect(0,0,windowWidth, windowHeight);
@@ -149,7 +149,7 @@ var EndModal = Class.extend({
 		this.scoreValue.position.x = windowWidth / 2 - this.scoreValue.width / 2;
 		this.bestScoreValue.position.x = windowWidth / 2 - this.bestScoreValue.width / 2;
 		this.playedLabelValue.position.x = windowWidth / 2 - this.playedLabelValue.width / 2;
-		
+
 		// this.screen.updateable = false;
 		// this.boxContainer.width / 2 - this.bestScoreValue.width / 2;
 		this.boxContainer.position.x = windowWidth / 2 - this.boxContainer.width / 2;

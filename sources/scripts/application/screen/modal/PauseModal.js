@@ -2,9 +2,9 @@
 var PauseModal = Class.extend({
 	init:function(screen){
 		this.screen = screen;
-		
-		this.container = new PIXI.DisplayObjectContainer();
-		this.boxContainer = new PIXI.DisplayObjectContainer();
+
+		this.container = new PIXI.Container();
+		this.boxContainer = new PIXI.Container();
 		this.bg = new PIXI.Graphics();
 		this.bg.beginFill(0x151c47);
 		this.bg.drawRect(0,0,windowWidth, windowHeight);

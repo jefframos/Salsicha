@@ -3,7 +3,7 @@ var InteractiveBackground = Entity.extend({
 	init:function(screen){
 		this._super( true );
 		this.screen = screen;
-		this.container = new PIXI.DisplayObjectContainer();
+		this.container = new PIXI.Container();
 		this.vecDots = [];
 		this.gravity = 0;
 		this.accel = 0;

@@ -18,7 +18,7 @@ var Application = AbstractApplication.extend({
         this.currentWorld = this.currentLevel = 0;
         function initialize(){
             self._super(windowWidth, windowHeight);
-            self.stage.setBackgroundColor(self.backColor);
+            // self.stage.setBackgroundColor(self.backColor);
             self.stage.removeChild(self.loadText);
 
             self.labelDebug = new PIXI.Text('', {font:'15px Arial'});
@@ -125,7 +125,6 @@ var Application = AbstractApplication.extend({
         // alert('build3');
     },
     initApplication:function(){
-        console.log(this.stage);
         if(!this.background){
             this.background = new PIXI.Graphics();
             this.background.beginFill(APP.backColor);

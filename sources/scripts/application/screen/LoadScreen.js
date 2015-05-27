@@ -28,7 +28,7 @@ var LoadScreen = AbstractScreen.extend({
     },
     initLoad:function(){
         var barHeight = 20;
-        this.loaderContainer = new PIXI.DisplayObjectContainer();
+        this.loaderContainer = new PIXI.Container();
         this.addChild(this.loaderContainer);
 
         this.loaderBar = new LifeBarHUD(windowWidth * 0.6, barHeight, 0, 0xFFFFFF, addBright(APP.vecColors[APP.currentColorID], 0.65));

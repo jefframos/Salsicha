@@ -20,7 +20,7 @@ var LevelsScreen = AbstractScreen.extend({
         var levelsContainer = null;
         var tempGraphicLevel = null;
         var tempColor = addBright(APP.vecColors[APP.currentColorID], 0.65);
-        this.worldsContainer = new PIXI.DisplayObjectContainer();
+        this.worldsContainer = new PIXI.Container();
         var iacumW = 0;
         var jacumW = 0;
         // alert(APP.maxLevel+' - '+ APP.maxWorld);
@@ -39,13 +39,13 @@ var LevelsScreen = AbstractScreen.extend({
             this.worldsGotCoins.push(levelCoinsAcum);
         }
         for (i = 0; i < LEVELS.length; i++) {
-            levelsContainer = new PIXI.DisplayObjectContainer();
+            levelsContainer = new PIXI.Container();
 
             if(i % 2 === 0 && i !== 0){
                 jacumW++;
                 iacumW = 0;
             }
-            tempWorldContainer = new PIXI.DisplayObjectContainer();
+            tempWorldContainer = new PIXI.Container();
             tempWorldGraphic = new PIXI.Graphics();
             tempWorldGraphic.beginFill(addBright(APP.vecColors[APP.currentColorID], 0.9 - 0.1 * i));
             tempWorldGraphic.drawRect(0,0,windowHeight * 0.2,windowHeight * 0.2);
@@ -86,7 +86,7 @@ var LevelsScreen = AbstractScreen.extend({
                 var tempCoins = LEVELS[i][j][1].coins;
                 var high = LEVELS[i][j][1].highscore;
                 console.log('highs', high);
-                tempContainer = new PIXI.DisplayObjectContainer();
+                tempContainer = new PIXI.Container();
                 tempGraphicLevel = new PIXI.Graphics();
                 tempGraphicLevel.beginFill(tempColor);
                 tempGraphicLevel.drawRect(0,0,windowHeight * 0.1,windowHeight * 0.1);
@@ -125,7 +125,7 @@ var LevelsScreen = AbstractScreen.extend({
 
 
 
-        this.backButtonContainer = new PIXI.DisplayObjectContainer();
+        this.backButtonContainer = new PIXI.Container();
         this.backButton = new PIXI.Graphics();
         this.backButton.beginFill(0xFFFFFF);
         this.backButton.moveTo(20,0);
