@@ -1283,7 +1283,6 @@ var GameScreen = AbstractScreen.extend({
         this.HUDLayer.build("HUDLayer"), this.layerManagerHUD.addLayer(this.HUDLayer);
     },
     backFunction: function(event) {
-        alert("back");
         var scope = event.target.scope;
         this.updateable = !1, scope.screenManager.change("Levels");
     },

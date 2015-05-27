@@ -254,7 +254,7 @@ var GameScreen = AbstractScreen.extend({
 	},
 
 	backFunction:function(event){
-		alert('back');
+		// alert('back');
 		var scope = event.target.scope;
 		// alert(scope.screenManager.currentScreen.screenLabel);
 		this.updateable = false;
