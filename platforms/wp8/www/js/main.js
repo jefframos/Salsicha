@@ -1,4 +1,4 @@
-/*! jefframos 21-05-2015 */
+/*! jefframos 27-05-2015 */
 function rgbToHsl(r, g, b) {
     r /= 255, g /= 255, b /= 255;
     var h, s, max = Math.max(r, g, b), min = Math.min(r, g, b), l = (max + min) / 2;
@@ -196,7 +196,7 @@ var Application = AbstractApplication.extend({
         this.vecPerfects = [ "PERFECT!", "AWESOME!", "AMAZING!", "GOD!!!", "WOWOWOW", "YEAH!" ], 
         this.vecGood = [ "GOOD", "COOL", "YEP", "NOT BAD" ], this.vecError = [ "NOOOO!", "BAD", "MISS!", "NOT", "AHHHH" ], 
         this.currentColorID = Math.floor(this.vecColors.length * Math.random()), this.backColor = this.vecColors[this.currentColorID], 
-        initialize(), this.mute = !1;
+        this.currentWorld = this.currentLevel = 0, initialize(), this.mute = !1;
     },
     update: function() {
         this.initialized && (this._super(), this.interactiveBackground && this.interactiveBackground.update(), 
@@ -752,17 +752,22 @@ var Application = AbstractApplication.extend({
         this.height = 1, this.type = "enemy", this.screen = screen, this.rot = 0;
     },
     build: function() {
-        this.spriteBall = new PIXI.Graphics(), this.spriteBall.lineStyle(1, 0);
+        this.spriteBall = new PIXI.Graphics(), this.spriteBall.beginFill(addBright(APP.vecColors[APP.currentColorID], .5));
         var size = .4 * APP.tileSize.w;
-        this.spriteBall.drawRect(-size / 2, -size / 2, size, size), this.sprite = new PIXI.Sprite(), 
-        this.sprite.addChild(this.spriteBall), this.updateable = !0, this.collidable = !0, 
-        this.getContent().alpha = .5, TweenLite.to(this.getContent(), .3, {
+        this.spriteBall.moveTo(0, 0);
+        for (var sides = 12, i = 0; sides >= i; i++) {
+            angle = degreesToRadians(360 / sides * i);
+            var tempSize = i % 2 === 0 ? size : size / 2;
+            0 >= i ? this.spriteBall.moveTo(Math.sin(angle) * tempSize, Math.cos(angle) * tempSize) : this.spriteBall.lineTo(Math.sin(angle) * tempSize, Math.cos(angle) * tempSize);
+        }
+        this.sprite = new PIXI.Sprite(), this.sprite.addChild(this.spriteBall), this.updateable = !0, 
+        this.collidable = !0, this.getContent().alpha = .5, TweenLite.to(this.getContent(), .3, {
             alpha: 1
         }), this.collideArea = new PIXI.Rectangle(-50, -50, windowWidth + 100, windowHeight + 100), 
         this.particlesCounterMax = 8, this.particlesCounter = 1;
     },
     update: function() {
-        this.range = this.spriteBall.width / 2, this._super(), this.rot += .1, this.spriteBall.rotation = this.rot;
+        this.range = this.spriteBall.width / 2, this._super(), this.rot += .08, this.spriteBall.rotation = this.rot;
     },
     changeShape: function() {},
     explode: function(velX, velY) {
@@ -784,7 +789,7 @@ var Application = AbstractApplication.extend({
         this.layer.addChild(particle);
     },
     preKill: function() {
-        this.invencible || (this.explode(-2, 2), this.collidable = !1, this.kill = !0);
+        this.invencible || (this.explode(0, 0), this.collidable = !1, this.kill = !0);
     }
 }), Enemy2 = Entity.extend({
     init: function(screen, id, loop) {
@@ -797,11 +802,16 @@ var Application = AbstractApplication.extend({
         this.testHorizontal(), this.testVertical();
     },
     build: function() {
-        this.spriteBall = new PIXI.Graphics(), this.spriteBall.lineStyle(1, 0);
+        this.spriteBall = new PIXI.Graphics(), this.spriteBall.beginFill(addBright(APP.vecColors[APP.currentColorID], .5));
         var size = .4 * APP.tileSize.w;
-        this.spriteBall.drawRect(-size / 2, -size / 2, size, size), this.sprite = new PIXI.Sprite(), 
-        this.sprite.addChild(this.spriteBall), this.updateable = !0, this.collidable = !0, 
-        this.getContent().alpha = .5, TweenLite.to(this.getContent(), .3, {
+        this.spriteBall.moveTo(0, 0);
+        for (var sides = 14, i = 0; sides >= i; i++) {
+            angle = degreesToRadians(360 / sides * i);
+            var tempSize = i % 2 === 0 ? size : size / 2.5;
+            0 >= i ? this.spriteBall.moveTo(Math.sin(angle) * tempSize, Math.cos(angle) * tempSize) : this.spriteBall.lineTo(Math.sin(angle) * tempSize, Math.cos(angle) * tempSize);
+        }
+        this.sprite = new PIXI.Sprite(), this.sprite.addChild(this.spriteBall), this.updateable = !0, 
+        this.collidable = !0, this.getContent().alpha = .5, TweenLite.to(this.getContent(), .3, {
             alpha: 1
         }), this.collideArea = new PIXI.Rectangle(-50, -50, windowWidth + 100, windowHeight + 100), 
         this.particlesCounterMax = 8, this.particlesCounter = 1, this.indo = !0, this.collideAccum = 0;
@@ -844,7 +854,7 @@ var Application = AbstractApplication.extend({
         this.layer.addChild(particle);
     },
     preKill: function() {
-        this.invencible || (this.explode(-2, 2), this.collidable = !1, this.kill = !0);
+        this.invencible || (this.explode(0, 0), this.collidable = !1, this.kill = !0);
     }
 }), EnemyBall = Entity.extend({
     init: function(vel, behaviour) {
@@ -1001,8 +1011,9 @@ var Application = AbstractApplication.extend({
 }), AppModel = Class.extend({
     init: function() {
         tempWorld = APP.cookieManager.getSafeCookie("maxworld"), tempLevel = APP.cookieManager.getSafeCookie("maxlevel"), 
-        APP.maxWorld = tempWorld && "undefined" === tempWorld ? 0 : tempWorld, APP.maxLevel = tempLevel && "undefined" === tempLevel ? 0 : tempLevel, 
-        APP.maxWorld || (APP.maxWorld = 0), APP.maxLevel || (APP.maxLevel = 0), console.log(APP.maxWorld, APP.maxLevel, APP.cookieManager.getSafeCookie("maxworld"));
+        APP.maxWorld = tempWorld && "undefined" !== tempWorld && "NaN" !== tempWorld ? tempWorld : 0, 
+        APP.maxLevel = tempLevel && "undefined" !== tempLevel && "NaN" !== tempLevel ? tempLevel : 0, 
+        APP.maxWorld || (APP.maxWorld = 0), APP.maxLevel || (APP.maxLevel = 0), console.log(" - ", APP.maxWorld, APP.maxLevel, APP.cookieManager.getSafeCookie("maxworld"));
         for (var i = 0; i < LEVELS.length; i++) if (tempHigh = APP.cookieManager.getSafeCookie("highscores" + i), 
         tempHigh) {
             tempHigh = tempHigh.split(",");
@@ -1200,7 +1211,12 @@ var GameScreen = AbstractScreen.extend({
         this.pinVel = {
             x: 0,
             y: 0
-        }, this.addSoundButton();
+        }, this.addSoundButton(), this.levelWorldLabel = new PIXI.Text("", {
+            font: "32px Vagron",
+            fill: "#FFFFFF"
+        }), this.levelWorldLabel.position.y = windowHeight / 2, this.levelWorldLabel.position.x = 20, 
+        this.levelWorldLabel.resolution = 2, this.addChild(this.levelWorldLabel), this.levelWorldLabel.alpha = 0, 
+        this.showWLLabel();
     },
     onProgress: function() {
         this._super();
@@ -1214,7 +1230,7 @@ var GameScreen = AbstractScreen.extend({
         }
         retina = 2;
         var self = this;
-        if (this.hitTouch = new PIXI.Graphics(), this.hitTouch.interactive = !0, this.hitTouch.beginFill(0), 
+        for (this.hitTouch = new PIXI.Graphics(), this.hitTouch.interactive = !0, this.hitTouch.beginFill(0), 
         this.hitTouch.drawRect(0, 0, windowWidth, windowHeight), this.hitTouch.alpha = 0, 
         this.hitTouch.position.y = 50, APP.stage.addChild(this.hitTouch), this.tapDown = !1, 
         testMobile() || document.body.addEventListener("keydown", function(e) {
@@ -1225,31 +1241,33 @@ var GameScreen = AbstractScreen.extend({
         this.gameContainer.addChild(this.trailContainer), this.layerManager = new LayerManager(), 
         this.layerManager.build("Main"), this.gameContainer.addChild(this.layerManager.getContent()), 
         this.layer = new Layer(), this.layer.build("EntityLayer"), this.layerManager.addLayer(this.layer), 
-        this.coinsLabel = new PIXI.Text("0", {
-            align: "center",
-            font: "48px Vagron",
-            fill: "#FFFFFF",
-            wordWrap: !0,
-            wordWrapWidth: 500
-        }), this.coinsLabel.resolution = retina, this.coinsLabel.alpha = .5, this.coinsLabel.position.x = 60, 
-        this.coinsLabel.position.y = 0, this.addChild(this.coinsLabel), isCordova) {
-            var controllerContainer = new PIXI.DisplayObjectContainer(), btnSize = .2 * windowWidth, upGr = new PIXI.Graphics();
-            upGr.beginFill(16777215), upGr.drawRect(0, 0, btnSize, btnSize), upGr.position.x = 1.1 * btnSize, 
-            upGr.interactive = !0, upGr.scope = this, upGr.side = "UP", upGr.touchstart = upGr.mousedown = clickController;
+        this.coinsContainer = new PIXI.DisplayObjectContainer(), this.addChild(this.coinsContainer), 
+        this.maxCoins = LEVELS[APP.currentWorld][APP.currentLevel][1].coins, this.vecCoins = [], 
+        i = 0; i < this.maxCoins; i++) {
+            var tempGraphic = new PIXI.Graphics();
+            tempGraphic.beginFill(0), tempGraphic.drawRect(0, 0, 20, 20), tempGraphic.position.x = 1.5 * tempGraphic.width * i, 
+            this.coinsContainer.addChild(tempGraphic), this.vecCoins.push(tempGraphic);
+        }
+        if (this.updateCoins(), isCordova || testMobile()) {
+            var controllerContainer = new PIXI.DisplayObjectContainer(), btnSize = .2 * windowWidth, distanceMulti = 2.1, upGr = new PIXI.Graphics();
+            upGr.beginFill(16777215), upGr.moveTo(0, btnSize), upGr.lineTo(btnSize, btnSize), 
+            upGr.lineTo(btnSize / 2, 0), upGr.position.x = 1.1 * btnSize, upGr.interactive = !0, 
+            upGr.scope = this, upGr.side = "UP", upGr.touchstart = upGr.mousedown = clickController;
             var dwGr = new PIXI.Graphics();
-            dwGr.beginFill(16777215), dwGr.drawRect(0, 0, btnSize, btnSize), dwGr.position.x = 1.1 * btnSize, 
-            dwGr.position.y = 1.2 * btnSize, dwGr.interactive = !0, dwGr.scope = this, dwGr.side = "DOWN", 
-            dwGr.touchstart = dwGr.mousedown = clickController;
+            dwGr.beginFill(16777215), dwGr.moveTo(0, 0), dwGr.lineTo(btnSize, 0), dwGr.lineTo(btnSize / 2, btnSize), 
+            dwGr.position.x = 1.1 * btnSize, dwGr.position.y = btnSize * distanceMulti, dwGr.interactive = !0, 
+            dwGr.scope = this, dwGr.side = "DOWN", dwGr.touchstart = dwGr.mousedown = clickController;
             var lfGr = new PIXI.Graphics();
-            lfGr.beginFill(16777215), lfGr.drawRect(0, 0, btnSize, btnSize), lfGr.position.x = 0, 
-            lfGr.position.y = .6 * btnSize, lfGr.interactive = !0, lfGr.scope = this, lfGr.side = "LEFT", 
-            lfGr.touchstart = lfGr.mousedown = clickController;
+            lfGr.beginFill(16777215), lfGr.moveTo(btnSize, 0), lfGr.lineTo(btnSize, btnSize), 
+            lfGr.lineTo(0, btnSize / 2), lfGr.position.x = 0, lfGr.position.y = btnSize * distanceMulti / 2, 
+            lfGr.interactive = !0, lfGr.scope = this, lfGr.side = "LEFT", lfGr.touchstart = lfGr.mousedown = clickController;
             var rgGr = new PIXI.Graphics();
-            rgGr.beginFill(16777215), rgGr.drawRect(0, 0, btnSize, btnSize), rgGr.position.x = 2.2 * btnSize, 
-            rgGr.position.y = .6 * btnSize, rgGr.interactive = !0, rgGr.scope = this, rgGr.side = "RIGHT", 
-            rgGr.touchstart = rgGr.mousedown = clickController, controllerContainer.addChild(upGr), 
-            controllerContainer.addChild(dwGr), controllerContainer.addChild(lfGr), controllerContainer.addChild(rgGr), 
-            this.addChild(controllerContainer), controllerContainer.alpha = .2, controllerContainer.position.x = windowWidth / 2 - controllerContainer.width / 2, 
+            rgGr.beginFill(16777215), rgGr.moveTo(0, 0), rgGr.lineTo(0, btnSize), rgGr.lineTo(btnSize, btnSize / 2), 
+            rgGr.position.x = 2.2 * btnSize, rgGr.position.y = btnSize * distanceMulti / 2, 
+            rgGr.interactive = !0, rgGr.scope = this, rgGr.side = "RIGHT", rgGr.touchstart = rgGr.mousedown = clickController, 
+            controllerContainer.addChild(upGr), controllerContainer.addChild(dwGr), controllerContainer.addChild(lfGr), 
+            controllerContainer.addChild(rgGr), this.addChild(controllerContainer), controllerContainer.alpha = .2, 
+            controllerContainer.position.x = windowWidth / 2 - controllerContainer.width / 2, 
             controllerContainer.position.y = windowHeight - 1.1 * controllerContainer.height;
         }
         this.initLevel(), this.startLevel = !1, this.debugBall = new PIXI.Graphics(), this.backButtonContainer = new PIXI.DisplayObjectContainer(), 
@@ -1257,7 +1275,7 @@ var GameScreen = AbstractScreen.extend({
         this.backButton.lineTo(20, 20), this.backButton.lineTo(0, 10), this.backButton.lineTo(20, 0), 
         this.backButtonContainer.addChild(this.backButton), this.backButtonContainer.scope = this, 
         this.backButtonContainer.interactive = !0, this.backButtonContainer.buttonMode = !0, 
-        this.backButton.touchstart = this.backButtonContainer.mousedown = this.backFunction, 
+        this.backButtonContainer.touchstart = this.backButtonContainer.mousedown = this.backFunction, 
         this.backButtonContainer.position.x = 20, this.backButtonContainer.position.y = 20, 
         this.addChild(this.backButtonContainer), this.crazyContent = new PIXI.DisplayObjectContainer(), 
         this.addChild(this.crazyContent), this.layerManagerHUD = new LayerManager(), this.layerManagerHUD.build("HUD"), 
@@ -1324,7 +1342,7 @@ var GameScreen = AbstractScreen.extend({
         this.layerManagerHUD.getContent() && this.layerManagerHUD.getContent().parent && (this.layerManagerHUD.getContent().parent.setChildIndex(this.layerManagerHUD.getContent(), this.layerManagerHUD.getContent().parent.children.length - 1), 
         this.layerManagerHUD.update()), this.updateMapPosition(), this._super(), this.layerManager && this.layerManager.update(), 
         !this.endGame)) {
-            if (this.coinsLabel.parent.setChildIndex(this.coinsLabel, this.coinsLabel.parent.children.length - 1), 
+            if (this.levelWorldLabel && this.levelWorldLabel.parent.setChildIndex(this.levelWorldLabel, 0), 
             this.onBack) {
                 for (var lastJoint = null, k = this.trails.length - 1; k >= 0; k--) if ("JOINT" === this.trails[k].type) {
                     lastJoint = this.trails[k];
@@ -1403,10 +1421,10 @@ var GameScreen = AbstractScreen.extend({
         this.player.getContent().position.y = windowHeight / 1.2, this.portal = new EndPortal(this), 
         this.portal.build(), this.layer.addChild(this.portal);
         this.force = 0, this.levelCounter = 800, this.levelCounterMax = 800, this.changeColor(!0, !0), 
-        this.endGame = !1, this.initEnvironment(), this.updateMapPosition(), TweenLite.from(this.getContent(), .5, {
-            y: -50,
-            alpha: 0
-        });
+        this.endGame = !1, this.initEnvironment(), this.updateMapPosition(), TweenLite.from(this.gameContainer.scale, .5, {
+            y: .5,
+            x: .5
+        }), this.updateCoins();
     },
     initEnvironment: function() {
         this.environment = [], this.mapSize = {
@@ -1418,9 +1436,7 @@ var GameScreen = AbstractScreen.extend({
     drawMap: function() {
         if (this.environment) if (this.vecTiles && this.vecTiles.length > 0) for (var k = 0; k < this.vecTiles.length; k++) {
             var tempTile = this.getTileByPos(this.vecTiles[k].x + 5, this.vecTiles[k].y + 5), tileType = this.getTileType(tempTile.i, tempTile.j);
-            try {
-                this.drawTile(tileType, tempTile.i, tempTile.j, this.vecTiles[k]);
-            } catch (error) {}
+            this.drawTile(tileType, tempTile.i, tempTile.j, this.vecTiles[k]);
         } else {
             this.vecTiles = [], this.vecMovEnemiesTemp = [], this.vecMovEnemies = [];
             for (var i = 0; i < this.environment.length; i++) for (var j = 0; j < this.environment[i].length; j++) if (this.environment[i][j] instanceof Array) for (var l = 0; l < this.environment[i][j].length; l++) this.drawTile(this.environment[i][j][l], j, i); else this.drawTile(this.environment[i][j], j, i);
@@ -1431,19 +1447,18 @@ var GameScreen = AbstractScreen.extend({
             var tempColor = addBright(this.player.color, 1 - .15 * (APP.currentWorld + 1)), tempGraphics = exists ? exists : new PIXI.Graphics();
             tempGraphics.clear();
             var isEnemy = !1;
-            if (1 === type) APP.currentWorld > 1 ? tempGraphics.lineStyle(1, tempColor) : tempGraphics.beginFill(tempColor), 
-            isCordova ? tempGraphics.drawRect(0, 0, Math.ceil(APP.tileSize.w), Math.ceil(APP.tileSize.h)) : tempGraphics.drawRect(0, 0, APP.tileSize.w, APP.tileSize.h); else if (2 === type) {
+            if (1 === type) tempGraphics.beginFill(tempColor), isCordova ? tempGraphics.drawRect(0, 0, Math.ceil(APP.tileSize.w), Math.ceil(APP.tileSize.h)) : tempGraphics.drawRect(0, 0, APP.tileSize.w, APP.tileSize.h); else if (2 === type) {
                 tempColor = addBright(this.player.color, .7 - .15 * (APP.currentWorld + 1)), tempGraphics.beginFill(tempColor);
-                for (var temp1 = -2, line = 4, sz = .05 * -APP.tileSize.w, init = {}, ii = 0; line >= ii; ii++) 0 === ii ? (init = {
+                for (var temp1 = -2, aux = 2, line = 5, sz = .05 * -APP.tileSize.w, init = {}, ii = 0; line >= ii; ii++) 0 === ii ? (init = {
                     x: APP.tileSize.w / line * ii,
-                    y: -(sz * temp1)
-                }, tempGraphics.moveTo(APP.tileSize.w / line * ii, -(sz * temp1))) : tempGraphics.lineTo(APP.tileSize.w / line * ii, -(sz * temp1)), 
+                    y: -(sz * temp1) + aux
+                }, tempGraphics.moveTo(init.x, init.y)) : tempGraphics.lineTo(APP.tileSize.w / line * ii, -(sz * temp1) + aux), 
                 temp1 *= -1;
-                for (ii = 0; line >= ii; ii++) tempGraphics.lineTo(APP.tileSize.w - sz * temp1, APP.tileSize.h / line * ii), 
+                for (ii = 0; line >= ii; ii++) tempGraphics.lineTo(APP.tileSize.w - aux - sz * temp1, APP.tileSize.h / line * ii), 
                 temp1 *= -1;
-                for (temp1 = 2, ii = 0; line >= ii; ii++) tempGraphics.lineTo(APP.tileSize.w - APP.tileSize.w / line * ii, APP.tileSize.h - sz * temp1), 
+                for (temp1 = 2, ii = 0; line >= ii; ii++) tempGraphics.lineTo(APP.tileSize.w - APP.tileSize.w / line * ii, APP.tileSize.h - sz * temp1 - aux), 
                 temp1 *= -1;
-                for (ii = 0; line >= ii; ii++) tempGraphics.lineTo(-sz * temp1, APP.tileSize.h - APP.tileSize.h / line * ii), 
+                for (ii = 0; line >= ii; ii++) tempGraphics.lineTo(-sz * temp1 + aux, APP.tileSize.h - APP.tileSize.h / line * ii), 
                 temp1 *= -1;
                 tempGraphics.lineTo(init.x, init.y), isEnemy = !0;
             } else 3 === type && (tempColor = addBright(this.player.color, .8 - .15 * (APP.currentWorld + 1)), 
@@ -1598,7 +1613,9 @@ var GameScreen = AbstractScreen.extend({
         this.player.inError = !0, this.levelCounter -= .1 * this.levelCounterMax, this.levelCounter < 0 && (this.levelCounter = 0);
     },
     nextLevel: function() {
-        this.changeColor(), APP.currentLevel >= LEVELS[APP.currentWorld].length - 1 ? (APP.appModel.saveScore(), 
+        this.changeColor();
+        for (var i = 0; i < this.layer.childs.length; i++) "enemy" === this.layer.childs[i].type && this.layer.childs[i].preKill();
+        APP.currentLevel >= LEVELS[APP.currentWorld].length - 1 ? (APP.appModel.saveScore(), 
         APP.currentWorld++, APP.appModel.saveWorld(), APP.currentLevel = 0) : (APP.appModel.saveScore(), 
         APP.currentLevel++), this.collideWall(!0), this.player.moveAccum = 5e4, this.player.stop(), 
         this.addCrazyMessage("AWESOME", 1);
@@ -1615,14 +1632,14 @@ var GameScreen = AbstractScreen.extend({
         }), console.log("current status", APP.currentWorld, APP.currentLevel);
     },
     reset: function() {
-        this.destroy(), this.build();
+        this.destroy(), this.updateable = !1, this.build();
     },
     gameOver: function() {
         if (!this.endGame) {
             this.collideWall(), this.hitTouch && this.hitTouch.parent && this.hitTouch.parent.removeChild(this.hitTouch), 
             setTimeout(function() {
                 self.player.preKill();
-            }, 50), this.earthquake(40), this.endGame = !0, this.coinsLabel.alpha = 0;
+            }, 50), this.earthquake(40), this.endGame = !0;
             var self = this;
             setTimeout(function() {
                 self.endGame = !1, APP.audioController.playSound("wub"), self.recoilTimeline && self.recoilTimeline.kill(), 
@@ -1670,10 +1687,13 @@ var GameScreen = AbstractScreen.extend({
             onUpdate: function() {
                 APP.background.clear(), APP.background.beginFill(APP.backColor), APP.background.drawRect(-80, -80, windowWidth + 160, windowHeight + 160);
             }
-        })), document.body.style.backgroundColor = APP.vecColorsS[APP.currentColorID], this.player && (tempColor = addBright(temptempColor, .9 - .15 * (APP.currentWorld + 1)), 
-        this.player.setColor(tempColor), this.drawMap(), this.trails && this.trails.length)) for (var i = 0; i < this.trails.length; i++) {
-            var tempTrail = this.trails[i].trail, tempRect = new PIXI.Rectangle(tempTrail.getLocalBounds().x, tempTrail.getLocalBounds().y, tempTrail.getLocalBounds().width, tempTrail.getLocalBounds().height);
-            tempTrail.clear(), tempTrail.beginFill(tempColor), "JOINT" !== this.trails[i].type ? tempTrail.drawRect(tempRect.x, tempRect.y, tempRect.width, tempRect.height) : tempTrail.drawCircle(0, 0, tempRect.width / 2);
+        })), document.body.style.backgroundColor = APP.vecColorsS[APP.currentColorID], this.player) {
+            if (tempColor = addBright(temptempColor, .9 - .15 * (APP.currentWorld + 1)), this.player.setColor(tempColor), 
+            this.drawMap(), this.trails && this.trails.length) for (var i = 0; i < this.trails.length; i++) {
+                var tempTrail = this.trails[i].trail, tempRect = new PIXI.Rectangle(tempTrail.getLocalBounds().x, tempTrail.getLocalBounds().y, tempTrail.getLocalBounds().width, tempTrail.getLocalBounds().height);
+                tempTrail.clear(), tempTrail.beginFill(tempColor), "JOINT" !== this.trails[i].type ? tempTrail.drawRect(tempRect.x, tempRect.y, tempRect.width, tempRect.height) : tempTrail.drawCircle(0, 0, tempRect.width / 2);
+            }
+            this.updateCoins();
         }
     },
     earthquake: function(force) {
@@ -1690,15 +1710,31 @@ var GameScreen = AbstractScreen.extend({
         }));
     },
     updateCoins: function() {
-        this.coinsLabel.setText(APP.points), TweenLite.to(this.coinsLabel, .2, {
+        this.coinsContainer.position.x = 60, this.coinsContainer.position.y = 20;
+        for (var i = 0; i < this.vecCoins.length; i++) {
+            var tempRect = this.vecCoins[i].getLocalBounds();
+            this.vecCoins[i].clear(), this.vecCoins[i].beginFill(i < APP.points ? 16777215 : addBright(APP.vecColors[APP.currentColorID], .4)), 
+            this.vecCoins[i].drawRect(tempRect.x, tempRect.y, tempRect.width, tempRect.height);
+        }
+        APP.background.parent && APP.background.parent.setChildIndex(APP.background, 0);
+    },
+    showWLLabel: function() {
+        this.levelWorldLabel.setText(APP.currentWorld + 1 + "-" + (APP.currentLevel + 1)), 
+        this.levelWorldLabel.position.x = windowWidth - 40 - this.levelWorldLabel.width / 2 - 20, 
+        this.levelWorldLabel.position.y = 10, TweenLite.to(this.levelWorldLabel, .5, {
             alpha: .5
-        }), this.coinsLabel.position.x = 60, APP.background.parent && APP.background.parent.setChildIndex(APP.background, 0), 
-        this.coinsLabel.parent.setChildIndex(this.coinsLabel, 1), this.coinsLabel.alpha < .5;
+        });
+    },
+    hideWLLabel: function() {
+        TweenLite.to(this.levelWorldLabel, .5, {
+            alpha: 0
+        });
     },
     transitionIn: function() {
         this.build();
     },
     transitionOut: function(nextScreen, container) {
+        this.hideWLLabel();
         var self = this;
         this.frontShape ? (this.frontShape.parent.setChildIndex(this.frontShape, this.frontShape.parent.children.length - 1), 
         TweenLite.to(this.frontShape, .3, {
@@ -1746,7 +1782,7 @@ var GameScreen = AbstractScreen.extend({
             coinGraph = new PIXI.Graphics(), coinGraph.beginFill(16777215), size = .2 * tempWorldGraphic.width, 
             coinGraph.drawRect(-size / 2, -size / 2, size, size), totalCoins = new PIXI.Text(this.worldsGotCoins[i] + "/" + this.worldsTotalCoins[i], {
                 align: "center",
-                font: "25px monospace",
+                font: "25px Vagron",
                 fill: "#FFFFFF"
             }), totalCoins.resolution = 2, coinGraph.position.x = tempWorldGraphic.width / 2, 
             coinGraph.position.y = tempWorldGraphic.height / 2, totalCoins.position.x = tempWorldGraphic.width / 2 - totalCoins.width / 2 / totalCoins.resolution, 
@@ -1765,7 +1801,7 @@ var GameScreen = AbstractScreen.extend({
                 tempContainer.position.y = 1.5 * tempGraphicLevel.height * jacum, j <= APP.maxLevel || i < APP.maxWorld) {
                     tempGraphicLevel.touchstart = tempGraphicLevel.mousedown = this.selectLevel, levelNumber = new PIXI.Text(j + 1, {
                         align: "center",
-                        font: "25px monospace",
+                        font: "25px Vagron",
                         fill: "#FFFFFF"
                     }), levelNumber.resolution = 2, levelNumber.position.x = tempGraphicLevel.width / 2 - levelNumber.width / 2 / levelNumber.resolution, 
                     levelNumber.position.y = .1 * tempGraphicLevel.height / levelNumber.resolution, 

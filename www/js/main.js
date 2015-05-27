@@ -1249,25 +1249,27 @@ var GameScreen = AbstractScreen.extend({
             this.coinsContainer.addChild(tempGraphic), this.vecCoins.push(tempGraphic);
         }
         if (this.updateCoins(), isCordova || testMobile()) {
-            var controllerContainer = new PIXI.DisplayObjectContainer(), btnSize = .2 * windowWidth, distanceMulti = 2.1, upGr = new PIXI.Graphics();
-            upGr.beginFill(16777215), upGr.moveTo(0, btnSize), upGr.lineTo(btnSize, btnSize), 
-            upGr.lineTo(btnSize / 2, 0), upGr.position.x = 1.1 * btnSize, upGr.interactive = !0, 
-            upGr.scope = this, upGr.side = "UP", upGr.touchstart = upGr.mousedown = clickController;
+            var controllerContainer = new PIXI.DisplayObjectContainer(), btnSize = .15 * windowWidth, distanceMulti = 3, distanceX = 2, upGr = new PIXI.Graphics();
+            upGr.beginFill(16777215), upGr.drawCircle(btnSize / 2, btnSize / 2, btnSize), upGr.moveTo(0, btnSize), 
+            upGr.lineTo(btnSize, btnSize), upGr.lineTo(btnSize / 2, 0), upGr.position.x = btnSize * distanceX, 
+            upGr.interactive = !0, upGr.scope = this, upGr.side = "UP", upGr.touchstart = upGr.mousedown = clickController;
             var dwGr = new PIXI.Graphics();
-            dwGr.beginFill(16777215), dwGr.moveTo(0, 0), dwGr.lineTo(btnSize, 0), dwGr.lineTo(btnSize / 2, btnSize), 
-            dwGr.position.x = 1.1 * btnSize, dwGr.position.y = btnSize * distanceMulti, dwGr.interactive = !0, 
-            dwGr.scope = this, dwGr.side = "DOWN", dwGr.touchstart = dwGr.mousedown = clickController;
+            dwGr.beginFill(16777215), dwGr.drawCircle(btnSize / 2, btnSize / 2, btnSize), dwGr.moveTo(0, 0), 
+            dwGr.lineTo(btnSize, 0), dwGr.lineTo(btnSize / 2, btnSize), dwGr.position.x = btnSize * distanceX, 
+            dwGr.position.y = btnSize * distanceMulti, dwGr.interactive = !0, dwGr.scope = this, 
+            dwGr.side = "DOWN", dwGr.touchstart = dwGr.mousedown = clickController;
             var lfGr = new PIXI.Graphics();
-            lfGr.beginFill(16777215), lfGr.moveTo(btnSize, 0), lfGr.lineTo(btnSize, btnSize), 
-            lfGr.lineTo(0, btnSize / 2), lfGr.position.x = 0, lfGr.position.y = btnSize * distanceMulti / 2, 
-            lfGr.interactive = !0, lfGr.scope = this, lfGr.side = "LEFT", lfGr.touchstart = lfGr.mousedown = clickController;
+            lfGr.beginFill(16777215), lfGr.drawCircle(btnSize / 2, btnSize / 2, btnSize), lfGr.moveTo(btnSize, 0), 
+            lfGr.lineTo(btnSize, btnSize), lfGr.lineTo(0, btnSize / 2), lfGr.position.x = 0, 
+            lfGr.position.y = btnSize * distanceMulti / 2, lfGr.interactive = !0, lfGr.scope = this, 
+            lfGr.side = "LEFT", lfGr.touchstart = lfGr.mousedown = clickController;
             var rgGr = new PIXI.Graphics();
-            rgGr.beginFill(16777215), rgGr.moveTo(0, 0), rgGr.lineTo(0, btnSize), rgGr.lineTo(btnSize, btnSize / 2), 
-            rgGr.position.x = 2.2 * btnSize, rgGr.position.y = btnSize * distanceMulti / 2, 
-            rgGr.interactive = !0, rgGr.scope = this, rgGr.side = "RIGHT", rgGr.touchstart = rgGr.mousedown = clickController, 
-            controllerContainer.addChild(upGr), controllerContainer.addChild(dwGr), controllerContainer.addChild(lfGr), 
-            controllerContainer.addChild(rgGr), this.addChild(controllerContainer), controllerContainer.alpha = .2, 
-            controllerContainer.position.x = windowWidth / 2 - controllerContainer.width / 2, 
+            rgGr.beginFill(16777215), rgGr.drawCircle(btnSize / 2, btnSize / 2, btnSize), rgGr.moveTo(0, 0), 
+            rgGr.lineTo(0, btnSize), rgGr.lineTo(btnSize, btnSize / 2), rgGr.position.x = btnSize * distanceX * 2, 
+            rgGr.position.y = btnSize * distanceMulti / 2, rgGr.interactive = !0, rgGr.scope = this, 
+            rgGr.side = "RIGHT", rgGr.touchstart = rgGr.mousedown = clickController, controllerContainer.addChild(upGr), 
+            controllerContainer.addChild(dwGr), controllerContainer.addChild(lfGr), controllerContainer.addChild(rgGr), 
+            this.addChild(controllerContainer), controllerContainer.alpha = .2, controllerContainer.position.x = windowWidth / 2 - controllerContainer.width / 2 + btnSize / 2, 
             controllerContainer.position.y = windowHeight - 1.1 * controllerContainer.height;
         }
         this.initLevel(), this.startLevel = !1, this.debugBall = new PIXI.Graphics(), this.backButtonContainer = new PIXI.DisplayObjectContainer(), 
@@ -1292,9 +1294,7 @@ var GameScreen = AbstractScreen.extend({
         }
         if (!(this.trails.length <= 0)) {
             var self = this;
-            self.recoil = !0, this.recoilTimeline = new TimelineLite({
-                onComplete: function() {}
-            });
+            self.recoil = !0, this.recoilTimeline = new TimelineLite();
             for (var frames = 1500, tempTrail = null, i = 0; i < this.trails.length; i++) tempTrail = this.trails[i].trail, 
             this.recoilTimeline.append("HORIZONTAL" === this.trails[i].type ? TweenLite.to(tempTrail, Math.abs(tempTrail.width) / frames, {
                 width: 0,
@@ -1342,8 +1342,7 @@ var GameScreen = AbstractScreen.extend({
         this.layerManagerHUD.getContent() && this.layerManagerHUD.getContent().parent && (this.layerManagerHUD.getContent().parent.setChildIndex(this.layerManagerHUD.getContent(), this.layerManagerHUD.getContent().parent.children.length - 1), 
         this.layerManagerHUD.update()), this.updateMapPosition(), this._super(), this.layerManager && this.layerManager.update(), 
         !this.endGame)) {
-            if (this.levelWorldLabel && this.levelWorldLabel.parent.setChildIndex(this.levelWorldLabel, 0), 
-            this.onBack) {
+            if (this.onBack) {
                 for (var lastJoint = null, k = this.trails.length - 1; k >= 0; k--) if ("JOINT" === this.trails[k].type) {
                     lastJoint = this.trails[k];
                     break;
