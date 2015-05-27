@@ -799,7 +799,16 @@ var Application = AbstractApplication.extend({
     },
     setWaypoints: function(wayPoints) {
         this.wayPoints = wayPoints, this.targetWay = 1, this.setPosition(this.wayPoints[0].x, this.wayPoints[0].y), 
-        this.testHorizontal(), this.testVertical();
+        this.testHorizontal(), this.testVertical(), console.log("setways");
+    },
+    drawWaypoints: function() {
+        if (!(!this.wayPoints || this.wayPoints.length <= 0 || this.trail)) {
+            this.trail = new PIXI.Graphics(), this.trail.lineStyle(1, addBright(APP.vecColors[APP.currentColorID], .5)), 
+            this.trail.moveTo(this.wayPoints[this.wayPoints.length - 1].x, this.wayPoints[this.wayPoints.length - 1].y);
+            for (var i = this.wayPoints.length - 2; i >= 0; i--) this.trail.lineTo(this.wayPoints[i].x, this.wayPoints[i].y);
+            this.loop && this.trail.lineTo(this.wayPoints[this.wayPoints.length - 1].x, this.wayPoints[this.wayPoints.length - 1].y), 
+            this.sprite.parent.addChild(this.trail);
+        }
     },
     build: function() {
         this.spriteBall = new PIXI.Graphics(), this.spriteBall.beginFill(addBright(APP.vecColors[APP.currentColorID], .5));
@@ -854,7 +863,8 @@ var Application = AbstractApplication.extend({
         this.layer.addChild(particle);
     },
     preKill: function() {
-        this.invencible || (this.explode(0, 0), this.collidable = !1, this.kill = !0);
+        this.invencible || (this.trail && (this.trail.alpha = 0), this.explode(0, 0), this.collidable = !1, 
+        this.kill = !0);
     }
 }), EnemyBall = Entity.extend({
     init: function(vel, behaviour) {
@@ -1439,6 +1449,7 @@ var GameScreen = AbstractScreen.extend({
         } else {
             this.vecTiles = [], this.vecMovEnemiesTemp = [], this.vecMovEnemies = [];
             for (var i = 0; i < this.environment.length; i++) for (var j = 0; j < this.environment[i].length; j++) if (this.environment[i][j] instanceof Array) for (var l = 0; l < this.environment[i][j].length; l++) this.drawTile(this.environment[i][j][l], j, i); else this.drawTile(this.environment[i][j], j, i);
+            for (var m = 0; m < this.vecMovEnemies.length; m++) this.vecMovEnemies[m].drawWaypoints();
         }
     },
     drawTile: function(type, i, j, exists) {
@@ -1497,7 +1508,8 @@ var GameScreen = AbstractScreen.extend({
                     tempPositions.sort(function(a, b) {
                         return a.index - b.index;
                     });
-                    for (var l = 0; l < this.vecMovEnemies.length; l++) this.vecMovEnemies[l].id === type[0] && this.vecMovEnemies[l].setWaypoints(tempPositions);
+                    var l;
+                    for (l = 0; l < this.vecMovEnemies.length; l++) this.vecMovEnemies[l].id === type[0] && this.vecMovEnemies[l].setWaypoints(tempPositions);
                 }
             }
         }

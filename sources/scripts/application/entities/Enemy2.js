@@ -21,6 +21,23 @@ var Enemy2 = Entity.extend({
 
 		this.testHorizontal();
 		this.testVertical();
+		console.log('setways');
+	},
+	drawWaypoints: function(){
+		if(!this.wayPoints || this.wayPoints.length <= 0 || this.trail){
+			return;
+		}
+		this.trail = new PIXI.Graphics();
+		this.trail.lineStyle(1,addBright(APP.vecColors[APP.currentColorID], 0.5));
+		this.trail.moveTo(this.wayPoints[this.wayPoints.length - 1].x,this.wayPoints[this.wayPoints.length - 1].y);
+		for (var i = this.wayPoints.length - 2; i >= 0; i--) {
+			this.trail.lineTo(this.wayPoints[i].x,this.wayPoints[i].y);
+		}
+		if(this.loop){
+			this.trail.lineTo(this.wayPoints[this.wayPoints.length - 1].x,this.wayPoints[this.wayPoints.length - 1].y);
+		}
+		// console.log('drawWaypoints',this.wayPoints);
+		this.sprite.parent.addChild(this.trail);
 	},
 	build: function(){
 
@@ -171,6 +188,9 @@ var Enemy2 = Entity.extend({
 	preKill:function(){
 		if(this.invencible){
 			return;
+		}
+		if(this.trail){
+			this.trail.alpha = 0;
 		}
 		this.explode(0, 0);
 		this.collidable = false;

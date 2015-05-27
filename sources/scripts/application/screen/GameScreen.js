@@ -649,6 +649,9 @@ var GameScreen = AbstractScreen.extend({
 			}
 		}
 
+		for (var m = 0; m < this.vecMovEnemies.length; m++) {
+			this.vecMovEnemies[m].drawWaypoints();
+		}
 		// this.hitTouch.hitArea = new PIXI.Rectangle(-100, -100, this.getContent().width, this.getContent().height);
 	},
 	drawTile: function(type, i,j, exists){
@@ -758,12 +761,14 @@ var GameScreen = AbstractScreen.extend({
 					enemyMov.getContent().position.x = i * APP.tileSize.w + APP.tileSize.w/2;
 					enemyMov.getContent().position.y = j * APP.tileSize.h + APP.tileSize.h/2;
 					enemyMov.setWaypoints(tempPositions);
+					// enemyMov.drawWaypoints();
 					this.vecMovEnemies.push(enemyMov);
 				}else if(count > 2){
 					tempPositions.sort(function(a, b){
 						return a.index-b.index;
 					});
-					for (var l = 0; l < this.vecMovEnemies.length; l++) {
+					var l;
+					for (l = 0; l < this.vecMovEnemies.length; l++) {
 						if(this.vecMovEnemies[l].id === type[0]){
 							this.vecMovEnemies[l].setWaypoints(tempPositions);
 						}
