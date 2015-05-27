@@ -1,4 +1,4 @@
-/*! jefframos 26-05-2015 */
+/*! jefframos 27-05-2015 */
 function rgbToHsl(r, g, b) {
     r /= 255, g /= 255, b /= 255;
     var h, s, max = Math.max(r, g, b), min = Math.min(r, g, b), l = (max + min) / 2;
@@ -196,7 +196,7 @@ var Application = AbstractApplication.extend({
         this.vecPerfects = [ "PERFECT!", "AWESOME!", "AMAZING!", "GOD!!!", "WOWOWOW", "YEAH!" ], 
         this.vecGood = [ "GOOD", "COOL", "YEP", "NOT BAD" ], this.vecError = [ "NOOOO!", "BAD", "MISS!", "NOT", "AHHHH" ], 
         this.currentColorID = Math.floor(this.vecColors.length * Math.random()), this.backColor = this.vecColors[this.currentColorID], 
-        initialize(), this.mute = !1;
+        this.currentWorld = this.currentLevel = 0, initialize(), this.mute = !1;
     },
     update: function() {
         this.initialized && (this._super(), this.interactiveBackground && this.interactiveBackground.update(), 
@@ -1211,7 +1211,12 @@ var GameScreen = AbstractScreen.extend({
         this.pinVel = {
             x: 0,
             y: 0
-        }, this.addSoundButton();
+        }, this.addSoundButton(), this.levelWorldLabel = new PIXI.Text("", {
+            font: "32px Vagron",
+            fill: "#FFFFFF"
+        }), this.levelWorldLabel.position.y = windowHeight / 2, this.levelWorldLabel.position.x = 20, 
+        this.levelWorldLabel.resolution = 2, this.addChild(this.levelWorldLabel), this.levelWorldLabel.alpha = 0, 
+        this.showWLLabel();
     },
     onProgress: function() {
         this._super();
@@ -1244,23 +1249,25 @@ var GameScreen = AbstractScreen.extend({
             this.coinsContainer.addChild(tempGraphic), this.vecCoins.push(tempGraphic);
         }
         if (this.updateCoins(), isCordova || testMobile()) {
-            var controllerContainer = new PIXI.DisplayObjectContainer(), btnSize = .2 * windowWidth, upGr = new PIXI.Graphics();
-            upGr.beginFill(16777215), upGr.drawRect(0, 0, btnSize, btnSize), upGr.position.x = 1.1 * btnSize, 
-            upGr.interactive = !0, upGr.scope = this, upGr.side = "UP", upGr.touchstart = upGr.mousedown = clickController;
+            var controllerContainer = new PIXI.DisplayObjectContainer(), btnSize = .2 * windowWidth, distanceMulti = 2.1, upGr = new PIXI.Graphics();
+            upGr.beginFill(16777215), upGr.moveTo(0, btnSize), upGr.lineTo(btnSize, btnSize), 
+            upGr.lineTo(btnSize / 2, 0), upGr.position.x = 1.1 * btnSize, upGr.interactive = !0, 
+            upGr.scope = this, upGr.side = "UP", upGr.touchstart = upGr.mousedown = clickController;
             var dwGr = new PIXI.Graphics();
-            dwGr.beginFill(16777215), dwGr.drawRect(0, 0, btnSize, btnSize), dwGr.position.x = 1.1 * btnSize, 
-            dwGr.position.y = 1.2 * btnSize, dwGr.interactive = !0, dwGr.scope = this, dwGr.side = "DOWN", 
-            dwGr.touchstart = dwGr.mousedown = clickController;
+            dwGr.beginFill(16777215), dwGr.moveTo(0, 0), dwGr.lineTo(btnSize, 0), dwGr.lineTo(btnSize / 2, btnSize), 
+            dwGr.position.x = 1.1 * btnSize, dwGr.position.y = btnSize * distanceMulti, dwGr.interactive = !0, 
+            dwGr.scope = this, dwGr.side = "DOWN", dwGr.touchstart = dwGr.mousedown = clickController;
             var lfGr = new PIXI.Graphics();
-            lfGr.beginFill(16777215), lfGr.drawRect(0, 0, btnSize, btnSize), lfGr.position.x = 0, 
-            lfGr.position.y = .6 * btnSize, lfGr.interactive = !0, lfGr.scope = this, lfGr.side = "LEFT", 
-            lfGr.touchstart = lfGr.mousedown = clickController;
+            lfGr.beginFill(16777215), lfGr.moveTo(btnSize, 0), lfGr.lineTo(btnSize, btnSize), 
+            lfGr.lineTo(0, btnSize / 2), lfGr.position.x = 0, lfGr.position.y = btnSize * distanceMulti / 2, 
+            lfGr.interactive = !0, lfGr.scope = this, lfGr.side = "LEFT", lfGr.touchstart = lfGr.mousedown = clickController;
             var rgGr = new PIXI.Graphics();
-            rgGr.beginFill(16777215), rgGr.drawRect(0, 0, btnSize, btnSize), rgGr.position.x = 2.2 * btnSize, 
-            rgGr.position.y = .6 * btnSize, rgGr.interactive = !0, rgGr.scope = this, rgGr.side = "RIGHT", 
-            rgGr.touchstart = rgGr.mousedown = clickController, controllerContainer.addChild(upGr), 
-            controllerContainer.addChild(dwGr), controllerContainer.addChild(lfGr), controllerContainer.addChild(rgGr), 
-            this.addChild(controllerContainer), controllerContainer.alpha = .2, controllerContainer.position.x = windowWidth / 2 - controllerContainer.width / 2, 
+            rgGr.beginFill(16777215), rgGr.moveTo(0, 0), rgGr.lineTo(0, btnSize), rgGr.lineTo(btnSize, btnSize / 2), 
+            rgGr.position.x = 2.2 * btnSize, rgGr.position.y = btnSize * distanceMulti / 2, 
+            rgGr.interactive = !0, rgGr.scope = this, rgGr.side = "RIGHT", rgGr.touchstart = rgGr.mousedown = clickController, 
+            controllerContainer.addChild(upGr), controllerContainer.addChild(dwGr), controllerContainer.addChild(lfGr), 
+            controllerContainer.addChild(rgGr), this.addChild(controllerContainer), controllerContainer.alpha = .2, 
+            controllerContainer.position.x = windowWidth / 2 - controllerContainer.width / 2, 
             controllerContainer.position.y = windowHeight - 1.1 * controllerContainer.height;
         }
         this.initLevel(), this.startLevel = !1, this.debugBall = new PIXI.Graphics(), this.backButtonContainer = new PIXI.DisplayObjectContainer(), 
@@ -1276,6 +1283,7 @@ var GameScreen = AbstractScreen.extend({
         this.HUDLayer.build("HUDLayer"), this.layerManagerHUD.addLayer(this.HUDLayer);
     },
     backFunction: function(event) {
+        alert("back");
         var scope = event.target.scope;
         this.updateable = !1, scope.screenManager.change("Levels");
     },
@@ -1335,7 +1343,8 @@ var GameScreen = AbstractScreen.extend({
         this.layerManagerHUD.getContent() && this.layerManagerHUD.getContent().parent && (this.layerManagerHUD.getContent().parent.setChildIndex(this.layerManagerHUD.getContent(), this.layerManagerHUD.getContent().parent.children.length - 1), 
         this.layerManagerHUD.update()), this.updateMapPosition(), this._super(), this.layerManager && this.layerManager.update(), 
         !this.endGame)) {
-            if (this.onBack) {
+            if (this.levelWorldLabel && this.levelWorldLabel.parent.setChildIndex(this.levelWorldLabel, 0), 
+            this.onBack) {
                 for (var lastJoint = null, k = this.trails.length - 1; k >= 0; k--) if ("JOINT" === this.trails[k].type) {
                     lastJoint = this.trails[k];
                     break;
@@ -1413,7 +1422,7 @@ var GameScreen = AbstractScreen.extend({
         this.player.getContent().position.y = windowHeight / 1.2, this.portal = new EndPortal(this), 
         this.portal.build(), this.layer.addChild(this.portal);
         this.force = 0, this.levelCounter = 800, this.levelCounterMax = 800, this.changeColor(!0, !0), 
-        this.endGame = !1, this.initEnvironment(), this.updateMapPosition(), TweenLite.from(this.getContent().scale, .5, {
+        this.endGame = !1, this.initEnvironment(), this.updateMapPosition(), TweenLite.from(this.gameContainer.scale, .5, {
             y: .5,
             x: .5
         }), this.updateCoins();
@@ -1710,10 +1719,23 @@ var GameScreen = AbstractScreen.extend({
         }
         APP.background.parent && APP.background.parent.setChildIndex(APP.background, 0);
     },
+    showWLLabel: function() {
+        this.levelWorldLabel.setText(APP.currentWorld + 1 + "-" + (APP.currentLevel + 1)), 
+        this.levelWorldLabel.position.x = windowWidth - 40 - this.levelWorldLabel.width / 2 - 20, 
+        this.levelWorldLabel.position.y = 10, TweenLite.to(this.levelWorldLabel, .5, {
+            alpha: .5
+        });
+    },
+    hideWLLabel: function() {
+        TweenLite.to(this.levelWorldLabel, .5, {
+            alpha: 0
+        });
+    },
     transitionIn: function() {
         this.build();
     },
     transitionOut: function(nextScreen, container) {
+        this.hideWLLabel();
         var self = this;
         this.frontShape ? (this.frontShape.parent.setChildIndex(this.frontShape, this.frontShape.parent.children.length - 1), 
         TweenLite.to(this.frontShape, .3, {

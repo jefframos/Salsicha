@@ -15,7 +15,7 @@ var Application = AbstractApplication.extend({
         this.currentColorID = Math.floor(this.vecColors.length * Math.random());
 
         this.backColor = this.vecColors[this.currentColorID];
-
+        this.currentWorld = this.currentLevel = 0;
         function initialize(){
             self._super(windowWidth, windowHeight);
             self.stage.setBackgroundColor(self.backColor);
@@ -25,6 +25,8 @@ var Application = AbstractApplication.extend({
             // self.stage.addChild(self.labelDebug);
             self.labelDebug.position.y = windowHeight - 20;
             self.labelDebug.position.x = 20;
+
+
 
             self.initialized = true;
             // self.mute = false;
@@ -43,6 +45,7 @@ var Application = AbstractApplication.extend({
         this.mute = false;
 
 	},
+
     update:function(){
         if(!this.initialized){
             return;

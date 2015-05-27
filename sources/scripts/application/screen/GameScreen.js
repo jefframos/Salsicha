@@ -32,6 +32,15 @@ var GameScreen = AbstractScreen.extend({
 		}
 		this.pinVel = {x:0, y:0};
 		this.addSoundButton();
+
+		this.levelWorldLabel = new PIXI.Text('', {font:'32px Vagron', fill:'#FFFFFF'});
+        this.levelWorldLabel.position.y = windowHeight / 2;
+        this.levelWorldLabel.position.x = 20;
+        this.levelWorldLabel.resolution = 2;
+        this.addChild(this.levelWorldLabel);
+        this.levelWorldLabel.alpha = 0;
+
+		this.showWLLabel();
 	},
 	onProgress:function(){
 		this._super();
@@ -130,11 +139,14 @@ var GameScreen = AbstractScreen.extend({
 
 			var controllerContainer = new PIXI.DisplayObjectContainer();
 			var btnSize = windowWidth*0.2;
-
+			var distanceMulti = 2.1;
 
 			var upGr = new PIXI.Graphics();
 			upGr.beginFill(0xFFFFFF);
-			upGr.drawRect(0,0,btnSize,btnSize);
+			// upGr.drawRect(0,0,btnSize,btnSize);
+			upGr.moveTo(0,btnSize);
+			upGr.lineTo(btnSize,btnSize);
+			upGr.lineTo(btnSize / 2,0);
 			upGr.position.x = btnSize * 1.1;
 			upGr.interactive = true;
 			upGr.scope = this;
@@ -143,9 +155,12 @@ var GameScreen = AbstractScreen.extend({
 
 			var dwGr = new PIXI.Graphics();
 			dwGr.beginFill(0xFFFFFF);
-			dwGr.drawRect(0,0,btnSize,btnSize);
+			// dwGr.drawRect(0,0,btnSize,btnSize);
+			dwGr.moveTo(0,0);
+			dwGr.lineTo(btnSize,0);
+			dwGr.lineTo(btnSize / 2,btnSize);
 			dwGr.position.x = btnSize*1.1;
-			dwGr.position.y = btnSize * 1.2;
+			dwGr.position.y = btnSize * distanceMulti;
 			dwGr.interactive = true;
 			dwGr.scope = this;
 			dwGr.side = 'DOWN';
@@ -153,9 +168,12 @@ var GameScreen = AbstractScreen.extend({
 
 			var lfGr = new PIXI.Graphics();
 			lfGr.beginFill(0xFFFFFF);
-			lfGr.drawRect(0,0,btnSize,btnSize);
+			// lfGr.drawRect(0,0,btnSize,btnSize);
+			lfGr.moveTo(btnSize,0);
+			lfGr.lineTo(btnSize,btnSize);
+			lfGr.lineTo(0,btnSize/2);
 			lfGr.position.x = 0;
-			lfGr.position.y = btnSize * 0.6;
+			lfGr.position.y = btnSize * distanceMulti/2;
 			lfGr.interactive = true;
 			lfGr.scope = this;
 			lfGr.side = 'LEFT';
@@ -163,9 +181,12 @@ var GameScreen = AbstractScreen.extend({
 
 			var rgGr = new PIXI.Graphics();
 			rgGr.beginFill(0xFFFFFF);
-			rgGr.drawRect(0,0,btnSize,btnSize);
+			// rgGr.drawRect(0,0,btnSize,btnSize);
+			rgGr.moveTo(0,0);
+			rgGr.lineTo(0,btnSize);
+			rgGr.lineTo(btnSize,btnSize/2);
 			rgGr.position.x = btnSize * 2.2;
-			rgGr.position.y = btnSize *0.6;
+			rgGr.position.y = btnSize * distanceMulti/2;
 			rgGr.interactive = true;
 			rgGr.scope = this;
 			rgGr.side = 'RIGHT';
@@ -233,6 +254,7 @@ var GameScreen = AbstractScreen.extend({
 	},
 
 	backFunction:function(event){
+		alert('back');
 		var scope = event.target.scope;
 		// alert(scope.screenManager.currentScreen.screenLabel);
 		this.updateable = false;
@@ -357,6 +379,9 @@ var GameScreen = AbstractScreen.extend({
 			return;
 		}
 
+		if(this.levelWorldLabel){
+			this.levelWorldLabel.parent.setChildIndex(this.levelWorldLabel,0);
+		}
 		// this.coinsLabel.parent.setChildIndex(this.coinsLabel, this.coinsLabel.parent.children.length - 1);
 
 
@@ -581,7 +606,7 @@ var GameScreen = AbstractScreen.extend({
 
 		this.updateMapPosition();
 
-		TweenLite.from(this.getContent().scale, 0.5,{y:0.5, x:0.5});
+		TweenLite.from(this.gameContainer.scale, 0.5,{y:0.5, x:0.5});
 		this.updateCoins();
 
 	},
@@ -1154,12 +1179,24 @@ var GameScreen = AbstractScreen.extend({
 		// }
 
 	},
+	showWLLabel:function(){
+        this.levelWorldLabel.setText((APP.currentWorld + 1) + '-' + (APP.currentLevel + 1));
+        // this.levelWorldLabel.position.x = windowWidth / 2 - this.levelWorldLabel.width / 2 / 2;
+        // this.levelWorldLabel.position.y = windowHeight / 2 - this.levelWorldLabel.height / 2 / 2;
+        this.levelWorldLabel.position.x =  windowWidth - 40 - this.levelWorldLabel.width / 2 - 20;
+        this.levelWorldLabel.position.y = 10;
+        TweenLite.to(this.levelWorldLabel, 0.5, {alpha:0.5});
+    },
+    hideWLLabel:function(){
+        TweenLite.to(this.levelWorldLabel, 0.5, {alpha:0});
+    },
 	transitionIn:function()
 	{
 		this.build();
 	},
 	transitionOut:function(nextScreen, container)
 	{
+		this.hideWLLabel();
 		var self = this;
 		if(this.frontShape){
 			this.frontShape.parent.setChildIndex(this.frontShape, this.frontShape.parent.children.length - 1);
