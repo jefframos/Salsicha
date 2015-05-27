@@ -46,7 +46,7 @@ module.exports = function(grunt) {
                 src: [
                     // '<%= globalConfig.src %>scripts/plugins/r.js',
                     '<%= globalConfig.src %>scripts/plugins/howler.js',
-                    '<%= globalConfig.src %>scripts/plugins/pixi.min.js',
+                    '<%= globalConfig.src %>scripts/plugins/pixi.js',
                     '<%= globalConfig.src %>scripts/plugins/modernizr-2.7.1.min.js',
                     '<%= globalConfig.src %>scripts/plugins/class.js',
                     '<%= globalConfig.src %>scripts/plugins/hammer.min.js',

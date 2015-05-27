@@ -91,10 +91,10 @@ var GameScreen = AbstractScreen.extend({
 		}
 		this.updateable = true;
 
-		this.gameContainer = new PIXI.Container();
+		this.gameContainer = new PIXI.DisplayObjectContainer();
 		this.addChild(this.gameContainer);
 
-		this.trailContainer = new PIXI.Container();
+		this.trailContainer = new PIXI.DisplayObjectContainer();
 		this.gameContainer.addChild(this.trailContainer);
 
 		this.layerManager = new LayerManager();
@@ -115,7 +115,7 @@ var GameScreen = AbstractScreen.extend({
 		// this.coinsLabel.alpha = 0.6;
 		// this.addChild(this.coinsLabel);
 
-		this.coinsContainer = new PIXI.Container();
+		this.coinsContainer = new PIXI.DisplayObjectContainer();
 		this.addChild(this.coinsContainer);
 		this.maxCoins = LEVELS[APP.currentWorld][APP.currentLevel][1].coins;
 		this.vecCoins = [];
@@ -133,17 +133,15 @@ var GameScreen = AbstractScreen.extend({
 		this.updateCoins();
 
 		function clickController(event){
-			alert('click');
 			event.target.scope.player.stretch(event.target.side);
 		}
 		if(isCordova || testMobile()){
 
-			var controllerContainer = new PIXI.Container();
+			var controllerContainer = new PIXI.DisplayObjectContainer();
 			var btnSize = windowWidth*0.15;
 			var distanceMulti = 3;
 			var distanceX = 2;
 			controllerContainer.interactive = true;
-			controllerContainer.on('mousedown', clickController);
 
 			var upGr = new PIXI.Graphics();
 			upGr.beginFill(0xFFFFFF);
@@ -155,8 +153,7 @@ var GameScreen = AbstractScreen.extend({
 			upGr.interactive = true;
 			upGr.scope = this;
 			upGr.side = 'UP';
-			upGr.on('mousedown', clickController);
-			upGr.on('touchstart', clickController);
+			upGr.touchstart = upGr.mousedown = clickController;
 
 			var dwGr = new PIXI.Graphics();
 			dwGr.beginFill(0xFFFFFF);
@@ -170,8 +167,7 @@ var GameScreen = AbstractScreen.extend({
 			dwGr.interactive = true;
 			dwGr.scope = this;
 			dwGr.side = 'DOWN';
-			dwGr.on('mousedown', clickController);
-			dwGr.on('touchstart', clickController);
+			dwGr.touchstart = dwGr.mousedown = clickController;
 
 			var lfGr = new PIXI.Graphics();
 			lfGr.beginFill(0xFFFFFF);
@@ -185,8 +181,7 @@ var GameScreen = AbstractScreen.extend({
 			lfGr.interactive = true;
 			lfGr.scope = this;
 			lfGr.side = 'LEFT';
-			lfGr.on('mousedown', clickController);
-			lfGr.on('touchstart', clickController);
+			lfGr.touchstart = lfGr.mousedown = clickController;
 
 			var rgGr = new PIXI.Graphics();
 			rgGr.beginFill(0xFFFFFF);
@@ -200,8 +195,7 @@ var GameScreen = AbstractScreen.extend({
 			rgGr.interactive = true;
 			rgGr.scope = this;
 			rgGr.side = 'RIGHT';
-			rgGr.on('mousedown', clickController);
-			rgGr.on('touchstart', clickController);
+			rgGr.touchstart = rgGr.mousedown = clickController;
 
 			controllerContainer.addChild(upGr);
 			controllerContainer.addChild(dwGr);
@@ -234,7 +228,7 @@ var GameScreen = AbstractScreen.extend({
 		// 	}
 		// };
 
-		this.backButtonContainer = new PIXI.Container();
+		this.backButtonContainer = new PIXI.DisplayObjectContainer();
         this.backButton = new PIXI.Graphics();
         this.backButton.beginFill(0xFFFFFF);
         this.backButton.moveTo(20,0);
@@ -251,7 +245,7 @@ var GameScreen = AbstractScreen.extend({
 
         this.addChild(this.backButtonContainer);
 
-        this.crazyContent = new PIXI.Container();
+        this.crazyContent = new PIXI.DisplayObjectContainer();
 		this.addChild(this.crazyContent);
 
 		this.layerManagerHUD = new LayerManager();
@@ -830,7 +824,7 @@ var GameScreen = AbstractScreen.extend({
 
 
 	addSoundButton:function(){
-		this.soundButtonContainer = new PIXI.Container();
+		this.soundButtonContainer = new PIXI.DisplayObjectContainer();
 		this.soundOn = new PIXI.Graphics();
 		this.soundOn.beginFill(0xFFFFFF);
 		this.soundOn.moveTo(10,0);
@@ -860,7 +854,7 @@ var GameScreen = AbstractScreen.extend({
 		this.soundButtonContainer.position.x = windowWidth - 40;
 		this.soundButtonContainer.position.y = 20;
 		// alert(this.soundButtonContainer.width/2);
-		// this.soundButtonContainer = new PIXI.Container();
+		// this.soundButtonContainer = new PIXI.DisplayObjectContainer();
 		this.soundButtonContainer.hitArea = new PIXI.Rectangle(-5, -5, 35, 35);
 		this.soundButtonContainer.interactive = true;
 		this.soundButtonContainer.buttonMode = true;
@@ -1161,7 +1155,7 @@ var GameScreen = AbstractScreen.extend({
 	},
 	updateCoins:function(){
 
-		// this.coinsLabel.text = (APP.points);
+		// this.coinsLabel.setText(APP.points);
 
 		this.coinsContainer.position.x = 60;
 		this.coinsContainer.position.y = 20;
@@ -1189,7 +1183,7 @@ var GameScreen = AbstractScreen.extend({
 
 	},
 	showWLLabel:function(){
-        this.levelWorldLabel.text = ((APP.currentWorld + 1) + '-' + (APP.currentLevel + 1));
+        this.levelWorldLabel.setText((APP.currentWorld + 1) + '-' + (APP.currentLevel + 1));
         // this.levelWorldLabel.position.x = windowWidth / 2 - this.levelWorldLabel.width / 2 / 2;
         // this.levelWorldLabel.position.y = windowHeight / 2 - this.levelWorldLabel.height / 2 / 2;
         this.levelWorldLabel.position.x =  windowWidth - 40 - this.levelWorldLabel.width / 2 - 20;

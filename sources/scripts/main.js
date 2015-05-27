@@ -112,7 +112,7 @@ function updateResolution(orientation, scale){
 }
 var isCordova = document.URL.indexOf( 'http://' ) === -1 && document.URL.indexOf( 'https://' ) === -1;
 function update() {
-	requestAnimationFrame(update );
+	requestAnimFrame(update );
 	if(!init){
 
 		var gambs = 0;
@@ -126,12 +126,12 @@ function update() {
 		realWindowWidth = res.x;
 		realWindowHeight = res.y;
 
-		// if(testMobile()){
-		// 	// updateResolution(screenOrientation, gameScale);
-		// 	renderer = PIXI.autoDetectRecommendedRenderer(realWindowWidth, realWindowHeight, {antialias:true, resolution:retina, view:gameView});
-		// }else{
-		// }
-		renderer = PIXI.autoDetectRenderer(realWindowWidth, realWindowHeight, {antialias:true, resolution:retina, view:gameView});
+		if(testMobile()){
+			// updateResolution(screenOrientation, gameScale);
+			renderer = PIXI.autoDetectRecommendedRenderer(realWindowWidth, realWindowHeight, {antialias:true, resolution:retina, view:gameView});
+		}else{
+			renderer = PIXI.autoDetectRenderer(realWindowWidth, realWindowHeight, {antialias:true, resolution:retina, view:gameView});
+		}
 		retina = 2;
 		// alert('init');
 		renderer.view.style.width = windowWidthVar+'px';
@@ -177,8 +177,8 @@ function update() {
 
 var initialize = function(){
 	// alert('initia');
-	// PIXI.BaseTexture.SCALE_MODE = PIXI.scaleModes.NEAREST;
-	requestAnimationFrame(update);
+	PIXI.BaseTexture.SCALE_MODE = PIXI.scaleModes.NEAREST;
+	requestAnimFrame(update);
 };
 
 var isfull = false;

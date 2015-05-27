@@ -3,7 +3,7 @@ var LifeBarHUD = Class.extend({
 	init: function (width, height, incX, frontColor, baseColor){
 
 		this.text = 'default';
-		this.container = new PIXI.Container();
+		this.container = new PIXI.DisplayObjectContainer();
 		this.width = width;
 		this.height = height;
 		this.incX = incX;
