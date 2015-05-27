@@ -142,6 +142,8 @@ var GameScreen = AbstractScreen.extend({
 			var btnSize = windowWidth*0.15;
 			var distanceMulti = 3;
 			var distanceX = 2;
+			controllerContainer.interactive = true;
+			controllerContainer.on('mousedown', clickController);
 
 			var upGr = new PIXI.Graphics();
 			upGr.beginFill(0xFFFFFF);
@@ -153,7 +155,7 @@ var GameScreen = AbstractScreen.extend({
 			upGr.interactive = true;
 			upGr.scope = this;
 			upGr.side = 'UP';
-			upGr.on('mousedown', function(){alert('clic');});
+			upGr.on('mousedown', clickController);
 			upGr.on('touchstart', clickController);
 
 			var dwGr = new PIXI.Graphics();

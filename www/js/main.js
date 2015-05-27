@@ -1252,12 +1252,13 @@ var GameScreen = AbstractScreen.extend({
             this.coinsContainer.addChild(tempGraphic), this.vecCoins.push(tempGraphic);
         }
         if (this.updateCoins(), isCordova || testMobile()) {
-            var controllerContainer = new PIXI.Container(), btnSize = .15 * windowWidth, distanceMulti = 3, distanceX = 2, upGr = new PIXI.Graphics();
+            var controllerContainer = new PIXI.Container(), btnSize = .15 * windowWidth, distanceMulti = 3, distanceX = 2;
+            controllerContainer.interactive = !0, controllerContainer.on("mousedown", clickController);
+            var upGr = new PIXI.Graphics();
             upGr.beginFill(16777215), upGr.drawCircle(btnSize / 2, btnSize / 2, btnSize), upGr.moveTo(0, btnSize), 
             upGr.lineTo(btnSize, btnSize), upGr.lineTo(btnSize / 2, 0), upGr.position.x = btnSize * distanceX, 
-            upGr.interactive = !0, upGr.scope = this, upGr.side = "UP", upGr.on("mousedown", function() {
-                alert("clic");
-            }), upGr.on("touchstart", clickController);
+            upGr.interactive = !0, upGr.scope = this, upGr.side = "UP", upGr.on("mousedown", clickController), 
+            upGr.on("touchstart", clickController);
             var dwGr = new PIXI.Graphics();
             dwGr.beginFill(16777215), dwGr.drawCircle(btnSize / 2, btnSize / 2, btnSize), dwGr.moveTo(0, 0), 
             dwGr.lineTo(btnSize, 0), dwGr.lineTo(btnSize / 2, btnSize), dwGr.position.x = btnSize * distanceX, 
