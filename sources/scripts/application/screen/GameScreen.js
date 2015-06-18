@@ -1125,10 +1125,11 @@ var GameScreen = AbstractScreen.extend({
 		for (var i = 0; i < this.vecCoins.length; i++) {
 			var tempRect = this.vecCoins[i].getLocalBounds();
 			this.vecCoins[i].clear();
+			this.vecCoins[i].lineStyle(2, addBright(APP.vecColors[APP.currentColorID], 0.7));
 			if(i < APP.points){
 				this.vecCoins[i].beginFill(0xFFFFFF);
 			}else{
-				this.vecCoins[i].beginFill(addBright(APP.vecColors[APP.currentColorID], 0.4));
+				this.vecCoins[i].beginFill(addBright(APP.vecColors[APP.currentColorID], 0.5));
 			}
 			this.vecCoins[i].drawRect(tempRect.x,tempRect.y,tempRect.width,tempRect.height);
 		}

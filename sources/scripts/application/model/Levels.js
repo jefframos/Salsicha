@@ -186,7 +186,7 @@ tempMap = [
 	[ 0, 0, 0, 0, 0, 1, 0, 0, 7, 0, 1, 0, 0, 1, 0, 0, 2, 0, 0, 0 ]
 ];
 
-world1.push([tempMap,{coins:2, highscore:0}]);
+world1.push([tempMap,{coins:4, highscore:0}]);
 
 // world1.pop();
 // world1.pop();
