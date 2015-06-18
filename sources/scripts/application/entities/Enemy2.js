@@ -21,7 +21,6 @@ var Enemy2 = Entity.extend({
 
 		this.testHorizontal();
 		this.testVertical();
-		console.log('setways');
 	},
 	drawWaypoints: function(){
 		if(!this.wayPoints || this.wayPoints.length <= 0 || this.trail){

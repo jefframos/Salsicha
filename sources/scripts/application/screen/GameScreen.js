@@ -568,11 +568,17 @@ var GameScreen = AbstractScreen.extend({
 	},
 	initLevel:function(whereInit){
 		if(windowWidth < windowHeight){
-			APP.tileSize = {w:windowWidth * 0.08,h:windowWidth * 0.08};
+			APP.tileSize = {w:Math.floor(windowWidth * 0.08),h:Math.floor(windowWidth * 0.08)};
 			APP.standardVel = APP.tileSize.h * 0.05;
 		}else{
-			APP.tileSize = {w:windowHeight * 0.06,h:windowHeight * 0.06};
+			APP.tileSize = {w:Math.floor(windowHeight * 0.06),h:Math.floor(windowHeight * 0.06)};
 			APP.standardVel = APP.tileSize.w * 0.05;
+		}
+		if(APP.tileSize.w < 50){
+			APP.tileSize.w = 50;
+		}
+		if(APP.tileSize.h < 50){
+			APP.tileSize.h = 50;
 		}
 		this.trails = [];
 
@@ -611,9 +617,10 @@ var GameScreen = AbstractScreen.extend({
 	initEnvironment: function(){
 		this.environment = [];
 
-		this.mapSize = {i:LEVELS[0][0].length,j:LEVELS[0].length};
 		this.environment = LEVELS[APP.currentWorld][APP.currentLevel][0];
-
+		this.mapSize = {i:this.environment[0].length,j:this.environment.length};
+		// console.log(this.environment);
+		// console.log('this.mapSize',this.mapSize);
 		this.drawMap();
 		this.drawPlayer();
 		this.drawEndPortal();
@@ -627,11 +634,11 @@ var GameScreen = AbstractScreen.extend({
 			for (var k = 0; k < this.vecTiles.length; k++) {
 				var tempTile = this.getTileByPos(this.vecTiles[k].x + 5,this.vecTiles[k].y + 5);
 				var tileType = this.getTileType(tempTile.i, tempTile.j);
-				// try{
-				this.drawTile(tileType, tempTile.i, tempTile.j, this.vecTiles[k]);
-				// }catch(error){
-				// 	// console.log(error);
-				// }
+				try{
+					this.drawTile(tileType, tempTile.i, tempTile.j, this.vecTiles[k]);
+				}catch(error){
+					console.log(error);
+				}
 			}
 			return;
 		}
@@ -653,7 +660,6 @@ var GameScreen = AbstractScreen.extend({
 		for (var m = 0; m < this.vecMovEnemies.length; m++) {
 			this.vecMovEnemies[m].drawWaypoints();
 		}
-		// this.hitTouch.hitArea = new PIXI.Rectangle(-100, -100, this.getContent().width, this.getContent().height);
 	},
 	drawTile: function(type, i,j, exists){
 		if(type >= 1 && type <= 3){
@@ -670,10 +676,6 @@ var GameScreen = AbstractScreen.extend({
 				}
 			}else if(type === 2){
 				tempColor = addBright(this.player.color,0.7 - (APP.currentWorld + 1) * 0.15);
-				// if(APP.currentWorld >1){
-				// 	tempGraphics.lineStyle(1,tempColor);
-				// }else{
-				// }
 				tempGraphics.beginFill(tempColor);
 
 				var temp1 = -2;
@@ -707,6 +709,9 @@ var GameScreen = AbstractScreen.extend({
 				}
 				tempGraphics.lineTo(init.x,init.y);
 				isEnemy = true;
+				tempGraphics.pivot = {x:APP.tileSize.w/2, y:APP.tileSize.h/2};
+				tempGraphics.scale.x = 0.8;
+				tempGraphics.scale.y = 0.8;
 			}else if(type === 3){
 				tempColor = addBright(this.player.color,0.8 - (APP.currentWorld + 1) * 0.15);
 				if(APP.currentWorld >1){
@@ -717,8 +722,9 @@ var GameScreen = AbstractScreen.extend({
 				tempGraphics.drawRoundedRect(0,0,APP.tileSize.w, APP.tileSize.h, APP.tileSize.w*0.4);
 			}
 
-			tempGraphics.position.x = i * APP.tileSize.w;
-			tempGraphics.position.y = j * APP.tileSize.h;
+			tempGraphics.position.x = i * APP.tileSize.w + tempGraphics.pivot.x;
+			tempGraphics.position.y = j * APP.tileSize.h + tempGraphics.pivot.y;
+			// console.log(tempGraphics);
 			this.gameContainer.addChild(tempGraphics);
 			if(!exists){
 				this.vecTiles.push(tempGraphics);
@@ -935,45 +941,6 @@ var GameScreen = AbstractScreen.extend({
 			this.addChild(this.crazyContent);
 		}
 	},
-	miss:function() {
-
-		APP.audioController.playSound('error');
-		this.player.breakJump = true;
-		this.player.velocity.y = 0;
-		var wrongLabel = APP.vecError[Math.floor(APP.vecError.length * Math.random())];
-		var rot = Math.random() * 0.004;
-		var tempLabel = new PIXI.Text(wrongLabel, {font:'35px Vagron', fill:'#ec8b78'});
-
-		var errou = new Particles({x: 0, y:0}, 120, tempLabel,rot);
-		errou.maxScale = this.player.getContent().scale.x;
-		errou.build();
-		// errou.getContent().tint = 0xf5c30c;
-		errou.gravity = 0.1;
-		errou.alphadecress = 0.01;
-		errou.scaledecress = +0.05;
-		errou.setPosition(this.player.getPosition().x - tempLabel.width / 2, this.player.getPosition().y - 50);
-		this.layer.addChild(errou);
-
-		var errou2 = new Particles({x: 0, y:0}, 120, new PIXI.Text(wrongLabel, {font:'35px Vagron', fill:'#c01f2e'}),-rot);
-		errou2.maxScale = this.player.getContent().scale.x;
-		errou2.build();
-		// errou2.getContent().tint = 0xf5c30c;
-		errou2.gravity = 0.1;
-		errou2.alphadecress = 0.01;
-		errou2.scaledecress = +0.05;
-		errou2.setPosition(this.player.getPosition().x - tempLabel.width / 2+2, this.player.getPosition().y - 50+2);
-		this.layer.addChild(errou2);
-
-		errou2.getContent().parent.setChildIndex(errou.getContent(), errou.getContent().parent.children.length - 1);
-		errou2.getContent().parent.setChildIndex(errou2.getContent(), errou2.getContent().parent.children.length - 1);
-
-
-		this.player.inError = true;
-		this.levelCounter -= this.levelCounterMax * 0.1;
-		if(this.levelCounter < 0){
-			this.levelCounter = 0;
-		}
-	},
 
 	nextLevel:function(){
 
@@ -1010,10 +977,6 @@ var GameScreen = AbstractScreen.extend({
 		this.updateable = false;
 		this.build();
 	},
-
-
-
-
 	gameOver:function(){
 		if(this.endGame){
 			return;

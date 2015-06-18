@@ -1,4 +1,4 @@
-/*! jefframos 27-05-2015 */
+/*! jefframos 18-06-2015 */
 function rgbToHsl(r, g, b) {
     r /= 255, g /= 255, b /= 255;
     var h, s, max = Math.max(r, g, b), min = Math.min(r, g, b), l = (max + min) / 2;
@@ -799,7 +799,7 @@ var Application = AbstractApplication.extend({
     },
     setWaypoints: function(wayPoints) {
         this.wayPoints = wayPoints, this.targetWay = 1, this.setPosition(this.wayPoints[0].x, this.wayPoints[0].y), 
-        this.testHorizontal(), this.testVertical(), console.log("setways");
+        this.testHorizontal(), this.testVertical();
     },
     drawWaypoints: function() {
         if (!(!this.wayPoints || this.wayPoints.length <= 0 || this.trail)) {
@@ -1111,7 +1111,7 @@ world1.push([ tempMap, {
 world1.push([ tempMap, {
     coins: 2,
     highscore: 0
-} ]), tempMap = [ [ 2, 2, 2, 2, 2, 2, 2, 2, 2, 0 ], [ 2, 0, 0, 0, 0, 0, 0, 0, 2, 0 ], [ 2, 0, 0, 4, 1, 0, 0, 0, 2, 0 ], [ 2, 0, 0, 0, 0, 0, 0, 0, 2, 0 ], [ 2, [ [ 15, 1, 1, 1 ] ], 0, 0, 0, 0, 0, [ [ 15, 0, 1, 1 ] ], 2, 0 ], [ 2, 0, 0, 0, 0, 0, 0, 0, 2, 0 ], [ 2, [ [ 16, 1, 1, 1 ] ], 0, 0, 0, 0, [ [ 16, 0, 1, 1 ] ], 8, 2, 0 ], [ 2, 0, 0, 4, 2, 2, 2, 2, 2, 0 ], [ 2, 0, 0, 0, 0, 0, 0, 7, 2, 0 ], [ 2, 2, 2, 2, 2, 2, 2, 2, 2, 0 ] ], 
+} ]), tempMap = [ [ 2, 2, 2, 2, 2, 2, 2, 2, 2, 0 ], [ 2, 0, 0, 0, 0, 0, 0, 0, 2, 0 ], [ 2, 0, 0, 4, 1, 0, 0, 0, 2, 0 ], [ 2, 0, 0, 0, 0, 0, 0, 0, 2, 0 ], [ 2, 0, 0, 0, 0, 0, 0, 0, 2, 0 ], [ 2, 0, 0, 0, 0, 0, 0, 0, 2, 0 ], [ 2, 0, 0, 0, 0, 0, 0, 8, 2, 0 ], [ 2, 0, 0, 4, 2, 2, 2, 2, 2, 0 ], [ 2, 0, 0, 0, 0, 0, 0, 7, 2, 0 ], [ 2, 2, 2, 2, 2, 2, 2, 2, 2, 0 ] ], 
 world1.push([ tempMap, {
     coins: 2,
     highscore: 0
@@ -1419,12 +1419,13 @@ var GameScreen = AbstractScreen.extend({
     },
     initLevel: function(whereInit) {
         windowHeight > windowWidth ? (APP.tileSize = {
-            w: .08 * windowWidth,
-            h: .08 * windowWidth
+            w: Math.floor(.08 * windowWidth),
+            h: Math.floor(.08 * windowWidth)
         }, APP.standardVel = .05 * APP.tileSize.h) : (APP.tileSize = {
-            w: .06 * windowHeight,
-            h: .06 * windowHeight
-        }, APP.standardVel = .05 * APP.tileSize.w), this.trails = [], this.recoil = !1, 
+            w: Math.floor(.06 * windowHeight),
+            h: Math.floor(.06 * windowHeight)
+        }, APP.standardVel = .05 * APP.tileSize.w), APP.tileSize.w < 50 && (APP.tileSize.w = 50), 
+        APP.tileSize.h < 50 && (APP.tileSize.h = 50), this.trails = [], this.recoil = !1, 
         APP.points = 0, this.player = new Ball({
             x: 0,
             y: 0
@@ -1438,16 +1439,20 @@ var GameScreen = AbstractScreen.extend({
         }), this.updateCoins();
     },
     initEnvironment: function() {
-        this.environment = [], this.mapSize = {
-            i: LEVELS[0][0].length,
-            j: LEVELS[0].length
-        }, this.environment = LEVELS[APP.currentWorld][APP.currentLevel][0], this.drawMap(), 
-        this.drawPlayer(), this.drawEndPortal();
+        this.environment = [], this.environment = LEVELS[APP.currentWorld][APP.currentLevel][0], 
+        this.mapSize = {
+            i: this.environment[0].length,
+            j: this.environment.length
+        }, this.drawMap(), this.drawPlayer(), this.drawEndPortal();
     },
     drawMap: function() {
         if (this.environment) if (this.vecTiles && this.vecTiles.length > 0) for (var k = 0; k < this.vecTiles.length; k++) {
             var tempTile = this.getTileByPos(this.vecTiles[k].x + 5, this.vecTiles[k].y + 5), tileType = this.getTileType(tempTile.i, tempTile.j);
-            this.drawTile(tileType, tempTile.i, tempTile.j, this.vecTiles[k]);
+            try {
+                this.drawTile(tileType, tempTile.i, tempTile.j, this.vecTiles[k]);
+            } catch (error) {
+                console.log(error);
+            }
         } else {
             this.vecTiles = [], this.vecMovEnemiesTemp = [], this.vecMovEnemies = [];
             for (var i = 0; i < this.environment.length; i++) for (var j = 0; j < this.environment[i].length; j++) if (this.environment[i][j] instanceof Array) for (var l = 0; l < this.environment[i][j].length; l++) this.drawTile(this.environment[i][j][l], j, i); else this.drawTile(this.environment[i][j], j, i);
@@ -1472,11 +1477,14 @@ var GameScreen = AbstractScreen.extend({
                 temp1 *= -1;
                 for (ii = 0; line >= ii; ii++) tempGraphics.lineTo(-sz * temp1 + aux, APP.tileSize.h - APP.tileSize.h / line * ii), 
                 temp1 *= -1;
-                tempGraphics.lineTo(init.x, init.y), isEnemy = !0;
+                tempGraphics.lineTo(init.x, init.y), isEnemy = !0, tempGraphics.pivot = {
+                    x: APP.tileSize.w / 2,
+                    y: APP.tileSize.h / 2
+                }, tempGraphics.scale.x = .8, tempGraphics.scale.y = .8;
             } else 3 === type && (tempColor = addBright(this.player.color, .8 - .15 * (APP.currentWorld + 1)), 
             APP.currentWorld > 1 ? tempGraphics.lineStyle(1, tempColor) : tempGraphics.beginFill(tempColor), 
             tempGraphics.drawRoundedRect(0, 0, APP.tileSize.w, APP.tileSize.h, .4 * APP.tileSize.w));
-            tempGraphics.position.x = i * APP.tileSize.w, tempGraphics.position.y = j * APP.tileSize.h, 
+            tempGraphics.position.x = i * APP.tileSize.w + tempGraphics.pivot.x, tempGraphics.position.y = j * APP.tileSize.h + tempGraphics.pivot.y, 
             this.gameContainer.addChild(tempGraphics), exists || this.vecTiles.push(tempGraphics);
         }
         if (!exists) {
@@ -1599,31 +1607,6 @@ var GameScreen = AbstractScreen.extend({
             delay: .3,
             alpha: 0
         }), this.crazyContent && this.crazyContent.parent ? this.crazyContent.parent.setChildIndex(this.crazyContent, this.crazyContent.parent.children.length - 1) : this.addChild(this.crazyContent);
-    },
-    miss: function() {
-        APP.audioController.playSound("error"), this.player.breakJump = !0, this.player.velocity.y = 0;
-        var wrongLabel = APP.vecError[Math.floor(APP.vecError.length * Math.random())], rot = .004 * Math.random(), tempLabel = new PIXI.Text(wrongLabel, {
-            font: "35px Vagron",
-            fill: "#ec8b78"
-        }), errou = new Particles({
-            x: 0,
-            y: 0
-        }, 120, tempLabel, rot);
-        errou.maxScale = this.player.getContent().scale.x, errou.build(), errou.gravity = .1, 
-        errou.alphadecress = .01, errou.scaledecress = .05, errou.setPosition(this.player.getPosition().x - tempLabel.width / 2, this.player.getPosition().y - 50), 
-        this.layer.addChild(errou);
-        var errou2 = new Particles({
-            x: 0,
-            y: 0
-        }, 120, new PIXI.Text(wrongLabel, {
-            font: "35px Vagron",
-            fill: "#c01f2e"
-        }), -rot);
-        errou2.maxScale = this.player.getContent().scale.x, errou2.build(), errou2.gravity = .1, 
-        errou2.alphadecress = .01, errou2.scaledecress = .05, errou2.setPosition(this.player.getPosition().x - tempLabel.width / 2 + 2, this.player.getPosition().y - 50 + 2), 
-        this.layer.addChild(errou2), errou2.getContent().parent.setChildIndex(errou.getContent(), errou.getContent().parent.children.length - 1), 
-        errou2.getContent().parent.setChildIndex(errou2.getContent(), errou2.getContent().parent.children.length - 1), 
-        this.player.inError = !0, this.levelCounter -= .1 * this.levelCounterMax, this.levelCounter < 0 && (this.levelCounter = 0);
     },
     nextLevel: function() {
         this.changeColor();
