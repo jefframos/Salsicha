@@ -610,7 +610,8 @@ var GameScreen = AbstractScreen.extend({
 
 		this.updateMapPosition();
 
-		TweenLite.from(this.gameContainer.scale, 0.5,{y:0.5, x:0.5});
+		TweenLite.from(this.gameContainer, 1,{delay:0.3, alpha:0});
+		TweenLite.from(this.gameContainer.scale, 1,{delay:0.3,y:0.5, x:0.5});
 		this.updateCoins();
 
 	},

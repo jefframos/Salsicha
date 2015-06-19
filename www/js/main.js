@@ -1,4 +1,4 @@
-/*! jefframos 18-06-2015 */
+/*! jefframos 19-06-2015 */
 function rgbToHsl(r, g, b) {
     r /= 255, g /= 255, b /= 255;
     var h, s, max = Math.max(r, g, b), min = Math.min(r, g, b), l = (max + min) / 2;
@@ -1433,7 +1433,11 @@ var GameScreen = AbstractScreen.extend({
         this.player.getContent().position.y = windowHeight / 1.2, this.portal = new EndPortal(this), 
         this.portal.build(), this.layer.addChild(this.portal);
         this.force = 0, this.levelCounter = 800, this.levelCounterMax = 800, this.changeColor(!0, !0), 
-        this.endGame = !1, this.initEnvironment(), this.updateMapPosition(), TweenLite.from(this.gameContainer.scale, .5, {
+        this.endGame = !1, this.initEnvironment(), this.updateMapPosition(), TweenLite.from(this.gameContainer, 1, {
+            delay: .3,
+            alpha: 0
+        }), TweenLite.from(this.gameContainer.scale, 1, {
+            delay: .3,
             y: .5,
             x: .5
         }), this.updateCoins();
@@ -1773,24 +1777,21 @@ var GameScreen = AbstractScreen.extend({
             levelsContainer = new PIXI.DisplayObjectContainer(), i % 2 === 0 && 0 !== i && (jacumW++, 
             iacumW = 0), tempWorldContainer = new PIXI.DisplayObjectContainer(), tempWorldGraphic = new PIXI.Graphics(), 
             tempWorldGraphic.lineStyle(1, addBright(APP.vecColors[APP.currentColorID], .8)), 
-            tempWorldGraphic.beginFill(addBright(APP.vecColors[APP.currentColorID], .9)), tempWorldGraphic.drawRect(0, 0, .18 * windowHeight, .18 * windowHeight), 
+            tempWorldGraphic.beginFill(addBright(APP.vecColors[APP.currentColorID], .9)), tempWorldGraphic.drawCircle(.09 * windowHeight, .09 * windowHeight, .09 * windowHeight), 
             tempWorldGraphic.interactive = !0, tempWorldGraphic.buttonMode = !0, tempWorldGraphic.id = i, 
             tempWorldGraphic.scope = this, tempWorldContainer.addChild(tempWorldGraphic), i <= APP.maxWorld ? (tempWorldGraphic.touchstart = tempWorldGraphic.mousedown = this.selectWorld, 
-            coinGraph = new PIXI.Graphics(), coinGraph.beginFill(16777215), size = .2 * tempWorldGraphic.width, 
-            coinGraph.drawRect(-size / 2, -size / 2, size, size), worldLabel = new PIXI.Text("WORLD " + (i + 1), {
+            size = .2 * tempWorldGraphic.width, worldLabel = new PIXI.Text("WORLD " + (i + 1), {
                 align: "left",
-                font: "20px Vagron",
+                font: "16px Vagron",
                 fill: "#FFFFFF"
-            }), worldLabel.resolution = 2, worldLabel.position.x = tempWorldGraphic.width / 2 - worldLabel.width / 2 / worldLabel.resolution, 
-            worldLabel.position.y = 5, totalCoins = new PIXI.Text(this.worldsGotCoins[i] + "/" + this.worldsTotalCoins[i], {
+            }), worldLabel.alpha = .8, worldLabel.resolution = 2, worldLabel.position.x = tempWorldGraphic.width / 2 - worldLabel.width / 2 / worldLabel.resolution, 
+            worldLabel.position.y = 15, totalCoins = new PIXI.Text(this.worldsGotCoins[i] + "/" + this.worldsTotalCoins[i], {
                 align: "center",
                 font: "25px Vagron",
                 fill: "#FFFFFF"
-            }), totalCoins.resolution = 2, coinGraph.position.x = tempWorldGraphic.width / 2, 
-            coinGraph.position.y = tempWorldGraphic.height / 2, totalCoins.position.x = tempWorldGraphic.width / 2 - totalCoins.width / 2 / totalCoins.resolution, 
-            totalCoins.position.y = tempWorldGraphic.height - totalCoins.height / totalCoins.resolution, 
-            tempWorldContainer.addChild(totalCoins), tempWorldContainer.addChild(coinGraph), 
-            tempWorldContainer.addChild(worldLabel)) : (tempWorldGraphic.clear(), tempWorldGraphic.beginFill(addBright(APP.vecColors[APP.currentColorID], .7)), 
+            }), totalCoins.resolution = 2, totalCoins.alpha = .8, totalCoins.position.x = tempWorldGraphic.width / 2 - totalCoins.width / 2 / totalCoins.resolution, 
+            totalCoins.position.y = tempWorldGraphic.height / 2 - totalCoins.height / totalCoins.resolution / 2, 
+            tempWorldContainer.addChild(totalCoins)) : (tempWorldGraphic.clear(), tempWorldGraphic.beginFill(addBright(APP.vecColors[APP.currentColorID], .7)), 
             tempWorldGraphic.drawRect(0, 0, .18 * windowHeight, .18 * windowHeight)), tempWorldContainer.position.x = 1.5 * tempWorldGraphic.width * iacumW, 
             tempWorldContainer.position.y = 1.5 * tempWorldGraphic.height * jacumW, iacumW++;
             var iacum = 0, jacum = 0;
@@ -1799,14 +1800,14 @@ var GameScreen = AbstractScreen.extend({
                 var tempCoins = LEVELS[i][j][1].coins, high = LEVELS[i][j][1].highscore;
                 if (tempContainer = new PIXI.DisplayObjectContainer(), tempGraphicLevel = new PIXI.Graphics(), 
                 tempGraphicLevel.lineStyle(1, addBright(APP.vecColors[APP.currentColorID], .8)), 
-                tempGraphicLevel.beginFill(tempColor), tempGraphicLevel.drawRect(0, 0, .1 * windowHeight, .1 * windowHeight), 
+                tempGraphicLevel.beginFill(tempColor), tempGraphicLevel.drawCircle(.05 * windowHeight, .05 * windowHeight, .05 * windowHeight), 
                 tempGraphicLevel.interactive = !0, tempGraphicLevel.buttonMode = !0, tempGraphicLevel.id = j, 
                 tempGraphicLevel.scope = this, tempContainer.addChild(tempGraphicLevel), tempContainer.position.x = 1.5 * tempGraphicLevel.width * iacum, 
                 tempContainer.position.y = 1.5 * tempGraphicLevel.height * jacum, levelNumber = new PIXI.Text(j + 1, {
                     align: "center",
                     font: "25px Vagron",
                     fill: "#FFFFFF"
-                }), levelNumber.resolution = 2, levelNumber.position.x = tempGraphicLevel.width / 2 - levelNumber.width / 2 / levelNumber.resolution, 
+                }), levelNumber.resolution = 2, levelNumber.alpha = .8, levelNumber.position.x = tempGraphicLevel.width / 2 - levelNumber.width / 2 / levelNumber.resolution, 
                 levelNumber.position.y = .1 * tempGraphicLevel.height / levelNumber.resolution, 
                 tempContainer.addChild(levelNumber), j <= APP.maxLevel || i < APP.maxWorld) {
                     tempGraphicLevel.touchstart = tempGraphicLevel.mousedown = this.selectLevel;
@@ -1815,14 +1816,14 @@ var GameScreen = AbstractScreen.extend({
                     coinGraph.position.x = tempGraphicLevel.width / (tempCoins + 1) * k, coinGraph.position.y = tempGraphicLevel.height - 2 * coinGraph.height, 
                     tempContainer.addChild(coinGraph);
                 } else tempGraphicLevel.clear(), tempGraphicLevel.beginFill(addBright(APP.vecColors[APP.currentColorID], .7)), 
-                tempGraphicLevel.drawRect(0, 0, .1 * windowHeight, .1 * windowHeight);
+                tempGraphicLevel.drawCircle(.05 * windowHeight, .05 * windowHeight, .05 * windowHeight);
                 levelsContainer.addChild(tempContainer), iacum++;
             }
             worldLabel2 = new PIXI.Text("WORLD " + (i + 1), {
                 align: "left",
                 font: "48px Vagron",
                 fill: "#FFFFFF"
-            }), worldLabel2.resolution = 2, worldLabel2.position.x = levelsContainer.width / 2 - worldLabel2.width / 2 / worldLabel2.resolution, 
+            }), worldLabel2.resolution = 2, worldLabel2.alpha = .5, worldLabel2.position.x = levelsContainer.width / 2 - worldLabel2.width / 2 / worldLabel2.resolution, 
             worldLabel2.position.y = -worldLabel2.height / 1.5, levelsContainer.addChild(worldLabel2), 
             this.worldsContainer.addChild(tempWorldContainer), this.worlds.push([ levelsContainer ]);
         }
@@ -1856,7 +1857,7 @@ var GameScreen = AbstractScreen.extend({
         var self = scope ? scope : this;
         self.currentWorldGraphics && self.currentWorldGraphics.parent && (console.log("removeLevelss"), 
         self.currentWorldGraphics.parent.removeChild(self.currentWorldGraphics)), self.worldsContainer.position.x = windowWidth / 2 - (.18 * windowHeight * 1.5 + .18 * windowHeight) / 2, 
-        self.worldsContainer.position.y = windowHeight / 2 - self.worldsContainer.height / 2, 
+        self.worldsContainer.position.y = windowHeight - 1.2 * self.worldsContainer.height, 
         self.addChild(self.worldsContainer), TweenLite.from(self.worldsContainer, .8, {
             x: windowWidth,
             y: -self.worldsContainer.height
@@ -1866,8 +1867,8 @@ var GameScreen = AbstractScreen.extend({
     },
     showLevels: function(scope) {
         var self = scope ? scope : this;
-        self.worldsContainer && self.worldsContainer.parent && (console.log("removeWorlds"), 
-        self.worldsContainer.parent.removeChild(self.worldsContainer)), self.currentWorldGraphics.position.x = windowWidth / 2 - (.1 * windowHeight * 1.5 * 2 + .1 * windowHeight) / 2, 
+        self.worldsContainer && self.worldsContainer.parent && self.worldsContainer.parent.removeChild(self.worldsContainer), 
+        self.currentWorldGraphics.position.x = windowWidth / 2 - (.1 * windowHeight * 1.5 * 2 + .1 * windowHeight) / 2, 
         self.currentWorldGraphics.position.y = windowHeight / 2 - (.1 * windowHeight * 1.5 * 3 + .1 * windowHeight) / 2, 
         self.addChild(self.currentWorldGraphics), TweenLite.from(self.currentWorldGraphics.position, .8, {
             x: windowWidth,
