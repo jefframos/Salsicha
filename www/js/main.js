@@ -1424,8 +1424,8 @@ var GameScreen = AbstractScreen.extend({
         }, APP.standardVel = .05 * APP.tileSize.h) : (APP.tileSize = {
             w: Math.floor(.06 * windowHeight),
             h: Math.floor(.06 * windowHeight)
-        }, APP.standardVel = .05 * APP.tileSize.w), APP.tileSize.w < 50 && (APP.tileSize.w = 50), 
-        APP.tileSize.h < 50 && (APP.tileSize.h = 50), this.trails = [], this.recoil = !1, 
+        }, APP.standardVel = .05 * APP.tileSize.w, APP.tileSize.w < 50 && (APP.tileSize.w = 50), 
+        APP.tileSize.h < 50 && (APP.tileSize.h = 50)), this.trails = [], this.recoil = !1, 
         APP.points = 0, this.player = new Ball({
             x: 0,
             y: 0
@@ -1830,9 +1830,10 @@ var GameScreen = AbstractScreen.extend({
         }
         this.backButtonContainer = new PIXI.DisplayObjectContainer(), this.backButton = new PIXI.Graphics(), 
         this.backButton.beginFill(16777215), this.backButton.moveTo(20, 0), this.backButton.lineTo(20, 20), 
-        this.backButton.lineTo(0, 10), this.backButton.lineTo(20, 0), this.backButtonContainer.addChild(this.backButton), 
-        this.backButtonContainer.scope = this, this.backButtonContainer.interactive = !0, 
-        this.backButtonContainer.buttonMode = !0, this.backButtonContainer.touchstart = this.backButtonContainer.mousedown = this.backFunction, 
+        this.backButton.lineTo(0, 10), this.backButton.lineTo(20, 0), this.backButton.hitArea = new PIXI.Rectangle(-5, -5, 35, 35), 
+        this.backButtonContainer.addChild(this.backButton), this.backButtonContainer.scope = this, 
+        this.backButtonContainer.interactive = !0, this.backButtonContainer.buttonMode = !0, 
+        this.backButtonContainer.touchstart = this.backButtonContainer.mousedown = this.backFunction, 
         this.backButtonContainer.position.x = 20, this.backButtonContainer.position.y = 20, 
         this.addChild(this.backButtonContainer), this.showWorlds();
     },

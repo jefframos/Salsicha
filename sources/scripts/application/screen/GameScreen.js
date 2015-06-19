@@ -574,13 +574,14 @@ var GameScreen = AbstractScreen.extend({
 		}else{
 			APP.tileSize = {w:Math.floor(windowHeight * 0.06),h:Math.floor(windowHeight * 0.06)};
 			APP.standardVel = APP.tileSize.w * 0.05;
+			if(APP.tileSize.w < 50){
+				APP.tileSize.w = 50;
+			}
+			if(APP.tileSize.h < 50){
+				APP.tileSize.h = 50;
+			}
 		}
-		if(APP.tileSize.w < 50){
-			APP.tileSize.w = 50;
-		}
-		if(APP.tileSize.h < 50){
-			APP.tileSize.h = 50;
-		}
+
 		this.trails = [];
 
 		this.recoil = false;
