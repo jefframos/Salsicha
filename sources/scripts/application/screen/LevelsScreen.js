@@ -47,7 +47,7 @@ var LevelsScreen = AbstractScreen.extend({
             }
             tempWorldContainer = new PIXI.DisplayObjectContainer();
             tempWorldGraphic = new PIXI.Graphics();
-            tempWorldGraphic.lineStyle(1,addBright(APP.vecColors[APP.currentColorID], 0.8));
+            tempWorldGraphic.lineStyle(2,addBright(APP.vecColors[APP.currentColorID], 0.8));
             tempWorldGraphic.beginFill(addBright(APP.vecColors[APP.currentColorID], 0.9));
             tempWorldGraphic.drawCircle(windowHeight * 0.09,windowHeight * 0.09,windowHeight * 0.09);
             // tempWorldGraphic.drawRect(0,0,windowHeight * 0.18,windowHeight * 0.18);
@@ -84,7 +84,7 @@ var LevelsScreen = AbstractScreen.extend({
             }else{
                 tempWorldGraphic.clear();
                 tempWorldGraphic.beginFill(addBright(APP.vecColors[APP.currentColorID], 0.7));
-                tempWorldGraphic.drawRect(0,0,windowHeight * 0.18,windowHeight * 0.18);
+                tempWorldGraphic.drawCircle(windowHeight * 0.09,windowHeight * 0.09,windowHeight * 0.09);
             }
 
             tempWorldContainer.position.x = (tempWorldGraphic.width * 1.5) * iacumW;
@@ -103,7 +103,7 @@ var LevelsScreen = AbstractScreen.extend({
 
                 tempContainer = new PIXI.DisplayObjectContainer();
                 tempGraphicLevel = new PIXI.Graphics();
-                tempGraphicLevel.lineStyle(1,addBright(APP.vecColors[APP.currentColorID], 0.8));
+                tempGraphicLevel.lineStyle(2,addBright(APP.vecColors[APP.currentColorID], 0.8));
                 tempGraphicLevel.beginFill(tempColor);
                 tempGraphicLevel.drawCircle(windowHeight * 0.05,windowHeight * 0.05,windowHeight * 0.05);
                 // tempGraphicLevel.drawRect(0,0,windowHeight * 0.1,windowHeight * 0.1);
@@ -160,6 +160,7 @@ var LevelsScreen = AbstractScreen.extend({
         this.backButton.lineTo(20,20);
         this.backButton.lineTo(0,10);
         this.backButton.lineTo(20,0);
+        this.backButton.hitArea = new PIXI.Rectangle(-5, -5, 35, 35);
         this.backButtonContainer.addChild(this.backButton);
         this.backButtonContainer.scope = this;
         this.backButtonContainer.interactive = true;

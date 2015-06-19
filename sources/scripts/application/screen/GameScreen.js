@@ -235,6 +235,7 @@ var GameScreen = AbstractScreen.extend({
         this.backButton.lineTo(20,20);
         this.backButton.lineTo(0,10);
         this.backButton.lineTo(20,0);
+        this.backButton.hitArea = new PIXI.Rectangle(-5, -5, 35, 35);
         this.backButtonContainer.addChild(this.backButton);
         this.backButtonContainer.scope = this;
         this.backButtonContainer.interactive = true;
@@ -763,7 +764,7 @@ var GameScreen = AbstractScreen.extend({
 				if(count === 2){
 					var tempVel = type.length > 2?type[2]:2;
 					enemyMov = new Enemy2(this, type[0], type.length >= 4 && type[3]);
-					enemyMov.standardVelocity = tempVel * APP.tileSize.w * 0.05;
+					enemyMov.standardVelocity = tempVel * APP.tileSize.w * 0.07;
 					enemyMov.build();
 					this.layer.addChild(enemyMov);
 					enemyMov.getContent().position.x = i * APP.tileSize.w + APP.tileSize.w/2;

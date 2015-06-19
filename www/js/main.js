@@ -1287,9 +1287,9 @@ var GameScreen = AbstractScreen.extend({
         this.initLevel(), this.startLevel = !1, this.debugBall = new PIXI.Graphics(), this.backButtonContainer = new PIXI.DisplayObjectContainer(), 
         this.backButton = new PIXI.Graphics(), this.backButton.beginFill(16777215), this.backButton.moveTo(20, 0), 
         this.backButton.lineTo(20, 20), this.backButton.lineTo(0, 10), this.backButton.lineTo(20, 0), 
-        this.backButtonContainer.addChild(this.backButton), this.backButtonContainer.scope = this, 
-        this.backButtonContainer.interactive = !0, this.backButtonContainer.buttonMode = !0, 
-        this.backButtonContainer.touchstart = this.backButtonContainer.mousedown = this.backFunction, 
+        this.backButton.hitArea = new PIXI.Rectangle(-5, -5, 35, 35), this.backButtonContainer.addChild(this.backButton), 
+        this.backButtonContainer.scope = this, this.backButtonContainer.interactive = !0, 
+        this.backButtonContainer.buttonMode = !0, this.backButtonContainer.touchstart = this.backButtonContainer.mousedown = this.backFunction, 
         this.backButtonContainer.position.x = 20, this.backButtonContainer.position.y = 20, 
         this.addChild(this.backButtonContainer), this.crazyContent = new PIXI.DisplayObjectContainer(), 
         this.addChild(this.crazyContent), this.layerManagerHUD = new LayerManager(), this.layerManagerHUD.build("HUD"), 
@@ -1514,7 +1514,7 @@ var GameScreen = AbstractScreen.extend({
                 var enemyMov = null;
                 if (2 === count) {
                     var tempVel = type.length > 2 ? type[2] : 2;
-                    enemyMov = new Enemy2(this, type[0], type.length >= 4 && type[3]), enemyMov.standardVelocity = tempVel * APP.tileSize.w * .05, 
+                    enemyMov = new Enemy2(this, type[0], type.length >= 4 && type[3]), enemyMov.standardVelocity = tempVel * APP.tileSize.w * .07, 
                     enemyMov.build(), this.layer.addChild(enemyMov), enemyMov.getContent().position.x = i * APP.tileSize.w + APP.tileSize.w / 2, 
                     enemyMov.getContent().position.y = j * APP.tileSize.h + APP.tileSize.h / 2, enemyMov.setWaypoints(tempPositions), 
                     this.vecMovEnemies.push(enemyMov);
@@ -1776,7 +1776,7 @@ var GameScreen = AbstractScreen.extend({
         for (i = 0; i < LEVELS.length; i++) {
             levelsContainer = new PIXI.DisplayObjectContainer(), i % 2 === 0 && 0 !== i && (jacumW++, 
             iacumW = 0), tempWorldContainer = new PIXI.DisplayObjectContainer(), tempWorldGraphic = new PIXI.Graphics(), 
-            tempWorldGraphic.lineStyle(1, addBright(APP.vecColors[APP.currentColorID], .8)), 
+            tempWorldGraphic.lineStyle(2, addBright(APP.vecColors[APP.currentColorID], .8)), 
             tempWorldGraphic.beginFill(addBright(APP.vecColors[APP.currentColorID], .9)), tempWorldGraphic.drawCircle(.09 * windowHeight, .09 * windowHeight, .09 * windowHeight), 
             tempWorldGraphic.interactive = !0, tempWorldGraphic.buttonMode = !0, tempWorldGraphic.id = i, 
             tempWorldGraphic.scope = this, tempWorldContainer.addChild(tempWorldGraphic), i <= APP.maxWorld ? (tempWorldGraphic.touchstart = tempWorldGraphic.mousedown = this.selectWorld, 
@@ -1792,14 +1792,15 @@ var GameScreen = AbstractScreen.extend({
             }), totalCoins.resolution = 2, totalCoins.alpha = .8, totalCoins.position.x = tempWorldGraphic.width / 2 - totalCoins.width / 2 / totalCoins.resolution, 
             totalCoins.position.y = tempWorldGraphic.height / 2 - totalCoins.height / totalCoins.resolution / 2, 
             tempWorldContainer.addChild(totalCoins)) : (tempWorldGraphic.clear(), tempWorldGraphic.beginFill(addBright(APP.vecColors[APP.currentColorID], .7)), 
-            tempWorldGraphic.drawRect(0, 0, .18 * windowHeight, .18 * windowHeight)), tempWorldContainer.position.x = 1.5 * tempWorldGraphic.width * iacumW, 
-            tempWorldContainer.position.y = 1.5 * tempWorldGraphic.height * jacumW, iacumW++;
+            tempWorldGraphic.drawCircle(.09 * windowHeight, .09 * windowHeight, .09 * windowHeight)), 
+            tempWorldContainer.position.x = 1.5 * tempWorldGraphic.width * iacumW, tempWorldContainer.position.y = 1.5 * tempWorldGraphic.height * jacumW, 
+            iacumW++;
             var iacum = 0, jacum = 0;
             for (j = 0; j < LEVELS[i].length; j++) {
                 j % 3 === 0 && 0 !== j && (jacum++, iacum = 0);
                 var tempCoins = LEVELS[i][j][1].coins, high = LEVELS[i][j][1].highscore;
                 if (tempContainer = new PIXI.DisplayObjectContainer(), tempGraphicLevel = new PIXI.Graphics(), 
-                tempGraphicLevel.lineStyle(1, addBright(APP.vecColors[APP.currentColorID], .8)), 
+                tempGraphicLevel.lineStyle(2, addBright(APP.vecColors[APP.currentColorID], .8)), 
                 tempGraphicLevel.beginFill(tempColor), tempGraphicLevel.drawCircle(.05 * windowHeight, .05 * windowHeight, .05 * windowHeight), 
                 tempGraphicLevel.interactive = !0, tempGraphicLevel.buttonMode = !0, tempGraphicLevel.id = j, 
                 tempGraphicLevel.scope = this, tempContainer.addChild(tempGraphicLevel), tempContainer.position.x = 1.5 * tempGraphicLevel.width * iacum, 
